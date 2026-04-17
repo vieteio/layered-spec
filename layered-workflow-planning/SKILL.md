@@ -92,16 +92,19 @@ Write each use case in this structure:
 ```md
 1. use_case_name
 workflow
-Layer_1_name: layer content
+Layer_1_name:
+layer content
 Layer_2_name:
 multi line
 layer content
-Layer_3_name: multi line
-layer
-content
 ```
 
-The workflow line comes first. Named layers come after it.
+Rules:
+
+- The workflow text appears immediately after the name, on the next line, without a `Workflow:` label.
+- Named layers follow the workflow, each starting with `LayerName:` on its own line.
+- All layers for one use case are grouped directly under that use case number.
+- Do NOT place layers in separate markdown sections (## or ###) away from their use case.
 
 ## Recommended Layers
 
@@ -237,8 +240,8 @@ Brief scope.
 
 ## Use Cases
 
-1. use_case_name
-Workflow: initial state --step--> next state
+### use_case_name
+initial state --step--> next state
 Execution Logic:
 1. Step name
 Input: ...
@@ -270,12 +273,24 @@ Validation:
 - ...
 Open Questions:
 - ...
+
+### second_use_case_name
+initial state --step--> next state
+Layer_1_name:
+...
+Layer_2_name:
+...
 ```
+
+CRITICAL: every layer belongs under its use case number. Do NOT create separate top-level or second-level markdown sections (`##`, `###`) for individual layers (Types, Events, Tests, etc.). All layers for a use case are grouped directly below that numbered use case entry.
 
 ## Quality Checks
 
 - Every use case starts with a workflow before deeper layers
+- The workflow line has no label; it is the raw workflow text immediately under the use case name
 - Layer names are explicit and stable across use cases unless the user asked for variation
+- All layers for a use case appear grouped directly under that numbered use case; no layer is placed in a separate markdown section
+- Individual layers are never rendered as markdown headers (`##`, `###`)
 - Typed workflow syntax is used only where it adds clarity
 - Branches, parallel work, and refactoring steps use the shared operators consistently
 - User-authored content is preserved unless it conflicts with nearby structure
