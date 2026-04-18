@@ -38,7 +38,7 @@ Recommended layers:
 
 ### Workflow syntax
 
-```text
+```python
 step: state 1 --step name--> state 2
 conditional branches: [branch1, branch2, branch3]
 parallel branches: (branch1, branch2, branch3)
@@ -47,17 +47,17 @@ workflow refactoring: {workflow1} --refactoring step--> {workflow2}
 
 Example:
 
-```text
+```python
 state 1 --step name 1--> state 2 --step name 2--> [
-conditional outcome state 1 --branch 1 step--> branch 1 state,
-conditional outcome state 2 --branch 2 step--> branch 2 state
+conditional state 1 --branch 1 step--> branch 1 state,
+conditional state 2 --branch 2 step--> branch 2 state
 ] --step name 3--> final state
 ```
 
 ### Layered use cases
 
-```text
-1. use_case_name
+```md
+### 1. use_case_name
 workflow
 Layer_1_name: layer content
 Layer_2_name:
@@ -72,7 +72,7 @@ content
 
 Type description syntax:
 
-```text
+```yaml
 Type_name
  - field_name1: optional_type # optional comment; for a table, the field name is a column
  - field_name2: optional_type
@@ -85,7 +85,7 @@ After type layers are defined, typed syntax can be used for the detailed workflo
 
 Syntax:
 
-```text
+```python
 step: state 1: Type --step name--> state 2: Type
 conditional branches: [branch1, branch2, branch3]
 parallel branches: (branch1, branch2, branch3)
@@ -94,9 +94,9 @@ workflow refactoring: {workflow1} --refactoring step--> {workflow2}
 
 Example:
 
-```text
+```python
 state 1: Tuple[A, B] --step name 1--> state 2: List[X] --step name 2--> [
-conditional outcome state 1 --branch 1 step--> branch 1 state,
-conditional outcome state 2 --branch 2 step--> branch 2 state
+conditional state 1 --branch 1 step--> branch 1 state,
+conditional state 2 --branch 2 step--> branch 2 state
 ] --step name 3--> final state
 ```
