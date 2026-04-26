@@ -6,6 +6,16 @@ Compact syntax for layered workflow descriptions that lets you add details gradu
 
 Join our [Discord](https://discord.gg/jumWsKCCe5) to discuss the spec and skills further development.
 
+## Contributing
+
+Contributions are welcome. To get started:
+
+- **Discuss first** — join the [Discord](https://discord.gg/jumWsKCCe5) or open a GitHub issue to describe your idea before submitting a pull request.
+- **Syntax changes** — include a concrete before/after example and confirm that existing README examples remain valid.
+- **Skill changes** — describe how the change affects the iterative planning interaction model (`layered-workflow-planning/SKILL.md`).
+- **Docs and fixes** — open a pull request directly against `main` with a short description of what changed and why.
+- **Bug reports** — open a GitHub issue with a minimal layered-spec example, the expected behavior, and the actual behavior.
+
 ## General idea
 
 Solution logic can be fully described in several layers, starting with a workflow diagram and then adding details gradually.
