@@ -12,7 +12,7 @@ Contributions are welcome. To get started:
 
 - **Discuss first** — join the [Discord](https://discord.gg/jumWsKCCe5) or open a GitHub issue to describe your idea before submitting a pull request.
 - **Syntax changes** — include a concrete before/after example and confirm that existing README examples remain valid.
-- **Skill changes** — describe how the change affects the iterative planning interaction model (`layered-workflow-planning/SKILL.md`).
+- **Skill changes** — share your personal experience of how the skill worked for you to confirm it functions as intended, and describe how the change affects the iterative planning interaction model (`layered-workflow-planning/SKILL.md`).
 - **Docs and fixes** — open a pull request directly against `main` with a short description of what changed and why.
 - **Bug reports** — open a GitHub issue with a minimal layered-spec example, the expected behavior, and the actual behavior.
 
