@@ -2,6 +2,10 @@
 
 Compact syntax for layered workflow descriptions that lets you add details gradually during an interactive session with an AI agent. Code can be generated from a complete set of workflow descriptions.
 
+## Community
+
+Join our [Discord](https://discord.gg/jumWsKCCe5) to discuss the spec and skills further development.
+
 ## General idea
 
 Solution logic can be fully described in several layers, starting with a workflow diagram and then adding details gradually.
