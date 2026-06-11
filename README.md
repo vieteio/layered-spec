@@ -10,7 +10,36 @@ This process can be significantly accelerated in an interactive session with an 
 
 Compact layered syntax makes this interactive work concise, fast, and convenient.
 
-This repository contains a ready-to-use skill for planning new features interactively with an AI agent.
+This repository contains a layered-spec skillpack for planning new features interactively with an AI agent.
+
+Canonical skill sources live under:
+
+- `skill/` — skill definitions
+- `planning/planning_contract.md` — spec structure description
+- `prompts/` — supporting prompt files used by the planning loop
+
+## Install skills for your IDE or agent
+
+Install host-specific copies from the canonical source:
+
+```bash
+python scripts/install_skillpack.py --host vscode --scope repo
+python scripts/install_skillpack.py --host cursor --scope repo
+python scripts/install_skillpack.py --host claude --scope repo
+python scripts/install_skillpack.py --host codex --scope repo
+python scripts/install_skillpack.py --host antigravity --scope repo
+```
+
+For a user-wide install:
+
+```bash
+python scripts/install_skillpack.py --host cursor --scope user
+python scripts/install_skillpack.py --host all --scope user
+```
+
+Use `--dry-run` to preview output paths without writing files.
+
+Repo-scoped installs place skills under each host's expected directory (for example `.github/skills/` for VS Code / GitHub Copilot, `.cursor/skills/` for Cursor). The installer rewrites internal path references to match the selected host while keeping generated specs in `specs/`.
 
 ## Interactive planning approach
 
