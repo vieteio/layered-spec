@@ -10,6 +10,8 @@ This process can be significantly accelerated in an interactive session with an 
 
 Compact layered syntax makes this interactive work concise, fast, and convenient.
 
+## Skills
+
 This repository contains a layered-spec skillpack for planning new features interactively with an AI agent.
 
 Canonical skill sources live under:
@@ -18,7 +20,7 @@ Canonical skill sources live under:
 - `planning/planning_contract.md` — spec structure description
 - `prompts/` — supporting prompt files used by the planning loop
 
-## Install skills for your IDE or agent
+### Install skills for your IDE or agent
 
 Install host-specific copies from the canonical source:
 
@@ -40,6 +42,10 @@ python scripts/install_skillpack.py --host all --scope user
 Use `--dry-run` to preview output paths without writing files.
 
 Repo-scoped installs place skills under each host's expected directory (for example `.github/skills/` for VS Code / GitHub Copilot, `.cursor/skills/` for Cursor). The installer rewrites internal path references to match the selected host while keeping generated specs in `specs/`.
+
+## Demo project
+
+See the [layered-spec meetup demo](https://github.com/vieteio/layered-spec-meetup-demo) project with spec and AI-agent chat log in the repo.
 
 ## Interactive planning approach
 

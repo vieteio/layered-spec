@@ -7,3 +7,6 @@ __pycache__/
 .claude/
 .agents/
 .github/
+
+.next/
+node_modules/
