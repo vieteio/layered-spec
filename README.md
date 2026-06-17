@@ -6,19 +6,21 @@ Compact syntax for layered workflow descriptions that lets you add details gradu
 
 Solution logic can be fully described in several layers, starting with a workflow diagram and then adding details gradually.
 
-This process can be significantly accelerated in an interactive session with an AI agent.
+This process can be significantly accelerated in an interactive chat with an AI agent.
 
 Compact layered syntax makes this interactive work concise, fast, and convenient.
 
 ## Skills
 
-This repository contains a layered-spec skillpack for planning new features interactively with an AI agent.
+This repository contains a layered-spec skillpack for planning new features or refactoring through chat with an AI agent.
 
 Canonical skill sources live under:
 
 - `skill/` — skill definitions
 - `planning/planning_contract.md` — spec structure description
 - `prompts/` — supporting prompt files used by the planning loop
+
+Describe a task in chat with an AI agent and ask it to create a spec. Review the spec and refine it in chat. When the spec is correct, ask the agent to implement it in a loop.
 
 ### Install skills for your IDE or agent
 
