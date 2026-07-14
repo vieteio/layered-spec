@@ -24,24 +24,25 @@ Describe a task in chat with an AI agent and ask it to create a spec. Review the
 
 ### Install skills for your IDE or agent
 
-Install host-specific copies from the canonical source:
+#### npm
 
 ```bash
-python scripts/install_skillpack.py --host vscode --scope repo
-python scripts/install_skillpack.py --host cursor --scope repo
-python scripts/install_skillpack.py --host claude --scope repo
-python scripts/install_skillpack.py --host codex --scope repo
-python scripts/install_skillpack.py --host antigravity --scope repo
+npm install -g @viete-io/layered-spec@latest
+cd your-project
+layered-spec init
 ```
 
-For a user-wide install:
+#### Python installer
+
+Clone this repository, then run the existing Python installer from its root:
 
 ```bash
-python scripts/install_skillpack.py --host cursor --scope user
-python scripts/install_skillpack.py --host all --scope user
+python scripts/install_skillpack.py --host <host_name> 
 ```
 
-Use `--dry-run` to preview output paths without writing files.
+#### Installer options
+
+`init` installs all supported hosts by default: `vscode`, `cursor`, `claude`, `codex`, and `antigravity`. Use `--host <host_name>` to install only one host.
 
 Repo-scoped installs place skills under each host's expected directory (for example `.github/skills/` for VS Code / GitHub Copilot, `.cursor/skills/` for Cursor). The installer rewrites internal path references to match the selected host while keeping generated specs in `specs/`.
 

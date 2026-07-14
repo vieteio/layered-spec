@@ -6,7 +6,10 @@ __pycache__/
 .cursor/
 .claude/
 .agents/
-.github/
+.github/*
+!.github/workflows/
+!.github/workflows/**
 
 .next/
 node_modules/
+.gitignore

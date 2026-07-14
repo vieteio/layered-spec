@@ -1,0 +1,38 @@
+{
+  "name": "@viete-io/layered-spec",
+  "version": "0.1.1",
+  "description": "Install layered-spec skills into AI coding-agent projects.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "layered-spec": "scripts/npm/bin/layered-spec.mjs"
+  },
+  "files": [
+    "scripts/npm/bin/",
+    "scripts/npm/src/",
+    "skill/",
+    "planning/",
+    "prompts/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vieteio/layered-spec.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vieteio/layered-spec/issues"
+  },
+  "homepage": "https://github.com/vieteio/layered-spec#readme",
+  "scripts": {
+    "test": "node --test scripts/npm/test/cli.test.mjs",
+    "check:pack": "npm pack --dry-run",
+    "check:packed-cli": "node scripts/npm/check-packed-cli.mjs"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
