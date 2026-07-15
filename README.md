@@ -1,5 +1,7 @@
 # layered-spec
 
+![Visitors](https://visitor-badge.laobi.icu/badge?page_id=vieteio.layered-spec)
+
 Compact syntax for layered workflow descriptions that lets you add details gradually during an interactive session with an AI agent. Code can be generated from a complete set of workflow descriptions.
 
 ## General idea
