@@ -2,15 +2,41 @@
 
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=vieteio.layered-spec)
 
-Compact syntax for layered workflow descriptions that lets you add details gradually during an interactive session with an AI agent. Code can be generated from a complete set of workflow descriptions.
+
+Compact syntax for spec-programming which makes AI code generation **predictable** for well-decomposed tasks and speed up development.
 
 ## General idea
 
 Solution logic can be fully described in several layers, starting with a workflow diagram and then adding details gradually.
 
-This process can be significantly accelerated in an interactive chat with an AI agent.
+AI-agent generates high quality specs from task in chat.
+First 1-3 layers are for review by a user, remaining layers are for reliable code generation by AI.
 
-Compact layered syntax makes this interactive work concise, fast, and convenient.
+Compact layered syntax makes spec driven development concise, fast, and convenient.
+
+## Quick start
+
+1. Install spec skills
+```bash
+npm install -g @viete-io/layered-spec@latest
+cd your-project
+layered-spec init
+```
+2. Describe task in a chat and add "Make spec for that" or "Update spec for that"
+
+3. Then review spec and edit it in chat with AI
+
+4. When spec is ready, write in chat "Implement the spec" or "Implement spec update"
+
+### Spec driven vibecoding
+
+Skip spec review step.
+
+Limit your work to
+1. Describe task and add "Make spec for that"
+2. Next message in chat "Implement the spec"
+
+AI agent will decompose moderate level complexity tasks well into use-cases with detailed workflow chains and then will generate code properly for well decomposed tasks.
 
 ## Skills
 
@@ -34,6 +60,8 @@ cd your-project
 layered-spec init
 ```
 
+Requires Node.js 20.19.0 or later.
+
 #### Python installer
 
 Clone this repository, then run the existing Python installer from its root:
@@ -41,6 +69,8 @@ Clone this repository, then run the existing Python installer from its root:
 ```bash
 python scripts/install_skillpack.py --host <host_name> 
 ```
+
+Requires Python 3.10 or later.
 
 #### Installer options
 
