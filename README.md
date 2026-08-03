@@ -5,9 +5,11 @@
 
 Compact syntax for spec-programming which makes AI code generation **predictable** for well-decomposed tasks and speed up development.
 
+> **✨ New!** Layered-spec now includes a User-stories level, supplementing spec with a context, UI layers and e2e tests.
+
 ## General idea
 
-Solution logic can be fully described in several layers, starting with a workflow diagram and then adding details gradually.
+Solution logic can be fully described in several layers, starting with a workflow chain and then adding details gradually.
 
 AI-agent generates high quality specs from task in chat.
 First 1-3 layers are for review by a user, remaining layers are for reliable code generation by AI.
@@ -24,7 +26,7 @@ layered-spec init
 ```
 2. Describe task in a chat and add "Make spec for that" or "Update spec for that"
 
-3. Then review spec and edit it in chat with AI
+3. Review spec and refine it in chat with AI
 
 4. When spec is ready, write in chat "Implement the spec" or "Implement spec update"
 
@@ -82,20 +84,15 @@ Repo-scoped installs place skills under each host's expected directory (for exam
 
 See the [layered-spec meetup demo](https://github.com/vieteio/layered-spec-meetup-demo) project with spec and AI-agent chat log in the repo.
 
-## Interactive planning approach
+## User-stories
 
-Describe the app or new feature in a free-form way to give the AI agent a general understanding.
-This can also be a code refactoring task rather than a feature. The workflow syntax supports that, see the syntax below.
+**✨ New!** User stories are added as a new level. They are extracted automatically from tasks descriptions in a chat.
 
-Then prepare workflows for each meaningful use case, each of which may start with some trigger such as user input or an API call.
+User stories are separated well from specifications. A user story describes an end-to-end scenario, including the user's actions and the application's responses. A spec describes only application actions, so each action begins with an event—most often one initiated by the user.
 
-Ask the AI agent to add workflows for any missing use cases.
+User stories also include UI layers that describe the interface the user interacts with during the scenario.
 
-Next, add layers to some workflows, fill those layers with examples, and ask the AI agent to complete the corresponding layers in other workflows.
-
-Use typed workflows to control data flow strictly.
-
-Recommended layers:
+## Recommended spec layers:
 
 - Workflow
 - Types and tables

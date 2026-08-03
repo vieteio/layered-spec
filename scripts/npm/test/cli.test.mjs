@@ -21,7 +21,9 @@ test("init writes a Codex project install and versioned manifest", async () => {
   assert.equal(manifest.package_name, "@viete-io/layered-spec");
   assert.equal(manifest.package_version, "9.9.9");
   assert.equal(manifest.scope, "repo");
-  assert.equal(manifest.files.length, 6);
+  assert.equal(manifest.files.length, 9);
+  await stat(path.join(project, ".agents", "skills", "user-story-workflow-documentation", "SKILL.md"));
+  await stat(path.join(project, ".agents", "skills", "design-ux-guardrails", "references", "design-system-sync.md"));
 });
 
 test("init defaults to all hosts in repo scope and combines shared configuration paths", async () => {

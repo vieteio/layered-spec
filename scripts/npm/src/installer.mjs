@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { HOSTS, SKILL_NAMES, resolveHostPaths } from "./hosts.mjs";
 
@@ -42,10 +42,14 @@ async function installHost({ hostNames, paths, scope, targetRoot, sources, packa
   ];
 
   for (const skillName of SKILL_NAMES) {
-    const rewritten = rewriteContent(sources.skills.get(skillName), replacements);
-    const normalized = normalizeSkillFrontmatter(rewritten, hostName);
-    validateInstalledSkill(normalized, hostName);
-    writes.push([path.join(paths.skillsDirectory, skillName, "SKILL.md"), normalized]);
+    for (const [relativePath, source] of sources.skills.get(skillName)) {
+      const rewritten = rewriteContent(source, replacements);
+      const output = relativePath === "SKILL.md"
+        ? normalizeSkillFrontmatter(rewritten, hostName)
+        : rewritten;
+      if (relativePath === "SKILL.md") validateInstalledSkill(output, hostName);
+      writes.push([path.join(paths.skillsDirectory, skillName, ...relativePath.split("/")), output]);
+    }
   }
 
   const allFiles = writes.map(([file]) => file);
@@ -82,9 +86,35 @@ async function loadCanonicalSources(packageRoot) {
   const prompt = await readRequired(sourcePath("prompts", "plan implementation in a loop.prompt.md"));
   const skills = new Map();
   for (const skillName of SKILL_NAMES) {
-    skills.set(skillName, await readRequired(sourcePath("skill", skillName, "SKILL.md")));
+    skills.set(skillName, await readSkillFiles(sourcePath("skill", skillName)));
   }
   return { planning, prompt, skills };
+}
+
+async function readSkillFiles(directory, relativeDirectory = "") {
+  let entries;
+  try {
+    entries = await readdir(directory, { withFileTypes: true });
+  } catch (error) {
+    if (error.code === "ENOENT") throw new Error(`Missing canonical skill directory: ${directory}`);
+    throw error;
+  }
+
+  const files = new Map();
+  for (const entry of entries) {
+    const relativePath = relativeDirectory ? `${relativeDirectory}/${entry.name}` : entry.name;
+    const absolutePath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      const nestedFiles = await readSkillFiles(absolutePath, relativePath);
+      for (const [nestedPath, content] of nestedFiles) files.set(nestedPath, content);
+    } else if (entry.isFile()) {
+      files.set(relativePath, await readRequired(absolutePath));
+    }
+  }
+  if (!relativeDirectory && !files.has("SKILL.md")) {
+    throw new Error(`Missing canonical skill file: ${path.join(directory, "SKILL.md")}`);
+  }
+  return files;
 }
 
 async function readRequired(file) {

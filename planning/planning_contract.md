@@ -13,6 +13,18 @@ Store generated plans and active specs in this folder:
 
 Use this folder as the default planning and spec registry unless a narrower location is explicitly required by the task.
 
+## Planning Levels
+
+Use the smallest level that preserves the requested behavior:
+
+- user stories under `specs/stories/` describe user goals, user/application actions, visible states, waits that affect the journey, UI states, and E2E acceptance;
+- technical use-case specs under `specs/` describe application-owned transitions, validation, persistence, APIs, events, and implementation logic;
+- shared UI contracts under `specs/ui/` describe reusable spatial and visual rules across stories.
+
+For mixed work, maintain both a story and one or more technical use cases. A material application action or state in the story maps to the use case or use cases that implement it. Do not duplicate internal contracts, durable-state representations, or implementation algorithms in the story merely because the same feature has a technical spec.
+
+Create or update a story when the change affects a meaningful user journey. Do not require one for an internal-only refactor, local algorithm change, or maintenance task with no user-visible workflow.
+
 
 ## Artifact Lifecycle
 
@@ -34,7 +46,7 @@ Allowed maintenance actions:
 
 ## Required Top-Level Sections
 
-Every non-trivial planning artifact should use these top-level sections in this order:
+Every non-trivial technical use-case planning artifact should use these top-level sections in this order. User-story artifacts use the shape in `User-Story Mapping` instead.
 
 1. `Title and scope`
 2. `Planning anchor`
@@ -126,6 +138,24 @@ Rules:
 - Keep hierarchical numbering shallow and consistent unless deeper nesting materially improves clarity.
 - Use-case-specific questions may be recorded in a use-case layer.
 - `Open questions` remains a top-level section for general, cross-use-case, or escalated question batches.
+
+## User-Story Mapping
+
+User stories are the parent product-workflow level, not a second prose rendering of technical use cases. A story may contain several user actions and application actions; each application action may decompose into one or more technical use cases with additional internal states.
+
+Use stable mapping labels where the relationship matters, for example `S2.step3 -> UC5.2`.
+
+Story artifacts should normally contain:
+
+- `Terms` for non-trivial actor, artifact, and state vocabulary;
+- `Connected Groups Or Observed Existing Logic` when related stories, use cases, observed behavior, or shared UI contracts materially reach, resume, constrain, or otherwise operate on a story state or transition;
+- `States` with user expectations, an optional story-specific `UI` wireframe, and technical mapping;
+- `User stories` with a compact workflow and `User expectations`, `Technical mapping`, and `E2E tests` layers;
+- `Implementation checklist`, `Open questions`, and `Decision log` when the story is actively driving implementation.
+
+Use actor names in story workflow lines. Waiting is an actor action on a transition, not a state. Record it in the transition label only when it changes ownership, visible status, interruption behavior, retry/cancel options, or another user expectation. Model an intermediate condition as a state only when that condition or its available actions are meaningful to the story; do not create a state solely to say that an actor waits.
+
+When present, `Connected Groups Or Observed Existing Logic` appears after `Terms` and before `States`. Each entry identifies the affected story state or step, relationship, evidence, and planning implication. Keep detailed code ownership and data flow in the connected-code map or technical use case.
 
 ### Common Use-Case Layers
 
@@ -402,6 +432,8 @@ A valid planning artifact should satisfy all of these:
 - scans existing specs when the task changes existing behavior or refactors a workflow
 - records which specs stay authoritative and which become outdated or superseded
 - includes spec maintenance in the implementation checklist when relevant
+- distinguishes story-level workflows from technical use cases and maps material application transitions between them when both levels apply
+- keeps story-specific UI states in `specs/stories/` and reusable UI rules in `specs/ui/`
 - records code-to-spec traceability when implementation boundaries map cleanly to use-case workflow steps
 - uses workflow operators consistently, including refactoring syntax when updating an existing implementation path
 - uses hierarchical use-case numbering when parent and child use cases need distinct workflow treatment

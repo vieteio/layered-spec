@@ -35,6 +35,7 @@ Build a mapping-first plan that:
 - prevents partial fixes where one caller changes but its loaders, persistence, propagation, or tests remain stale
 - prevents code changes from silently leaving repository specs outdated
 - can be summarized into layered workflow planning sections when the broader feature plan or one chapter of a mixed document genuinely needs workflow-bearing format
+- can provide concise, evidence-backed context for a related user-story artifact without duplicating the connected code map in that story
 
 ## Core Rule
 
@@ -93,6 +94,8 @@ For each relevant spec, record:
 
 If no relevant spec exists, record that explicitly.
 
+When the mapping supports a user-story artifact, also inspect `specs/stories/`. Record each related story, its affected state or step, the relationship to the planning anchor, and whether the story should be reused, amended, or only cited as observed context.
+
 ### 3. Build A Connected-Part Map
 
 Trace both upstream and downstream from the anchor.
@@ -138,6 +141,11 @@ Map connected parts into these responsibility groups:
    - plans or specs in `specs/`
    - spec status and required updates
 
+8. Story context, when a user-visible workflow is affected
+   - related story files and affected states or steps
+   - technical use cases that create, restore, constrain, or publish those states
+   - observed existing behavior and shared UI contracts that change visible expectations
+
 ### 4. Describe Context Per Group
 
 For each connected group, capture:
@@ -164,6 +172,14 @@ For the `Specs` group, also capture:
 - whether the spec is still authoritative for the impacted workflow
 - whether the new work is a refinement, compatibility slice, or refactoring of an existing implementation
 - whether the existing spec must be amended, marked outdated, or superseded
+
+For the `Story context` group, also capture:
+
+- the relationship to each affected story state or step
+- evidence from an existing story, use case, code path, or UI contract
+- the planning implication: `reuse`, `amend`, `preserve`, or `validate`
+
+Keep the result concise enough to place in a story's `## Connected Groups Or Observed Existing Logic` section. Do not replace the code map with story prose.
 
 ### 5. State The Compatibility Strategy
 
@@ -217,6 +233,7 @@ If this mapping work supports a broader planning artifact for a new or changed f
 
 - Planning anchor
 - Connected groups or observed existing logic
+- Story context, when the output supports a user-story artifact
 - Use cases
 - Input Validation And Contracts
 - Implementation Logic
@@ -257,6 +274,8 @@ For each group:
 - validation
 
 For the `Specs` group, include status and required action for each matched spec.
+
+When the mapping feeds a user story, add a concise `### Story context` subsection that can be copied into the story's `## Connected Groups Or Observed Existing Logic` section. Each entry must identify the affected story state or step, relationship, evidence, and planning implication.
 
 ### Use cases
 
@@ -300,6 +319,7 @@ A good result from this skill must satisfy all of these:
 - if layered output is requested, uses `Implementation Logic` only when declarative workflow layers are insufficient and uses omission or `Implementation Logic Proposal` when the algorithm cannot be reconstructed confidently from existing code without developer clarification
 - if a `Tests` layer is emitted, it is tied to the mapped impact slice and stays compatible with the contract
 - records whether impacted specs remain authoritative, become outdated, or are superseded
+- when a user story is affected, distinguishes story-level context from the detailed connected code map and identifies evidence for each story connection
 
 ## Common Failure Modes
 

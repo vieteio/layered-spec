@@ -6,7 +6,9 @@ export const SKILL_NAMES = [
   "layered-workflow-planning",
   "spec-first-planning-loop",
   "connected-code-mapping",
-  "code-logic-workflow-documentation"
+  "code-logic-workflow-documentation",
+  "user-story-workflow-documentation",
+  "design-ux-guardrails"
 ];
 
 const host = (displayName, repo, user) => ({ displayName, repo, user });

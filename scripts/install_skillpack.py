@@ -64,6 +64,11 @@ def validate_canonical_source(root: Path) -> list[Path]:
     return required
 
 
+def canonical_skill_files(root: Path, skill_name: str) -> list[Path]:
+    skill_root = root / "skill" / skill_name
+    return sorted(path for path in skill_root.rglob("*") if path.is_file())
+
+
 def parse_frontmatter(content: str) -> tuple[dict[str, str], str]:
     if not content.startswith("---"):
         return {}, content
@@ -200,25 +205,30 @@ def install_host(
         written.append(target)
 
     for skill_name in SKILL_NAMES:
-        source = root / "skill" / skill_name / "SKILL.md"
-        target = paths.skills_dir / skill_name / "SKILL.md"
-        raw = source.read_text(encoding="utf-8")
-        rewritten = rewrite_content(raw, replacements)
-        frontmatter, body = parse_frontmatter(rewritten)
-        normalized = normalize_frontmatter(frontmatter, config.keep_user_invocable)
-        output = render_frontmatter(normalized) + "\n" + body.lstrip("\n")
+        skill_root = root / "skill" / skill_name
+        for source in canonical_skill_files(root, skill_name):
+            relative_path = source.relative_to(skill_root)
+            target = paths.skills_dir / skill_name / relative_path
+            rewritten = rewrite_content(source.read_text(encoding="utf-8"), replacements)
 
-        validation_errors = validate_installed_skill(output, host)
-        if validation_errors:
-            details = "\n".join(f"  - {error}" for error in validation_errors)
-            raise SystemExit(f"Validation failed for {target}:\n{details}")
+            if relative_path == Path("SKILL.md"):
+                frontmatter, body = parse_frontmatter(rewritten)
+                normalized = normalize_frontmatter(frontmatter, config.keep_user_invocable)
+                output = render_frontmatter(normalized) + "\n" + body.lstrip("\n")
 
-        if dry_run:
-            print(f"[dry-run] would write {target}")
-        else:
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(output, encoding="utf-8", newline="\n")
-        written.append(target)
+                validation_errors = validate_installed_skill(output, host)
+                if validation_errors:
+                    details = "\n".join(f"  - {error}" for error in validation_errors)
+                    raise SystemExit(f"Validation failed for {target}:\n{details}")
+            else:
+                output = rewritten
+
+            if dry_run:
+                print(f"[dry-run] would write {target}")
+            else:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(output, encoding="utf-8", newline="\n")
+            written.append(target)
 
     install_root = target_root or root
     if scope == "repo":

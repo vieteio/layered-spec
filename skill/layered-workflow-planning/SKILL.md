@@ -35,6 +35,7 @@ Produce a planning artifact that is:
 - compatible with connected existing-code observations when a new workflow relies on old logic
 - aligned with `planning/planning_contract.md`
 - stored under `specs/` unless a narrower task-specific location is required
+- technical in scope: it explains application-owned state transitions rather than retelling the user journey
 
 ## Core Rule
 
@@ -49,6 +50,8 @@ Represent each use case as:
 1. one workflow line or workflow block
 2. zero or more named layers added underneath it
 3. user-authored content preserved unless it is locally inconsistent
+
+When a related user story exists, treat its application action as the outer transition and this use case as its technical decomposition. Preserve the story mapping (`S<story>.step<step> -> UC<use case>`) in the story or the relevant technical planning anchor. Do not duplicate user expectations, wireframes, or every user wait inside the use-case layers.
 
 ## Interaction Model
 
@@ -71,6 +74,8 @@ The shared planning contract in `planning/planning_contract.md` is the single no
 - recommended optional use-case layers
 - layer-specific syntax such as `Data`, `Types`, `Tables`, `Files And Functions`, `Tests`, and `Use Case Questions`
 - question placement rules between local and top-level question sections
+
+User-story files and shared UI contracts are owned by `user-story-workflow-documentation` and `design-ux-guardrails`. Consult them when a technical transition changes a user-visible workflow or UI state; keep system-boundary, state-ownership, and implementation detail in this technical artifact.
 
 This skill should not redefine those rules. Use the contract directly for exact syntax and output shape.
 
@@ -242,6 +247,7 @@ If the user asks for improvement instead of expansion:
 - Workflow lines and deeper layers keep concrete task terms unless a new alias is defined immediately and remains semantically exact
 - Helper and intermediate-structure names stay close to the concrete data they hold, the concrete action they perform, and the user-visible distinctions they preserve
 - Existing-code observations are separated from planned new logic
+- A related story maps its application steps to this technical use case when the work is user-visible
 - Hierarchical numbering is used when parent and child use cases need separate but related workflow treatment
 - Early validation and post-validation contracts are captured when they simplify downstream logic or remove redundant validation
 - Execution Logic and Implementation Plan steps include Input, Outcome, Logic, External state, Config parameters, and Metrics

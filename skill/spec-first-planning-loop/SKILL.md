@@ -1,6 +1,6 @@
 ---
 name: spec-first-planning-loop
-description: "Use when: a non-trivial coding request needs a workflow-bearing markdown spec or workflow-bearing spec section before implementation, plus connected code context and batched open questions. Do not use for pure analysis or reference documents unless a specific chapter genuinely needs workflow/state/step treatment."
+description: "Use when: a non-trivial coding request needs a user-story workflow, a technical use-case spec, or both before implementation, plus connected code context and batched open questions. Route user-visible journeys through story mapping and UI contracts; do not use for pure analysis or reference documents unless a specific chapter genuinely needs workflow/state/step treatment."
 argument-hint: "Describe the requested change, known anchor or failing flow if any, and whether the task needs a workflow-bearing spec, a workflow-bearing section inside a larger document, or a narrower direct implementation."
 user-invocable: true
 ---
@@ -17,6 +17,8 @@ This skill orchestrates the planning loop. It does not replace specialized plann
 - Prompt for question batching and execution loop behavior: `prompts/plan implementation in a loop.prompt.md`
 - Existing mapping skill: `skill/connected-code-mapping/SKILL.md`
 - Existing layered planning skill: `skill/layered-workflow-planning/SKILL.md`
+- User-story planning skill: `skill/user-story-workflow-documentation/SKILL.md`
+- UI-state and shared-contract review: `skill/design-ux-guardrails/SKILL.md`
 - Existing reverse-documentation skill: `skill/code-logic-workflow-documentation/SKILL.md`
 
 ## When To Use
@@ -38,11 +40,12 @@ This skill orchestrates the planning loop. It does not replace specialized plann
 Drive every non-trivial request through this lifecycle:
 
 1. collect planning context
-2. create or update a markdown plan in `specs/`
-3. resolve or batch open questions
-4. check whether the plan is clear enough to start implementation
-5. continue into implementation only after the plan is coherent enough
-6. keep the spec synchronized as implementation lands
+2. classify whether the request needs a user story, a technical use-case spec, or both
+3. create or update the selected artifacts under `specs/`
+4. resolve or batch open questions
+5. check whether the plan is clear enough to start implementation
+6. continue into implementation only after the plan is coherent enough
+7. keep the artifacts synchronized as implementation lands
 
 Implemented plans become specs. The loop must therefore maintain both the current plan and older affected specs.
 
@@ -50,7 +53,7 @@ Implemented plans become specs. The loop must therefore maintain both the curren
 
 Do not start with implementation for non-trivial work.
 
-Start by creating or updating the workflow-bearing planning artifact or workflow-bearing section in `specs/` using the shared contract in `planning/planning_contract.md`.
+Start by classifying the requested behavior, then create or update the needed workflow-bearing artifact or section using the shared contract in `planning/planning_contract.md`.
 
 If the requested document is mixed, apply the contract only to the chapter that actually needs workflow, state, or step logic.
 
@@ -64,6 +67,14 @@ Determine whether the request is:
 - non-trivial but mostly new behavior
 - non-trivial and refactoring existing behavior
 - non-trivial and a compatibility or migration slice
+
+Then classify its planning level:
+
+- `user-story only`: a journey/UI clarification that does not change system behavior yet;
+- `technical use case only`: internal behavior with no meaningful user-visible workflow;
+- `mixed`: user/application actions or visible states plus technical behavior required to make them true.
+
+Treat developer technical language as a possible source for an induced user story when the resulting change alters a user journey. Treat product-language details about system boundaries, authority, state ownership, or implementation constraints as technical use-case input rather than forcing them into the story.
 
 If the request is non-trivial, continue with this skill.
 
@@ -89,23 +100,29 @@ Record the required action:
 
 ### 3. Choose The Specialized Planning Inputs
 
-Use `connected-code-mapping` when the task is non-local, crosses layers, or changes ownership, payload shape, route scope, persistence scope, or propagation logic.
+Use `user-story-workflow-documentation` when the request needs a user journey, visible states, user/application actions, waits that affect user behavior, or E2E acceptance. Create or amend `specs/stories/<feature>_user_stories.md` as needed.
+
+Use `design-ux-guardrails` after the story is known when the request changes visible UI. Keep story-specific wireframes in the story, reusable geometry in `specs/ui/layout-wireframes.md`, and reusable visual/icon rules in `specs/ui/style-and-icons.md`.
+
+Use `connected-code-mapping` when the task is non-local, crosses system boundaries, or changes authority, data shape, durable state, or propagation.
 
 Use `code-logic-workflow-documentation` when the task first needs a reliable reverse-engineered explanation of existing runtime behavior before new planning can proceed.
 
-Use `layered-workflow-planning` to expand the target artifact into use cases and layers after the existing context is understood.
+Use `layered-workflow-planning` to expand technical use cases and layers after the existing context is understood. Map story application steps to those use cases; do not repeat the full user journey inside the technical spec.
 
 If the target artifact has no workflow-bearing section, do not force it through the layered contract just because it is non-trivial.
 
-These skills may be combined in that order:
+These skills may be combined in this order:
 
 1. reverse-document existing behavior when necessary
 2. map connected impacted surfaces when necessary
-3. write or refine the target plan/spec in the shared contract shape
+3. create or amend a user story when the request has a user-visible journey
+4. review story UI states and shared UI contracts when visible UI changes
+5. write or refine technical use cases in the shared contract shape
 
 ## Required Output Shape
 
-The produced plan must follow `planning/planning_contract.md`.
+The produced technical use-case plan and any related user story must follow their respective shapes in `planning/planning_contract.md`.
 
 That requirement applies to workflow-bearing specs and workflow-bearing sections, not to pure analysis documents.
 
@@ -120,8 +137,11 @@ Write or amend the plan/spec in `specs/`.
 The artifact should include:
 
 - planning anchor and changed assumption
+- a story/use-case classification and links between the required levels
 - connected existing logic when needed
 - use cases with workflow lines, hierarchical numbering when that clarifies parent and child cases, and relevant layers
+- user-story mappings for material application steps when the request is mixed
+- story-specific UI states and shared UI-contract updates when the request changes visible UI
 - early input validation and the post-validation contracts that downstream steps may rely on when that boundary matters
 - `Implementation Logic` when declarative workflow layers are not enough to explain the coding path, or `Implementation Logic Proposal` when implementation detail should remain developer-owned
 - implementation notes when created functions or methods should mention the workflow step in their docstrings
@@ -178,6 +198,7 @@ The plan is clear enough to start implementation only when:
 
 - the changed behavior and planning anchor are specific enough to guide code changes
 - the relevant use cases and required layers are present for the slice being implemented
+- when the slice is user-visible, the relevant user story, its technical mappings, and its UI-state ownership are present
 - use-case numbering is explicit enough to distinguish top-level cases from parent-child refinements when the workflow needs that structure
 - validation boundaries and post-validation contracts are explicit enough when inner steps depend on stronger assumptions or should avoid redundant re-validation
 - important files, functions, types, tables, or workflow states are named when implementation depends on them
@@ -221,6 +242,8 @@ Spec maintenance is a first-class step, not cleanup.
 
 - non-trivial work starts with a plan/spec update, not code edits
 - the plan is stored in `specs/`
+- mixed user-visible work distinguishes story-level workflows from technical use cases and keeps their mappings current
+- user-story UI states are synchronized with `specs/ui/` contracts through `design-ux-guardrails` when visible UI changes
 - related existing specs are scanned and classified
 - use-case layers stay under each use case
 - hierarchical use-case numbering is used when parent-child workflow relationships need to stay explicit

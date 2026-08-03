@@ -6,10 +6,11 @@ description: When you need to execute a series of tasks in a loop, updating the 
 <!-- Tip: Use /create-prompt in chat to generate content with agent assistance -->
 
 Work on plan implementation in a loop, where you:
+ - classify whether the next task affects a user story, technical use case, shared UI contract, or more than one level
  - pick next task from the plan
  - implement the task
- - ensure, that implementation matches plan description, ui guidlines in docs/ md files. Run tests, use playwright mcp to emulate manual tests
- - update the task state to track progress and pick proper new task on next loop iteration.
+ - ensure that implementation matches the story expectations, technical use-case contract, and UI guidelines in `specs/ui/` when they apply. Run tests, use Playwright MCP to emulate manual tests
+ - update story mappings, technical use cases, shared UI contracts, and task state before picking the next task.
 
 1. work in a loop without interruptions until all tasks done.
 2. do not stop to offer me two or more options of next development.

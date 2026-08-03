@@ -13,6 +13,8 @@ SKILL_NAMES = (
     "spec-first-planning-loop",
     "connected-code-mapping",
     "code-logic-workflow-documentation",
+    "user-story-workflow-documentation",
+    "design-ux-guardrails",
 )
 
 PLANNING_CONTRACT = "planning_contract.md"
