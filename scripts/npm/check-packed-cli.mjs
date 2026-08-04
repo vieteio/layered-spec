@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -23,7 +23,11 @@ try {
   const executableArguments = process.platform === "win32"
     ? [path.join(prefix, "node_modules", "@viete-io", "layered-spec", "scripts", "npm", "bin", "layered-spec.mjs")]
     : [];
-  execFileSync(executable, [...executableArguments, "init", "--target-root", project, "--dry-run"], { stdio: "inherit" });
+  execFileSync(executable, [...executableArguments, "init", "--target-root", project], { stdio: "inherit" });
+  const manifest = JSON.parse(await readFile(path.join(project, ".agents", "layered-spec-skillpack.json"), "utf8"));
+  if (manifest.package_version !== pack[0].version) {
+    throw new Error(`Packed CLI installed ${manifest.package_version}; expected ${pack[0].version}`);
+  }
 } finally {
   await rm(workspace, { recursive: true, force: true });
 }

@@ -1,6 +1,6 @@
 {
   "name": "@viete-io/layered-spec",
-  "version": "0.1.1",
+  "version": "0.2.0-alpha.0",
   "description": "Install layered-spec skills into AI coding-agent projects.",
   "license": "MIT",
   "type": "module",
@@ -28,9 +28,16 @@
   },
   "homepage": "https://github.com/vieteio/layered-spec#readme",
   "scripts": {
-    "test": "node --test scripts/npm/test/cli.test.mjs",
+    "test": "node --test scripts/npm/test/cli.test.mjs scripts/npm/test/release-channel-check.test.mjs",
     "check:pack": "npm pack --dry-run",
-    "check:packed-cli": "node scripts/npm/check-packed-cli.mjs"
+    "check:packed-cli": "node scripts/npm/check-packed-cli.mjs",
+    "check:release-channel": "node scripts/npm/release-channel-check.mjs",
+    "release:check:auto": "node scripts/npm/release-channel-check.mjs --tag auto",
+    "release:check:stable": "node scripts/npm/release-channel-check.mjs --tag latest",
+    "release:check:prerelease": "node scripts/npm/release-channel-check.mjs --tag next",
+    "release:publish:stable": "npm run release:check:stable && npm publish --tag latest",
+    "release:publish:prerelease": "npm run release:check:prerelease && npm publish --tag next",
+    "prepublishOnly": "npm test && npm run check:pack && npm run check:release-channel"
   },
   "publishConfig": {
     "access": "public"
