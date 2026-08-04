@@ -232,6 +232,8 @@ Follow the shared artifact contract in `planning/planning_contract.md`.
 
 Do not restate workflow operators or layer syntax locally. Use the contract for exact operator and layer definitions.
 
+When mapped scientific logic needs a formal expression, put KaTeX in the receiving technical `Execution Logic`, `Implementation Logic`, `Logic Details`, or `Data` layer. Keep workflow lines, state names, and transition labels as prose so the map stays scannable.
+
 ## Output Format
 
 When using this skill, produce a plan or planning note with these sections.
@@ -297,6 +299,7 @@ A good result from this skill must satisfy all of these:
 - records early validation boundaries and downstream contracts when the mapped slice depends on them
 - leaves deferred work explicit
 - if layered output is requested, preserves mapping-first reasoning while staying syntax-compatible with `planning/planning_contract.md`
+- if layered output includes scientific formulas, places them in technical Logic or Data layers as KaTeX while keeping workflow chains prose-only
 - if layered output is requested, uses `Implementation Logic` only when declarative workflow layers are insufficient and uses omission or `Implementation Logic Proposal` when the algorithm cannot be reconstructed confidently from existing code without developer clarification
 - if a `Tests` layer is emitted, it is tied to the mapped impact slice and stays compatible with the contract
 - records whether impacted specs remain authoritative, become outdated, or are superseded
