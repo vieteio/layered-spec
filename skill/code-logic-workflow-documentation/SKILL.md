@@ -49,6 +49,8 @@ Use that compatibility shape only for workflow-bearing artifacts or workflow-bea
 
 That includes hierarchical use-case numbering when parent and child workflow cases should stay grouped, plus the distinction between declarative workflow layers and `Implementation Logic` or `Implementation Logic Proposal` when implementation detail is or is not clear enough to document.
 
+Keep documented workflow schemas, state names, and transition labels in concise prose even when the code implements scientific logic. Put relevant KaTeX equations in `Logic Details`, `Execution Logic`, `Implementation Logic`, or `Data`, with notation definitions and assumptions close to the equation. Use `$...$` inline and `$$...$$` for standalone formulas.
+
 ## Tests Layer Compatibility
 
 When the user wants compatibility with layered-workflow-planning or the shared planning contract, a `Tests` layer may be added using the syntax defined in the contract.
@@ -151,6 +153,7 @@ Transition: <how state changes>
 - If named layers are used, they stay compatible with layered-workflow-planning naming and with `planning/planning_contract.md`
 - Early validation boundaries and their downstream contracts are documented when later workflow steps rely on stronger assumptions
 - `Implementation Logic` is used only when declarative workflow layers are not enough to explain the implementation, and `Implementation Logic Proposal` or omission is used when the full algorithm is not recoverable yet from the existing code and needs developer clarification
+- Scientific formulas that clarify observed logic use KaTeX in a technical Logic or Data layer; workflow schemas stay prose-only and scannable
 - If a `Tests` layer is used, it reflects the documented behavior rather than speculative future behavior and each test entry includes at least `description` or `workflow`
 
 ## Common Variations

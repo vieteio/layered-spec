@@ -171,6 +171,12 @@ For each step, include:
 - Config parameters: settings or flags controlling the step
 - Metrics: measurable signals, including execution time when relevant
 
+## Scientific Formula Rule
+
+When a scientific or mathematical expression materially clarifies the implementation, render it as KaTeX in `Execution Logic`, `Implementation Logic`, `Logic Details`, or `Data`. Use `$...$` for a short inline expression and `$$...$$` for a standalone equation or derivation.
+
+Keep workflow lines, state names, transition labels, and branch labels as concise prose. Name the semantic transition there, then state the formula and its symbols, units, domains, and assumptions in the relevant logic layer. Do not introduce KaTeX merely for decoration.
+
 ## Implementation Logic Layer Rule
 
 Use `Execution Logic` for operational step behavior when that is enough to explain how the workflow should proceed.
@@ -251,6 +257,7 @@ If the user asks for improvement instead of expansion:
 - Hierarchical numbering is used when parent and child use cases need separate but related workflow treatment
 - Early validation and post-validation contracts are captured when they simplify downstream logic or remove redundant validation
 - Execution Logic and Implementation Plan steps include Input, Outcome, Logic, External state, Config parameters, and Metrics
+- Scientific formulas use KaTeX in a technical Logic or Data layer when useful; workflow chains remain prose-only and scannable
 - `Implementation Logic` is added only when declarative workflow layers are insufficient for implementation, and `Implementation Logic Proposal` or omission is used when the algorithm should remain developer-owned
 - Complex algorithmic decompositions and intermediate structures are made explicit in the plan when they are needed for a correct or maintainable implementation
 - Output examples should stay thin and must not drift from the contract

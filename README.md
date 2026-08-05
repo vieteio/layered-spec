@@ -64,6 +64,24 @@ layered-spec init
 
 Requires Node.js 20.19.0 or later.
 
+#### Select a release version
+
+The default install always uses the newest stable release (`latest`):
+
+```bash
+npm install -g @viete-io/layered-spec
+# equivalent: npm install -g @viete-io/layered-spec@latest
+```
+
+Use `next` to try the newest prerelease, or use an exact version to keep an installation reproducible:
+
+```bash
+npm install -g @viete-io/layered-spec@next
+npm install -g @viete-io/layered-spec@0.2.0-alpha.0
+```
+
+To return to the stable release, install `@latest` again. The selected package version is recorded in `.agents/layered-spec-skillpack.json` (or the selected host's equivalent manifest) when you run `layered-spec init`.
+
 #### Python installer
 
 Clone this repository, then run the existing Python installer from its root:

@@ -17,5 +17,6 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: npm test
+      - run: npm run release:check:auto
       - run: npm run check:pack
       - run: npm run check:packed-cli

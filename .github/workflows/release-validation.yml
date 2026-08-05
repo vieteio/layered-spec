@@ -1,0 +1,27 @@
+name: Release validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      dist_tag:
+        description: npm dist-tag that will be used for the manual publish
+        required: true
+        default: auto
+        type: choice
+        options:
+          - auto
+          - latest
+          - next
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.19.0
+      - run: node scripts/npm/release-channel-check.mjs --tag "${{ inputs.dist_tag }}"
+      - run: npm test
+      - run: npm run check:pack
+      - run: npm run check:packed-cli

@@ -218,6 +218,28 @@ Typed workflow syntax:
 
 Refactoring syntax exists because implemented specs can become outdated after an implementation update. Use it when the plan changes an existing workflow rather than adding a net-new one.
 
+### Scientific Formula Syntax
+
+Use KaTeX only when a scientific or mathematical expression materially clarifies a technical rule, algorithm, invariant, transformation, or data definition. Keep ordinary implementation prose in plain language.
+
+Put formulas primarily in `Execution Logic`, `Implementation Logic`, `Logic Details`, or `Data`. Use inline KaTeX (`$...$`) for a short expression within a sentence and display KaTeX (`$$...$$`) for a standalone equation, derivation, or multi-line aligned expression.
+
+Do not put KaTeX in workflow lines, transition labels, branch labels, or workflow-state names. Those chains must remain scannable state-to-state prose. Give the chain a concise semantic state or step name, then place the formula in the relevant Logic layer and refer to the named state or quantity there.
+
+For example:
+
+```md
+raw measurements --estimate model parameters--> fitted model
+
+Logic Details:
+Least-squares estimator:
+$$
+\hat{\theta} = \underset{\theta}{\operatorname{arg\,min}}\; \lVert X\theta - y \rVert_2^2
+$$
+```
+
+Preserve notation definitions, units, domains, and assumptions next to a formula when they are needed to interpret it. Do not add formulas decoratively when a named rule or short prose is clearer.
+
 ### Decomposition And Intermediate Structures
 
 The workflow line and deeper workflow layers may rely on intermediate steps or states already described by the developer in the task description.
@@ -436,6 +458,7 @@ A valid planning artifact should satisfy all of these:
 - keeps story-specific UI states in `specs/stories/` and reusable UI rules in `specs/ui/`
 - records code-to-spec traceability when implementation boundaries map cleanly to use-case workflow steps
 - uses workflow operators consistently, including refactoring syntax when updating an existing implementation path
+- uses KaTeX for scientific formulas only where it clarifies technical logic or data, while keeping workflow chains as readable prose
 - uses hierarchical use-case numbering when parent and child use cases need distinct workflow treatment
 - plans early validation and the post-validation contract when later workflow steps depend on stronger assumptions
 - uses `Implementation Logic` only when algorithmic detail is needed beyond declarative workflow behavior, and uses `Implementation Logic Proposal` or omission when the implementation should stay developer-owned

@@ -128,6 +128,8 @@ That requirement applies to workflow-bearing specs and workflow-bearing sections
 
 Use the contract as the single source of truth for top-level sections, use-case shape, optional layers, and question placement.
 
+When scientific or mathematical logic needs formal notation, use KaTeX in technical Logic or Data layers as defined by the contract. Keep workflow lines as prose state transitions; do not embed formulas in state or transition labels.
+
 ## Planning Loop
 
 ### Step 1. Create Or Update The Spec
@@ -252,6 +254,7 @@ Spec maintenance is a first-class step, not cleanup.
 - helper and intermediate-structure names in the spec stay concrete enough that the reader can infer their contents, operation, and preserved distinctions without translating from generic planning vocabulary
 - local questions may stay in `Use Case Questions`; general or escalated questions are grouped in the top-level `Open questions` section
 - plans capture early validation and the downstream contracts that follow from it when that simplifies the implementation slice
+- scientific formulas use KaTeX only where they clarify technical logic or data; workflow chains remain concise prose
 - declarative workflow plans gain `Implementation Logic` when implementation detail is required, or explicitly leave the algorithm to the developer via `Implementation Logic Proposal` or omission
 - implementation guidance captures when function or method docstrings should name the workflow step they implement
 - implementation starts only after an explicit plan-readiness check confirms the plan is complete and consistent enough for the active slice
