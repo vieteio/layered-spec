@@ -1,6 +1,6 @@
 {
   "name": "@viete-io/layered-spec",
-  "version": "0.2.0-alpha.0",
+  "version": "0.2.0-alpha.1",
   "description": "Install layered-spec skills into AI coding-agent projects.",
   "license": "MIT",
   "type": "module",

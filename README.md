@@ -77,7 +77,7 @@ Use `next` to try the newest prerelease, or use an exact version to keep an inst
 
 ```bash
 npm install -g @viete-io/layered-spec@next
-npm install -g @viete-io/layered-spec@0.2.0-alpha.0
+npm install -g @viete-io/layered-spec@0.2.0-alpha.1
 ```
 
 To return to the stable release, install `@latest` again. The selected package version is recorded in `.agents/layered-spec-skillpack.json` (or the selected host's equivalent manifest) when you run `layered-spec init`.

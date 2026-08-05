@@ -2,10 +2,14 @@
 
 Distribute layered-spec as `@viete-io/layered-spec` so a user can install the CLI with `npm install -g @viete-io/layered-spec@latest`, enter a project, and run `layered-spec init` without cloning this repository. `init` defaults to all supported hosts in the current project, while `--host <host>` remains available for a one-host installation.
 
+Package selection happens at npm installation time: an unqualified install and `@latest` select the newest stable release, `@next` selects the newest prerelease, and an exact SemVer version selects a pinned release. The CLI installs only the canonical assets embedded in its resolved package version; it must not download and execute a different version at `init` time.
+
 ## Planning anchor
 
 - Anchor: `scripts/install_skillpack.py#main` is the only current installation entry point. It depends on a checked-out repository for the canonical `skill/`, `planning/`, and `prompts/` source files and requires a Python runtime.
 - Changed assumption: distribution is no longer a cloned Python repository; the published npm tarball is the immutable source bundle and the Node CLI is the supported public entry point.
+- Version-selection anchor: `package.json#version` is being prepared as `0.2.0-alpha.1` from the six-skill `user-stories` branch. npm currently maps `latest` to `0.1.1`; the prior four-skill `0.2.0-alpha.0` package was unpublished and must not be reused.
+- Changed release rule: stable and prerelease packages are separately published and selected through npm dist-tags. A prerelease must never move `latest`.
 - Why this is non-local: the change affects source layout, install runtime, CLI compatibility, package contents, documentation, release credentials, CI, and end-to-end tests on every supported host/path combination.
 - Impacted specs already present in `specs/`:
   - `specs/construction-drawing-pdf-estimation-service.md` — unrelated demo-project plan. Status: `active`. Action: `reuse` unchanged.
@@ -42,6 +46,16 @@ Distribute layered-spec as `@viete-io/layered-spec` so a user can install the CL
 
 - There are no automated tests for the installer today.
 - The Python installer has a side-effect-free `--dry-run` path that can become a fixture-based contract test baseline before it is retired.
+
+### 6. Release channel and package selection
+
+- `package.json` currently exposes one package version; `scripts/npm/src/cli.mjs#readPackageVersion` writes that resolved version into the installation manifest.
+- npm already resolves package versions before the CLI executes. Adding a version prompt to `init` would require downloading, unpacking, and trusting a second package version at runtime, while the installed executable and manifest could then disagree about their source version.
+- The supported selection surface should therefore be npm's native specifier syntax:
+  - `npm install -g @viete-io/layered-spec` or `@latest` for the newest stable release.
+  - `npm install -g @viete-io/layered-spec@next` for the newest prerelease.
+  - `npm install -g @viete-io/layered-spec@<exact-version>` for a reproducible pinned release.
+- The existing `v0.2-alpha` Git tag is a repository milestone. The corrected npm prerelease uses the complete SemVer version `0.2.0-alpha.1` and receives the matching Git tag `v0.2.0-alpha.1`.
 
 ## Use cases
 
@@ -165,6 +179,52 @@ Tests:
    workflow: release trigger --test and publish--> npm `latest` release
    expected outcome: the published package version equals the release tag, while the npm token remains available only to the protected workflow.
 
+### 4. Select a stable, prerelease, or pinned installer version
+
+user chooses package selector --npm resolves and globally installs one immutable package--> `layered-spec init` writes skills and a manifest from the selected release
+
+Input Validation And Contracts:
+
+- Treat an omitted selector as `latest`; `latest` must point only to a non-prerelease SemVer version.
+- Treat `next` as the documented prerelease channel; it may point only to a SemVer prerelease version.
+- Accept exact versions only as npm package selectors. The shell/npm client validates selector syntax and resolves the package before the CLI runs.
+- After npm resolves a selector, `package.json#version`, the executable, canonical assets, and `layered-spec-skillpack.json#package_version` must all describe the same package tarball.
+
+Execution Logic:
+
+1. Publish `0.2.0-alpha.1` from the merged six-skill `user-stories` release state with `npm publish --tag next`; verify `latest` remains `0.1.1`.
+2. Document the three native npm selectors in README quick start and upgrade guidance, with `@latest` as the displayed default.
+3. Add release validation that rejects a prerelease publish targeting `latest` and a stable publish targeting `next`.
+4. Promote a tested prerelease by publishing its final stable SemVer version from the merged `main` release state with `npm publish --tag latest`; only this step advances the default installer.
+
+Files And Functions:
+
+- existing: `package.json#version` - package version installed and recorded by the CLI.
+- existing: `scripts/npm/src/cli.mjs#readPackageVersion` - preserves package-to-manifest provenance; do not add remote version loading.
+- planned: `scripts/npm/release-channel-check.mjs` - validates the package version and intended npm dist-tag before a publish command runs.
+- planned: `.github/workflows/release-validation.yml` - validates the selected release channel, tests, and packed tarball without publishing.
+- existing: `README.md` - document stable, prerelease, pinned, upgrade, and rollback commands.
+
+Tests:
+
+`scripts/npm/test/release-channel-check.test.mjs`
+ - description: accepts a stable package version only for `latest`
+   input: `0.2.0` with `latest`
+   workflow: stable package metadata --validate release channel--> publishable stable release
+   expected outcome: validation succeeds.
+ - description: accepts a prerelease package version only for `next`
+   input: `0.2.0-alpha.0` with `next`
+   workflow: prerelease package metadata --validate release channel--> publishable prerelease
+   expected outcome: validation succeeds and `latest` is not selected.
+ - description: rejects channel/version mismatches
+   input: prerelease with `latest`, stable with `next`, or malformed package version
+   workflow: invalid release metadata --validate--> failed release validation
+   expected outcome: non-zero exit before npm publish can run.
+ - description: records the package selected by npm
+   input: each packed stable/prerelease fixture
+   workflow: resolved package --`layered-spec init`--> installation manifest
+   expected outcome: manifest `package_version` equals the fixture's `package.json#version`.
+
 ## Implementation checklist
 
 1. [x] Create this npm-installer plan and record the current Python installer, canonical assets, documentation, and absent release automation.
@@ -175,6 +235,10 @@ Tests:
 6. [x] Add CI packaging checks and release validation. The maintainer npm account is authenticated; the initial release will be manually published with public access and npm 2FA.
 7. [x] Publish `0.1.0`, install it from npm in a clean prefix, and start the six-month legacy Python migration window.
 8. [-] Publish `0.1.1` so `layered-spec init` installs all supported hosts by default and records shared Codex/Antigravity output in one manifest.
+9. [x] Amend this spec and README with npm-native stable, prerelease, and exact-version selection. Keep `@latest` as the default command and do not add an `init`-time package downloader.
+10. [x] Add a release-channel validator and its unit tests; wire it before packed-tarball checks in release validation. The packed CLI smoke test now verifies that the manifest version equals the installed tarball version.
+11. [-] Prepare the merged six-skill `user-stories` branch state as `0.2.0-alpha.1` for `npm publish --tag next`; verify after publication that registry tags are `latest=0.1.1` and `next=0.2.0-alpha.1`.
+12. [ ] On merge to `main`, publish the corresponding final stable SemVer package with `latest`, then verify a no-selector global install resolves that version.
 
 ## Open questions
 
@@ -182,6 +246,8 @@ Tests:
 - Resolved: Node 20.19+ is the supported runtime floor.
 - Resolved: no GitHub OIDC. First releases are manually published by an authorized `viete-io` npm user with 2FA; later GitHub automation, if wanted, uses a manually created granular access token in a protected secret.
 - Resolved: retain the Python installer for six months after the first stable npm release.
+- Resolved: use npm dist-tags rather than an interactive CLI downloader for version selection. npm selects the immutable package before the CLI runs, which keeps the executable, canonical assets, and installed manifest aligned.
+- Resolved: stable releases use `latest`, prereleases use `next`, and reproducible installations use exact complete SemVer versions. `v0.2-alpha` remains a Git milestone; the npm prerelease is tagged and published as a complete SemVer version.
 
 ## Decision log
 
@@ -195,3 +261,5 @@ Tests:
 - 2026-07-14: `npm publish --access public` passed package assembly and registry validation but npm required an authenticator one-time password. The release must be completed by the authenticated maintainer without exposing that code to the agent.
 - 2026-07-14: Published `@viete-io/layered-spec@0.1.0` with the `latest` dist-tag. A clean registry installation ran `layered-spec init --host codex` successfully and produced the expected versioned manifest.
 - 2026-07-14: Existing unrelated specs remain active and unchanged; this new spec is the only authoritative plan for npm distribution.
+- 2026-08-04: npm registry inspection shows `latest` points to `0.1.1` and no prerelease is published. Keep this stable default while publishing the `user-stories` branch as a separately selectable `next` prerelease.
+- 2026-08-06: Merge the npm release support from `main` into the six-skill `user-stories` branch. The four-skill `0.2.0-alpha.0` package was unpublished; publish the corrected immutable replacement as `0.2.0-alpha.1` under `next`.
