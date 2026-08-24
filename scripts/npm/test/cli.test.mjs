@@ -17,6 +17,15 @@ test("init writes a Codex project install and versioned manifest", async () => {
   assert.match(skill, /\.agents\/planning\/planning_contract\.md/);
   assert.doesNotMatch(skill, /`planning\/planning_contract\.md`/);
 
+  const lifecycleSkill = await readFile(path.join(project, ".agents", "skills", "spec-first-planning-loop", "SKILL.md"), "utf8");
+  assert.match(lifecycleSkill, /specs\/spec-lifecycle\/workflow\.md/);
+  assert.doesNotMatch(lifecycleSkill, /user stor|solution basis|basis selection/i);
+
+  const workflowTemplate = await readFile(path.join(project, ".agents", "skills", "spec-first-planning-loop", "assets", "default_workflow.md"), "utf8");
+  assert.match(workflowTemplate, /Check specification completeness/);
+  assert.match(workflowTemplate, /Check specification consistency/);
+  assert.doesNotMatch(workflowTemplate, /user stor|solution basis|basis selection/i);
+
   const manifest = JSON.parse(await readFile(path.join(project, ".agents", "layered-spec-skillpack.json"), "utf8"));
   assert.equal(manifest.package_name, "@viete-io/layered-spec");
   assert.equal(manifest.package_version, "9.9.9");

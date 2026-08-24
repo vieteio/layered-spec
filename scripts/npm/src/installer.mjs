@@ -6,7 +6,6 @@ const MANIFEST_NAME = "layered-spec-skillpack.json";
 const SOURCE_REPOSITORY = "https://github.com/vieteio/layered-spec";
 const canonicalPathPatterns = [
   /(?<![\w/.-])planning\/planning_contract\.md/,
-  /(?<![\w/.-])prompts\/plan implementation in a loop\.prompt\.md/,
   /(?<![\w/.-])skill\/[a-z0-9-]+\/SKILL\.md/
 ];
 
@@ -37,8 +36,7 @@ async function installHost({ hostNames, paths, scope, targetRoot, sources, packa
   const hostName = hostNames[0];
   const replacements = buildRewriteMap(paths);
   const writes = [
-    [path.join(paths.planningDirectory, "planning_contract.md"), rewriteContent(sources.planning, replacements)],
-    [path.join(paths.promptsDirectory, "plan implementation in a loop.prompt.md"), rewriteContent(sources.prompt, replacements)]
+    [path.join(paths.planningDirectory, "planning_contract.md"), rewriteContent(sources.planning, replacements)]
   ];
 
   for (const skillName of SKILL_NAMES) {
@@ -47,6 +45,11 @@ async function installHost({ hostNames, paths, scope, targetRoot, sources, packa
     validateInstalledSkill(normalized, hostName);
     writes.push([path.join(paths.skillsDirectory, skillName, "SKILL.md"), normalized]);
   }
+
+  writes.push([
+    path.join(paths.skillsDirectory, "spec-first-planning-loop", "assets", "default_workflow.md"),
+    rewriteContent(sources.defaultWorkflow, replacements)
+  ]);
 
   const allFiles = writes.map(([file]) => file);
   const manifest = {
@@ -79,12 +82,12 @@ async function installHost({ hostNames, paths, scope, targetRoot, sources, packa
 async function loadCanonicalSources(packageRoot) {
   const sourcePath = (...parts) => path.join(packageRoot, ...parts);
   const planning = await readRequired(sourcePath("planning", "planning_contract.md"));
-  const prompt = await readRequired(sourcePath("prompts", "plan implementation in a loop.prompt.md"));
+  const defaultWorkflow = await readRequired(sourcePath("skill", "spec-first-planning-loop", "assets", "default_workflow.md"));
   const skills = new Map();
   for (const skillName of SKILL_NAMES) {
     skills.set(skillName, await readRequired(sourcePath("skill", skillName, "SKILL.md")));
   }
-  return { planning, prompt, skills };
+  return { planning, defaultWorkflow, skills };
 }
 
 async function readRequired(file) {
@@ -99,7 +102,6 @@ async function readRequired(file) {
 function buildRewriteMap(paths) {
   const replacements = [
     ["planning/planning_contract.md", `${paths.planningReference}/planning_contract.md`],
-    ["prompts/plan implementation in a loop.prompt.md", `${paths.promptsReference}/plan implementation in a loop.prompt.md`],
     ...SKILL_NAMES.map((name) => [`skill/${name}/SKILL.md`, `${paths.skillsReference}/${name}/SKILL.md`])
   ];
   return replacements.sort(([left], [right]) => right.length - left.length);
@@ -132,7 +134,7 @@ function normalizeSkillFrontmatter(content, hostName) {
 
 function validateInstalledSkill(content, hostName) {
   const errors = canonicalPathPatterns.filter((pattern) => pattern.test(content)).map((pattern) => `still contains canonical path: ${pattern}`);
-  if (hostName !== "vscode" && /(?<![\w/.-])\.github\/(planning|prompts|skills)\//.test(content)) {
+  if (hostName !== "vscode" && /(?<![\w/.-])\.github\/(planning|skills)\//.test(content)) {
     errors.push("still contains VS Code-only .github reference");
   }
   if (!/^---\nname: .+\ndescription: .+/m.test(content)) errors.push("missing required frontmatter");
@@ -142,7 +144,7 @@ function validateInstalledSkill(content, hostName) {
 function groupCompatibleHosts(pathsByHost) {
   const groups = new Map();
   for (const { hostName, paths } of pathsByHost) {
-    const key = [paths.skillsDirectory, paths.planningDirectory, paths.promptsDirectory, paths.manifestDirectory].join("\0");
+    const key = [paths.skillsDirectory, paths.planningDirectory, paths.manifestDirectory].join("\0");
     const group = groups.get(key);
     if (group) {
       group.hostNames.push(hostName);

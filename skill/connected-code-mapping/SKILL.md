@@ -34,7 +34,7 @@ Build a mapping-first plan that:
 - plans updates by responsibility instead of by file list
 - prevents partial fixes where one caller changes but its loaders, persistence, propagation, or tests remain stale
 - prevents code changes from silently leaving repository specs outdated
-- can be summarized into layered workflow planning sections when the broader feature plan or one chapter of a mixed document genuinely needs workflow-bearing format
+- can be summarized into layered workflow planning sections when the broader solution plan or one chapter of a mixed document genuinely needs workflow-bearing format
 
 ## Core Rule
 
@@ -213,7 +213,7 @@ Examples:
 
 ### 8. Emit Layered Output When Relevant
 
-If this mapping work supports a broader planning artifact for a new or changed feature, summarize the result in compatible layers such as:
+If this mapping work supports a broader planning artifact for a new or changed solution, summarize the result in compatible layers such as:
 
 - Planning anchor
 - Connected groups or observed existing logic

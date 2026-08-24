@@ -1,14 +1,14 @@
 ---
 name: layered-workflow-planning
-description: "Use when: planning or refining a workflow-bearing feature slice, use-case set, or document section that genuinely needs layered workflow syntax, typed workflows, branch or parallel states, execution logic, types, tables, events, or logic details. Do not use for pure analysis or reference documents with no workflow-bearing section."
-argument-hint: "Describe the workflow-bearing feature or document section, the use cases already written, the layers already filled, and what should be expanded next."
+description: "Use when: planning or refining a workflow-bearing solution slice, use-case set, or document section that genuinely needs layered workflow syntax, typed workflows, branch or parallel states, execution logic, types, tables, events, or logic details. Do not use for pure analysis or reference documents with no workflow-bearing section."
+argument-hint: "Describe the workflow-bearing solution or document section, the use cases already written, the layers already filled, and what should be expanded next."
 user-invocable: true
 ---
 
 # Layered Workflow Planning
 
 ## When to Use
-- Plan a new feature before implementation when the target artifact needs explicit workflows, state changes, or step-owned logic
+- Plan a new solution before implementation when the target artifact needs explicit workflows, state changes, or step-owned logic
 - Expand user-provided workflow-bearing use cases into a complete set of workflows
 - Fill missing layers for workflows the user has already started
 - Refine one planning layer without regenerating the whole workflow-bearing part of the document

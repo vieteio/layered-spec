@@ -14,6 +14,14 @@ First 1-3 layers are for review by a user, remaining layers are for reliable cod
 
 Compact layered syntax makes spec driven development concise, fast, and convenient.
 
+## New! Layered-spec is partially rewritten using layered-spec
+
+1. Layered-spec lifecycle is now described using layered-specs's own syntax. It is stored in your project's `/specs` folder at `specs/spec-lifecycle/workflow.md`, where it is explicit, easy to review, and fully customizable. You can extend layered-spec now with steps from your own workflow, such as BDD testing and PR preparation.
+
+2. As the first lifecycle customization, this update adds specification completeness and consistency checks. These checks reduce the need for manual spec review and editing.
+
+3. Loop syntax was added to support changes above, making the layered-spec syntax minimally complete.
+
 ## Quick start
 
 1. Install spec skills
@@ -46,7 +54,9 @@ Canonical skill sources live under:
 
 - `skill/` — skill definitions
 - `planning/planning_contract.md` — spec structure description
-- `prompts/` — supporting prompt files used by the planning loop
+
+Spec lifecycle files live under:
+- `specs/spec-lifecycle/workflow.md` — repository lifecycle workflow that users can review and customize
 
 Describe a task in chat with an AI agent and ask it to create a spec. Review the spec and refine it in chat. When the spec is correct, ask the agent to implement it in a loop.
 
@@ -131,15 +141,24 @@ step: state 1 --step name--> state 2
 conditional branches: [branch1, branch2, branch3]
 parallel branches: (branch1, branch2, branch3)
 workflow refactoring: {workflow1} --refactoring step--> {workflow2}
+workflow loop: | loop condition: input --step name--> outcome |
 ```
+
+Place loop workflows in fenced text blocks or inline code so the enclosing `|` characters are not interpreted as a Markdown table.
 
 Example:
 
 ```python
 state 1 --step name 1--> state 2 --step name 2--> [
-conditional state 1 --branch 1 step--> branch 1 state,
-conditional state 2 --branch 2 step--> branch 2 state
+  conditional state 1 --branch 1 step--> branch 1 state,
+  conditional state 2 --branch 2 step--> branch 2 state
 ] --step name 3--> final state
+
+| process each file: file --perform analysis--> report |
+
+| while unfinished work items remain:
+  current work state --select next item--> selected item
+  --process item--> updated work state |
 ```
 
 ### Layered use cases
@@ -175,17 +194,14 @@ Syntax:
 
 ```python
 step: state 1: Type --step name--> state 2: Type
-conditional branches: [branch1, branch2, branch3]
-parallel branches: (branch1, branch2, branch3)
-workflow refactoring: {workflow1} --refactoring step--> {workflow2}
 ```
 
 Example:
 
 ```python
 state 1: Tuple[A, B] --step name 1--> state 2: List[X] --step name 2--> [
-conditional state 1 --branch 1 step--> branch 1 state,
-conditional state 2 --branch 2 step--> branch 2 state
+  conditional state 1 --branch 1 step--> branch 1 state,
+  conditional state 2 --branch 2 step--> branch 2 state
 ] --step name 3--> final state
 ```
 

@@ -16,11 +16,10 @@ SKILL_NAMES = (
 )
 
 PLANNING_CONTRACT = "planning_contract.md"
-LOOP_PROMPT = "plan implementation in a loop.prompt.md"
+DEFAULT_WORKFLOW = "default_workflow.md"
 
 # Canonical source paths (posix-style strings used inside skill text).
 CANONICAL_PLANNING_CONTRACT = f"planning/{PLANNING_CONTRACT}"
-CANONICAL_LOOP_PROMPT = f"prompts/{LOOP_PROMPT}"
 CANONICAL_SKILL_PATHS = tuple(f"skill/{name}/SKILL.md" for name in SKILL_NAMES)
 
 
@@ -28,11 +27,9 @@ CANONICAL_SKILL_PATHS = tuple(f"skill/{name}/SKILL.md" for name in SKILL_NAMES)
 class HostPaths:
     skills_dir: Path
     planning_dir: Path
-    prompts_dir: Path
     manifest_dir: Path
     skills_ref: str
     planning_ref: str
-    prompts_ref: str
 
 
 @dataclass(frozen=True)
@@ -44,15 +41,13 @@ class HostConfig:
     user: HostPaths
 
 
-def _repo_paths(skills: str, planning: str, prompts: str, manifest: str) -> HostPaths:
+def _repo_paths(skills: str, planning: str, manifest: str) -> HostPaths:
     return HostPaths(
         skills_dir=Path(skills),
         planning_dir=Path(planning),
-        prompts_dir=Path(prompts),
         manifest_dir=Path(manifest),
         skills_ref=skills,
         planning_ref=planning,
-        prompts_ref=prompts,
     )
 
 
@@ -62,16 +57,14 @@ def _user_ref(path: str) -> str:
     return f"~/{path}"
 
 
-def _user_paths(skills: str, planning: str, prompts: str, manifest: str) -> HostPaths:
+def _user_paths(skills: str, planning: str, manifest: str) -> HostPaths:
     home = Path.home()
     return HostPaths(
         skills_dir=home / skills,
         planning_dir=home / planning,
-        prompts_dir=home / prompts,
         manifest_dir=home / manifest,
         skills_ref=_user_ref(skills),
         planning_ref=_user_ref(planning),
-        prompts_ref=_user_ref(prompts),
     )
 
 
@@ -83,13 +76,11 @@ HOSTS: dict[str, HostConfig] = {
         repo=_repo_paths(
             ".github/skills",
             ".github/planning",
-            ".github/prompts",
             ".github",
         ),
         user=_user_paths(
             ".copilot/skills",
             ".copilot/planning",
-            ".copilot/prompts",
             ".copilot",
         ),
     ),
@@ -100,13 +91,11 @@ HOSTS: dict[str, HostConfig] = {
         repo=_repo_paths(
             ".cursor/skills",
             ".cursor/planning",
-            ".cursor/prompts",
             ".cursor",
         ),
         user=_user_paths(
             ".cursor/skills",
             ".cursor/planning",
-            ".cursor/prompts",
             ".cursor",
         ),
     ),
@@ -117,13 +106,11 @@ HOSTS: dict[str, HostConfig] = {
         repo=_repo_paths(
             ".claude/skills",
             ".claude/planning",
-            ".claude/prompts",
             ".claude",
         ),
         user=_user_paths(
             ".claude/skills",
             ".claude/planning",
-            ".claude/prompts",
             ".claude",
         ),
     ),
@@ -134,13 +121,11 @@ HOSTS: dict[str, HostConfig] = {
         repo=_repo_paths(
             ".agents/skills",
             ".agents/planning",
-            ".agents/prompts",
             ".agents",
         ),
         user=_user_paths(
             ".agents/skills",
             ".agents/planning",
-            ".agents/prompts",
             ".agents",
         ),
     ),
@@ -151,13 +136,11 @@ HOSTS: dict[str, HostConfig] = {
         repo=_repo_paths(
             ".agents/skills",
             ".agents/planning",
-            ".agents/prompts",
             ".agents",
         ),
         user=_user_paths(
             ".gemini/config/skills",
             ".gemini/config/planning",
-            ".gemini/config/prompts",
             ".gemini/config",
         ),
     ),
@@ -173,10 +156,8 @@ def resolve_paths(host: str, scope: Scope, target_root: Path | None = None) -> H
         return HostPaths(
             skills_dir=target_root / paths.skills_dir,
             planning_dir=target_root / paths.planning_dir,
-            prompts_dir=target_root / paths.prompts_dir,
             manifest_dir=target_root / paths.manifest_dir,
             skills_ref=paths.skills_ref,
             planning_ref=paths.planning_ref,
-            prompts_ref=paths.prompts_ref,
         )
     return paths
