@@ -3,7 +3,7 @@
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=vieteio.layered-spec)
 
 
-Compact syntax for spec-programming which makes AI code generation **predictable** for well-decomposed tasks and speed up development.
+Compact syntax for spec-programming which makes AI code generation **predictable** for well-decomposed tasks and speeds up development.
 
 ## General idea
 
@@ -20,7 +20,7 @@ Compact layered syntax makes spec driven development concise, fast, and convenie
 
 2. As the first lifecycle customization, this update adds specification completeness and consistency checks. These checks reduce the need for manual spec review and editing.
 
-3. Loop syntax was added to support changes above, making the layered-spec syntax minimally complete.
+3. Loop syntax was added to support the changes above, making the layered-spec syntax minimally complete.
 
 ## Quick start
 
@@ -36,7 +36,7 @@ layered-spec init
 
 4. When spec is ready, write in chat "Implement the spec" or "Implement spec update"
 
-### Spec driven vibecoding
+### Spec-driven vibecoding
 
 Skip spec review step.
 
@@ -44,7 +44,7 @@ Limit your work to
 1. Describe task and add "Make spec for that"
 2. Next message in chat "Implement the spec"
 
-AI agent will decompose moderate level complexity tasks well into use-cases with detailed workflow chains and then will generate code properly for well decomposed tasks.
+AI agent will decompose moderately level complexity tasks well into use cases with detailed workflow chains and then will generate code properly for well-decomposed tasks.
 
 ## Skills
 
