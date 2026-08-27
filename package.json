@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/vieteio/layered-spec#readme",
   "scripts": {
-    "test": "node --test scripts/npm/test/cli.test.mjs scripts/npm/test/release-channel-check.test.mjs",
+    "test": "node --test scripts/npm/test/cli.test.mjs scripts/npm/test/release-channel-check.test.mjs scripts/npm/test/update-check.test.mjs",
     "check:pack": "npm pack --dry-run",
     "check:packed-cli": "node scripts/npm/check-packed-cli.mjs",
     "check:release-channel": "node scripts/npm/release-channel-check.mjs",

@@ -11,7 +11,7 @@ async function temporaryDirectory(prefix) {
 
 test("init writes a Codex project install and versioned manifest", async () => {
   const project = await temporaryDirectory("layered-spec-project-");
-  await main(["init", "--host", "codex"], { cwd: project, homeDir: project, packageVersion: "9.9.9", output: () => {} });
+  await main(["init", "--host", "codex"], { cwd: project, homeDir: project, packageVersion: "9.9.9", output: () => {}, updateChecker: () => {} });
 
   const skill = await readFile(path.join(project, ".agents", "skills", "layered-workflow-planning", "SKILL.md"), "utf8");
   assert.match(skill, /\.agents\/planning\/planning_contract\.md/);
@@ -35,7 +35,7 @@ test("init writes a Codex project install and versioned manifest", async () => {
 
 test("init defaults to all hosts in repo scope and combines shared configuration paths", async () => {
   const project = await temporaryDirectory("layered-spec-default-");
-  await main(["init"], { cwd: project, homeDir: project, packageVersion: "9.9.9", output: () => {} });
+  await main(["init"], { cwd: project, homeDir: project, packageVersion: "9.9.9", output: () => {}, updateChecker: () => {} });
 
   await Promise.all([
     stat(path.join(project, ".github", "skills", "layered-workflow-planning", "SKILL.md")),
@@ -49,7 +49,7 @@ test("init defaults to all hosts in repo scope and combines shared configuration
 
 test("init supports all hosts in user scope", async () => {
   const home = await temporaryDirectory("layered-spec-home-");
-  await main(["init", "--host", "all", "--scope", "user"], { cwd: home, homeDir: home, packageVersion: "9.9.9", output: () => {} });
+  await main(["init", "--host", "all", "--scope", "user"], { cwd: home, homeDir: home, packageVersion: "9.9.9", output: () => {}, updateChecker: () => {} });
 
   await Promise.all([
     stat(path.join(home, ".copilot", "skills", "layered-workflow-planning", "SKILL.md")),
@@ -63,7 +63,7 @@ test("init supports all hosts in user scope", async () => {
 test("dry run creates no project files", async () => {
   const project = await temporaryDirectory("layered-spec-dry-run-");
   const output = [];
-  await main(["init", "--host", "cursor", "--dry-run"], { cwd: project, homeDir: project, output: (line) => output.push(line) });
+  await main(["init", "--host", "cursor", "--dry-run"], { cwd: project, homeDir: project, output: (line) => output.push(line), updateChecker: () => { throw new Error("dry runs must skip update checks"); } });
 
   await assert.rejects(stat(path.join(project, ".cursor")));
   assert.ok(output.some((line) => line.includes("would write")));
@@ -71,6 +71,20 @@ test("dry run creates no project files", async () => {
 
 test("rejects unsafe or incomplete input before writes", async () => {
   const project = await temporaryDirectory("layered-spec-invalid-");
-  await assert.rejects(main(["init", "--host", "unknown"], { cwd: project, homeDir: project, output: () => {} }), /Unknown host/);
-  await assert.rejects(main(["init", "--host", "cursor", "--scope", "user", "--target-root", project], { cwd: project, homeDir: project, output: () => {} }), /only be used/);
+  await assert.rejects(main(["init", "--host", "unknown"], { cwd: project, homeDir: project, output: () => {}, updateChecker: () => {} }), /Unknown host/);
+  await assert.rejects(main(["init", "--host", "cursor", "--scope", "user", "--target-root", project], { cwd: project, homeDir: project, output: () => {}, updateChecker: () => {} }), /only be used/);
+});
+
+test("checks for updates after installation unless explicitly disabled", async () => {
+  const project = await temporaryDirectory("layered-spec-update-check-");
+  const checks = [];
+  const updateChecker = async (options) => checks.push(options);
+
+  await main(["init", "--host", "codex"], { cwd: project, homeDir: project, packageVersion: "9.9.9", output: () => {}, updateChecker });
+  assert.equal(checks.length, 1);
+  assert.equal(checks[0].packageVersion, "9.9.9");
+  assert.equal(checks[0].homeDir, project);
+
+  await main(["init", "--host", "codex", "--no-update-check"], { cwd: project, homeDir: project, packageVersion: "9.9.9", output: () => {}, updateChecker });
+  assert.equal(checks.length, 1);
 });
