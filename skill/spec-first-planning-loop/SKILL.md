@@ -31,6 +31,15 @@ Treat changes to the bundled template as defaults for future initialization only
 
 Restore the bundled default only when the user explicitly requests restoration. Before replacing an existing active workflow, show or summarize its differences from the bundled default and ensure the current version is recoverable through version control or a user-approved backup. After restoration, continue to treat the restored active file as the sole authority.
 
+## Helping Users Customize The Lifecycle
+
+When the user requests lifecycle behavior that conflicts with the active workflow, or expresses a lasting workflow preference that the active workflow does not support:
+
+- Briefly explain at the relevant point that the specification lifecycle is defined in `specs/spec-lifecycle/workflow.md` and can be changed to support the requested behavior.
+- Do not silently override the active workflow or treat a conflicting request as a permanent exception.
+- Do not modify the active workflow unless the user asks to update or customize it.
+- Do not show this help message when the user is already requesting a `workflow.md` update or has already been given the same explanation for the current preference.
+
 ## Files Used By This Skill
 
 After ensuring that the active workflow exists, read both authoritative files completely before starting a non-trivial specification lifecycle:
@@ -69,8 +78,9 @@ Each workflow step may use these fields:
 - `Run when`: condition that enables the step.
 - `Skip when`: condition that allows an optional step to be bypassed.
 - `Input`: state and files consumed by the step.
+- `Conversation state`: optional lifecycle state scoped to the current conversation and shared with later lifecycle tasks in that conversation.
 - `Skill`: specialized skill used to perform the step.
-- `Logic`: instructions written directly in the step when no specialized skill is needed.
+- `Logic`: instructions written directly in the step, or supplementary instruction files linked from it, when no specialized skill is needed.
 - `Request next user input`: optional step-specific instructions for requesting user input and processing the response.
 - `Output`: state and files produced by the step.
 - `Record`: decisions or evidence that must be written down.
@@ -78,17 +88,21 @@ Each workflow step may use these fields:
 
 Every step must define `Purpose`. A step normally defines either `Skill` or `Logic`, not both. A step that may pause for a user response should define `Request next user input`. Step headings are stable identifiers; do not rely on step numbers when extending the workflow.
 
+Preserve workflow-declared `Conversation state` after a lifecycle task reaches a final outcome so later tasks in the same conversation can use it. Reset that state for a new conversation. Do not infer conversation state that the active workflow does not declare, and do not write it into solution artifacts unless the step's `Record` instructions require that.
+
+When `Logic` links to supplementary instructions, resolve relative paths from the active `workflow.md` location and read each selected file completely before executing the step. If a referenced file is missing or cannot be read, report the error and keep the step incomplete instead of inventing fallback instructions.
+
 Follow these instructions:
 
 1. Read `workflow.md` and `planning_contract.md` completely.
 2. If resuming an existing lifecycle, continue from its current unfinished step or permitted handoff. Otherwise, start with the first step defined by the active workflow chain.
 3. Find the detailed description of the current step.
 4. Read `Purpose` to understand what the step must accomplish before it can finish.
-5. Use the request, repository rules, existing files, and earlier outputs to evaluate `Run when` and `Skip when`.
+5. Use the request, repository rules, existing files, earlier outputs, and declared conversation state to evaluate `Run when` and `Skip when`.
 6. Perform the step:
    - if it names a `Skill`, read that skill completely and follow its instructions;
    - if it contains `Logic`, follow those instructions directly.
-7. Write or update the declared `Output` and `Record` items before following `Next`.
+7. Update declared `Conversation state`, `Output`, and `Record` items before following `Next`.
 8. When skipping a step or branch, record the reason if its description requires one.
 9. Before leaving the step, confirm that its execution, output, and next transition fulfill its `Purpose`. Treat an incomplete result as a paused state only when `Purpose` permits it and the step defines how to request the next user input.
 10. Use `planning_contract.md` to interpret workflow arrows, branches, parallel states, refactoring transitions, typed workflows, and loops.
@@ -146,6 +160,7 @@ The final outcomes mean:
 - An inline step followed the `Logic` written in the workflow.
 - Required branch and skip decisions were recorded.
 - User input was requested and processed according to the active step's `Request next user input` instructions.
+- Workflow-declared conversation state was preserved across lifecycle tasks in the same conversation, reset for a new conversation, and kept out of solution artifacts unless the workflow required it there.
 - Lifecycle-policy files were excluded from solution-spec searches and status classification.
 - Work resumed from the interrupted step and existing files instead of restarting unnecessarily.
 - The implemented behavior and all affected planning files are synchronized.

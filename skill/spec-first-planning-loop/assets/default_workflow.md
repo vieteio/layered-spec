@@ -8,16 +8,17 @@ task in chat
   --reverse-document existing behavior when necessary--> understood existing behavior
   --collect connected context when necessary--> grounded planning task
   --prepare layered technical use cases--> canonical solution spec
-  --prepare implementation checklist--> solution spec with implementation checklist
-| while the specification has not passed both checks:
-  solution spec with implementation checklist or corrected solution spec
+  --prepare implementation checklist--> reviewable solution spec with implementation checklist
+| while completeness and consistency checks are needed and the specification has not passed both checks:
+  reviewable solution spec with implementation checklist or corrected solution spec
     --check specification completeness--> completeness-checked solution spec
     --check specification consistency--> reviewable solution spec |
   --select handoff-->
 [
-  stop with the spec ready for user review,
-  implement now or after a later user request
-    --implement the plan in a loop--> implemented and synchronized solution spec
+  implementation is authorized
+    --implement the plan in a loop--> implemented and synchronized solution spec,
+  implementation requires confirmation
+    --present the prepared specification and ask whether to implement it--> spec ready for user review
 ]
 ```
 
@@ -147,19 +148,33 @@ Logic:
 5. Keep current status markers accurate.
 
 Output:
-- Solution spec with implementation checklist awaiting completeness and consistency checks.
+- Reviewable solution spec with implementation checklist, ready for the optional completeness and consistency loop.
 
 Record:
 - Explicitly deferred implementation work and checklist status.
+- Whether the optional check loop was entered or skipped, and why.
 
 Next:
-- `Check specification completeness`.
+- `Check specification completeness` when the check-loop condition applies.
+- Otherwise, `Select the handoff`.
 
 ### Check specification completeness
 
 Purpose:
 - Ensure the solution specification and its supporting planning artifacts cover the task's required scope, applicable lifecycle outputs, and implementation work without silent omissions.
 - If required missing content cannot be derived safely, request and process user input before completing the check.
+
+Run when:
+- Before the first iteration, run the check loop when one or more of these conditions apply:
+  - the task was described partially and material behavior was developed while preparing the specification;
+  - the specification contains material assumptions or non-obvious design decisions;
+  - several workflows, branches, responsibilities, contracts, or planning artifacts must agree;
+  - omissions or contradictions remain plausible;
+  - the user explicitly requested the checks.
+- Once the loop has started, keep it active until both checks have passed.
+
+Skip when:
+- Before the first iteration, skip the entire check loop when the task and result are narrow and unambiguous, the specification contains no material inference, the checklist follows directly from it, and no meaningful cross-artifact reconciliation is required.
 
 Input:
 - Solution spec with implementation checklist or corrected solution spec.
@@ -188,6 +203,7 @@ Request next user input:
 
 Output:
 - Completeness-checked solution spec and synchronized supporting planning artifacts, with no unresolved completeness findings for the current scope.
+- After the check passes, a concise user-visible chat summary of what the check added or changed, including material omissions resolved and explicit exclusions or deferrals. If nothing changed, state that the check passed without changes.
 
 Record:
 - Material omissions that were resolved, explicit exclusions or deferrals, and user decisions required by the check.
@@ -200,6 +216,9 @@ Next:
 Purpose:
 - Ensure the complete specification set expresses one compatible solution across the task requirements, recorded decisions, workflow states, artifact mappings, implementation checklist, and affected specifications.
 - If conflicting authoritative inputs cannot be reconciled safely, request and process user input before completing the check.
+
+Run when:
+- `Check specification completeness` completed in the current check-loop iteration.
 
 Input:
 - Completeness-checked solution spec.
@@ -227,6 +246,7 @@ Request next user input:
 
 Output:
 - Complete and consistent reviewable solution spec with synchronized supporting planning artifacts.
+- After the check passes, a concise user-visible chat summary of what the check changed or synchronized, including material contradictions resolved and the affected artifacts or sections. If nothing changed, state that the check passed without changes.
 
 Record:
 - Material inconsistencies that were resolved, the authority used for each non-obvious correction, and user decisions required by the check.
@@ -238,20 +258,33 @@ Next:
 ### Select the handoff
 
 Purpose:
-- Choose whether to stop with a reviewable specification or enter authorized implementation without discarding the current specification state.
+- Decide whether to stop for specification review or enter implementation using the task's readiness and the conversation-local implementation flow.
 
 Input:
-- Reviewable solution spec.
-- The user's current instruction about implementation.
+- Reviewable solution spec after the optional check loop was skipped or completed.
+- The user's current task request.
+- Any unresolved questions or material planning decisions.
+
+Conversation state:
+- `implementation flow`: starts `inactive` in a new conversation, becomes `active` when the user's current task request authorizes implementation or when the user later authorizes implementation of a prepared specification, remains active across later lifecycle tasks, and becomes `inactive` when the user requests that automatic implementation stop.
 
 Logic:
-1. Stop with the spec ready for review when the user requested planning only or has not authorized implementation.
-2. Continue to implementation when the user requested immediate implementation or later explicitly asks to implement the reviewed spec.
-3. Do not enter `Implement the plan` or start non-trivial implementation until this step has established user authorization.
-4. A later implementation request resumes from the same canonical spec and checklist.
+Support the user's work as a flow. In a new conversation, prepare the first specification without implementation unless the user's request already requires an implementation change. The first implementation authorization activates the flow. While the flow is active, later narrow and unambiguous tasks may proceed from specification update to implementation without separate confirmation.
+
+1. Honor the requested outcome. A request requiring an implementation change authorizes implementation; a request limited to specification preparation or review does not.
+2. When implementation is not authorized and the flow is inactive, stop after preparing the specification and request an implementation decision. A later decision resumes from the same specification and checklist.
+3. When implementation is authorized while the flow is inactive, activate the flow, notify the user about its conversation scope and stopping condition, and continue after any required user input has been processed.
+4. While the flow is active, proceed directly to implementation when the task and resulting specification are narrow and unambiguous, the check loop was skipped, and no material question remains. Otherwise, stop with the specification ready for review without deactivating the flow unless the user requests that it stop.
+
+Request next user input:
+- When implementation requires confirmation, present the prepared specification and ask whether the user wants to proceed with its implementation.
+- Do not request this decision when the current task request already authorizes implementation or explicitly limits the outcome to specification preparation or review.
+- Make the requested decision clear and treat any unambiguous implementation authorization as confirmation, regardless of its wording.
+- Keep this step available for a later response. When the response authorizes implementation, process it as input for this handoff, update the conversation state, and continue according to the logic above.
 
 Output:
 - Terminal `spec ready for user review`, or authorization to enter the implementation loop.
+- When this handoff activates the implementation flow, a user-visible notification that the flow is active, including its conversation scope and stopping condition.
 
 Next:
 - Terminal, or `Implement the plan`.

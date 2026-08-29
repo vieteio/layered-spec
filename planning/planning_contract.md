@@ -194,7 +194,7 @@ Loop workflows:
 | loop condition: input --step 1--> state --step 2--> outcome |
 ```
 
-The text before the first `:` is the natural-language loop condition. The workflow after `:` repeats while that condition applies. Iterations are sequential unless the loop body explicitly uses parallel workflow syntax. The condition is descriptive text and does not require further formalization.
+The text before the first `:` is the natural-language loop condition. The workflow after `:` repeats while that condition applies. If the loop condition does not apply before the first iteration, the loop performs no steps and its input state continues unchanged. Iterations are sequential unless the loop body explicitly uses parallel workflow syntax. The condition is descriptive text and does not require further formalization.
 
 Examples:
 
