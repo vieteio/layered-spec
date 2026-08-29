@@ -48,7 +48,7 @@ Canonical skill sources live under:
 
 - `skill/` — skill definitions
 - `planning/planning_contract.md` — spec structure description
-- `prompts/` — supporting prompt files used by the planning loop
+- `skill/spec-first-planning-loop/assets/default_workflow.md` — default specification lifecycle installed with the planning-loop skill
 
 Describe a task in chat with an AI agent and ask it to create a spec. Review the spec and refine it in chat. When the spec is correct, ask the agent to implement it in a loop.
 

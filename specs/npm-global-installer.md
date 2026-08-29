@@ -6,7 +6,7 @@ Package selection happens at npm installation time: an unqualified install and `
 
 ## Planning anchor
 
-- Anchor: `scripts/install_skillpack.py#main` is the only current installation entry point. It depends on a checked-out repository for the canonical `skill/`, `planning/`, and `prompts/` source files and requires a Python runtime.
+- Anchor: `scripts/install_skillpack.py#main` is the only current installation entry point. It depends on a checked-out repository for the canonical `skill/` and `planning/` source files and requires a Python runtime.
 - Changed assumption: distribution is no longer a cloned Python repository; the published npm tarball is the immutable source bundle and the Node CLI is the supported public entry point.
 - Version-selection anchor: `package.json#version` is being prepared as `0.2.0-alpha.1` from the six-skill `user-stories` branch. npm currently maps `latest` to `0.1.1`; the prior four-skill `0.2.0-alpha.0` package was unpublished and must not be reused.
 - Changed release rule: stable and prerelease packages are separately published and selected through npm dist-tags. A prerelease must never move `latest`.
@@ -26,13 +26,13 @@ Package selection happens at npm installation time: an unqualified install and `
 
 ### 2. Canonical source and transformation
 
-- Canonical artifacts are `skill/*/SKILL.md`, `planning/planning_contract.md`, and `prompts/plan implementation in a loop.prompt.md`.
+- Canonical artifacts are the complete skill directories under `skill/`, including skill-owned assets and references, plus `planning/planning_contract.md`.
 - `validate_canonical_source`, `build_rewrite_map`, `rewrite_content`, `normalize_frontmatter`, and `validate_installed_skill` enforce source existence, rewrite host-local references, preserve allowed frontmatter, and reject stale paths.
 - The package must include exactly these canonical assets; the npm `files` allowlist must exclude examples, generated installations, local agent state, and repository-only documents by default.
 
 ### 3. Filesystem output and compatibility
 
-- `install_host` writes planning guidance, loop prompt, one `SKILL.md` per skill, and `layered-spec-skillpack.json` into host-specific directories.
+- `install_host` writes planning guidance, each complete skill directory, and `layered-spec-skillpack.json` into host-specific directories.
 - The manifest records `source_repo`, `git_revision`, timestamp, host, scope, and installed files. Under npm distribution, `source_repo` should become the public repository URL and the manifest needs a `package_name` and `package_version` to identify the installed release.
 - Repo scope is intentionally caller-selected through `--target-root`; user scope resolves from the current user's home directory.
 
@@ -83,7 +83,7 @@ Files And Functions:
 - implemented: `scripts/npm/src/cli.mjs#main` — parse and validate command input.
 - implemented: `scripts/npm/src/installer.mjs#installHost` — implement the workflow above; its docstring links it to Use case 1.
 - implemented: `scripts/npm/src/hosts.mjs#HOSTS` — canonical host metadata ported from `scripts/skillpack_hosts.py`.
-- existing: `skill/`, `planning/`, `prompts/` — package-owned canonical source assets.
+- existing: `skill/`, `planning/` — package-owned canonical source assets.
 
 Tests:
 
@@ -163,7 +163,7 @@ package metadata invariants:
 | default registry tag | `latest` |
 | publish access | public |
 | engine | chosen supported Node LTS range |
-| package assets | `scripts/npm/bin/`, `scripts/npm/src/`, `skill/`, `planning/`, `prompts/`, `README.md`, `LICENSE` |
+| package assets | `scripts/npm/bin/`, `scripts/npm/src/`, `skill/`, `planning/`, `README.md`, `LICENSE` |
 
 Tests:
 
@@ -263,3 +263,4 @@ Tests:
 - 2026-07-14: Existing unrelated specs remain active and unchanged; this new spec is the only authoritative plan for npm distribution.
 - 2026-08-04: npm registry inspection shows `latest` points to `0.1.1` and no prerelease is published. Keep this stable default while publishing the `user-stories` branch as a separately selectable `next` prerelease.
 - 2026-08-06: Merge the npm release support from `main` into the six-skill `user-stories` branch. The four-skill `0.2.0-alpha.0` package was unpublished; publish the corrected immutable replacement as `0.2.0-alpha.1` under `next`.
+- 2026-08-29: Move implementation-loop behavior into `skill/spec-first-planning-loop/assets/default_workflow.md`, remove the superseded standalone prompt from canonical package content, and install complete skill directories so skill-owned assets remain available.
