@@ -35,11 +35,9 @@ export function resolveHostPaths(hostName, scope, { targetRoot, homeDir }) {
   return {
     skillsDirectory: skillDirectory,
     planningDirectory: path.join(base, "planning"),
-    promptsDirectory: path.join(base, "prompts"),
     manifestDirectory: base,
     skillsReference: toReference(scope, config.repo, config.user),
-    planningReference: toReference(scope, replaceLast(config.repo, "planning"), replaceLast(config.user, "planning")),
-    promptsReference: toReference(scope, replaceLast(config.repo, "prompts"), replaceLast(config.user, "prompts"))
+    planningReference: toReference(scope, replaceLast(config.repo, "planning"), replaceLast(config.user, "planning"))
   };
 }
 

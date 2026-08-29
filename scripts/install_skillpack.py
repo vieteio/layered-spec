@@ -13,11 +13,9 @@ from pathlib import Path
 
 from skillpack_hosts import (
     ALL_HOST_NAMES,
-    CANONICAL_LOOP_PROMPT,
     CANONICAL_PLANNING_CONTRACT,
     CANONICAL_SKILL_PATHS,
     HOSTS,
-    LOOP_PROMPT,
     PLANNING_CONTRACT,
     SKILL_NAMES,
     Scope,
@@ -52,10 +50,7 @@ def git_revision(root: Path) -> str | None:
 
 
 def validate_canonical_source(root: Path) -> list[Path]:
-    required = [
-        root / "planning" / PLANNING_CONTRACT,
-        root / "prompts" / LOOP_PROMPT,
-    ]
+    required = [root / "planning" / PLANNING_CONTRACT]
     required.extend(root / "skill" / name / "SKILL.md" for name in SKILL_NAMES)
     missing = [path for path in required if not path.is_file()]
     if missing:
@@ -121,7 +116,6 @@ def render_frontmatter(frontmatter: dict[str, str]) -> str:
 def build_rewrite_map(paths) -> list[tuple[str, str]]:
     replacements = [
         (CANONICAL_PLANNING_CONTRACT, f"{paths.planning_ref}/{PLANNING_CONTRACT}"),
-        (CANONICAL_LOOP_PROMPT, f"{paths.prompts_ref}/{LOOP_PROMPT}"),
     ]
     for skill_path in CANONICAL_SKILL_PATHS:
         skill_name = skill_path.split("/")[1]
@@ -140,13 +134,11 @@ def rewrite_content(content: str, replacements: list[tuple[str, str]]) -> str:
 
 CANONICAL_PATH_PATTERNS = [
     re.compile(r"(?<![\w/.-])planning/planning_contract\.md"),
-    re.compile(r"(?<![\w/.-])prompts/plan implementation in a loop\.prompt\.md"),
     re.compile(r"(?<![\w/.-])skill/[a-z0-9-]+/SKILL\.md"),
 ]
 
 NON_VSCODE_PATH_PATTERNS = [
     re.compile(r"(?<![\w/.-])\.github/planning/"),
-    re.compile(r"(?<![\w/.-])\.github/prompts/"),
     re.compile(r"(?<![\w/.-])\.github/skills/"),
 ]
 
@@ -184,25 +176,20 @@ def install_host(
     written: list[Path] = []
 
     planning_source = root / "planning" / PLANNING_CONTRACT
-    prompt_source = root / "prompts" / LOOP_PROMPT
     planning_target = paths.planning_dir / PLANNING_CONTRACT
-    prompt_target = paths.prompts_dir / LOOP_PROMPT
 
     if not dry_run:
         paths.planning_dir.mkdir(parents=True, exist_ok=True)
-        paths.prompts_dir.mkdir(parents=True, exist_ok=True)
         paths.skills_dir.mkdir(parents=True, exist_ok=True)
 
     planning_text = rewrite_content(planning_source.read_text(encoding="utf-8"), replacements)
-    prompt_text = rewrite_content(prompt_source.read_text(encoding="utf-8"), replacements)
 
-    for target, text in ((planning_target, planning_text), (prompt_target, prompt_text)):
-        if dry_run:
-            print(f"[dry-run] would write {target}")
-        else:
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(text, encoding="utf-8", newline="\n")
-        written.append(target)
+    if dry_run:
+        print(f"[dry-run] would write {planning_target}")
+    else:
+        planning_target.parent.mkdir(parents=True, exist_ok=True)
+        planning_target.write_text(planning_text, encoding="utf-8", newline="\n")
+    written.append(planning_target)
 
     for skill_name in SKILL_NAMES:
         skill_root = root / "skill" / skill_name

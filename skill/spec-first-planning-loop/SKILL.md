@@ -1,268 +1,168 @@
 ---
 name: spec-first-planning-loop
-description: "Use when: a non-trivial coding request needs a user-story workflow, a technical use-case spec, or both before implementation, plus connected code context and batched open questions. Route user-visible journeys through story mapping and UI contracts; do not use for pure analysis or reference documents unless a specific chapter genuinely needs workflow/state/step treatment."
-argument-hint: "Describe the requested change, known anchor or failing flow if any, and whether the task needs a workflow-bearing spec, a workflow-bearing section inside a larger document, or a narrower direct implementation."
+description: "Use for non-trivial coding tasks that should be planned through repository user stories, technical solution specifications, or both before implementation. Initialize and follow the repository's customizable specification lifecycle, gather connected code context, request and process required user input, restore the bundled workflow only when explicitly requested, and keep planning files synchronized with implementation. Do not use for trivial local changes or pure analysis and reference documents that do not describe a process or state change."
+argument-hint: "Describe the task, known code entry point or failing behavior, existing user story or solution spec if any, and whether you want planning only or implementation after the spec."
 user-invocable: true
 ---
 
 # Spec-First Planning Loop
 
-Use this skill when a non-trivial request should be handled as a plan-first, implementation-second workflow.
+For non-trivial tasks, this repository uses user-story files and solution specifications to describe the intended change before implementation.
 
-This skill orchestrates the planning loop. It does not replace specialized planning skills.
+- User stories describe user goals, visible behavior, interactions, and recovery paths.
+- Solution specifications describe technical workflows, connected code, solution decisions, implementation details, and the implementation checklist.
+- Some tasks need both artifacts; internal or technical tasks may need only a solution specification.
 
-## Supporting Artifacts
+The specification lifecycle describes how to turn a task description into the required user stories and solution specifications, prepare them for review, implement the approved specification, and keep the planning files synchronized with the code.
 
-- Shared planning contract: `planning/planning_contract.md`
-- Prompt for question batching and execution loop behavior: `prompts/plan implementation in a loop.prompt.md`
-- Existing mapping skill: `skill/connected-code-mapping/SKILL.md`
-- Existing layered planning skill: `skill/layered-workflow-planning/SKILL.md`
-- User-story planning skill: `skill/user-story-workflow-documentation/SKILL.md`
-- UI-state and shared-contract review: `skill/design-ux-guardrails/SKILL.md`
-- Existing reverse-documentation skill: `skill/code-logic-workflow-documentation/SKILL.md`
+The active lifecycle chain and its step descriptions are stored in `specs/spec-lifecycle/workflow.md`. This skill explains how to initialize that file from the bundled default when necessary, follow its chain, use the specialized skills named by its steps, request and process user input, resume interrupted work, and decide when planning or implementation is complete.
 
-## When To Use
+## Workflow Template And Active File
 
-- a request spans multiple files or layers
-- an implementation update may invalidate an existing spec
-- a refactoring changes workflow shape while preserving broad use cases
-- a compatibility slice must be planned before code edits
-- the user wants a workflow-bearing markdown spec or workflow-bearing spec section to drive later implementation
+- `assets/default_workflow.md` is the bundled default template.
+- `specs/spec-lifecycle/workflow.md` is the only active lifecycle workflow.
 
-## Do Not Use This Skill When
+Before starting a specification lifecycle:
 
-- the task is trivial and isolated enough to implement directly without a meaningful spec
-- the user explicitly asks for direct implementation and the change is genuinely local
-- the requested markdown artifact is pure analysis or reference content with no workflow-bearing section to plan
+1. Check whether the active workflow exists.
+2. If it exists, use it without replacing it or reconciling it automatically with the bundled template.
+3. If it is missing, create its parent directory when necessary, copy `assets/default_workflow.md` to the active path, report that the repository workflow was initialized, and then use the created active workflow.
+4. If initialization fails, report the error and stop instead of silently executing the bundled template.
 
-## Goal
+Treat changes to the bundled template as defaults for future initialization only. Never propagate them automatically into an existing active workflow.
 
-Drive every non-trivial request through this lifecycle:
+Restore the bundled default only when the user explicitly requests restoration. Before replacing an existing active workflow, show or summarize its differences from the bundled default and ensure the current version is recoverable through version control or a user-approved backup. After restoration, continue to treat the restored active file as the sole authority.
 
-1. collect planning context
-2. classify whether the request needs a user story, a technical use-case spec, or both
-3. create or update the selected artifacts under `specs/`
-4. resolve or batch open questions
-5. check whether the plan is clear enough to start implementation
-6. continue into implementation only after the plan is coherent enough
-7. keep the artifacts synchronized as implementation lands
+## Helping Users Customize The Lifecycle
 
-Implemented plans become specs. The loop must therefore maintain both the current plan and older affected specs.
+When the user requests lifecycle behavior that conflicts with the active workflow, or expresses a lasting workflow preference that the active workflow does not support:
 
-## Core Rule
+- Briefly explain at the relevant point that the specification lifecycle is defined in `specs/spec-lifecycle/workflow.md` and can be changed to support the requested behavior.
+- Do not silently override the active workflow or treat a conflicting request as a permanent exception.
+- Do not modify the active workflow unless the user asks to update or customize it.
+- Do not show this help message when the user is already requesting a `workflow.md` update or has already been given the same explanation for the current preference.
 
-Do not start with implementation for non-trivial work.
+## Files Used By This Skill
 
-Start by classifying the requested behavior, then create or update the needed workflow-bearing artifact or section using the shared contract in `planning/planning_contract.md`.
+After ensuring that the active workflow exists, read both authoritative files completely before starting a non-trivial specification lifecycle:
 
-If the requested document is mixed, apply the contract only to the chapter that actually needs workflow, state, or step logic.
+- `specs/spec-lifecycle/workflow.md` describes the active lifecycle chain and every available step.
+- `planning/planning_contract.md` describes the format used inside solution specifications, including workflow notation, layers, and section structure.
 
-## Decision Tree
+Use them together:
 
-### 1. Classify The Request
+- Read the active `workflow.md` to determine what step comes next, why it exists, what it consumes, and what it must produce.
+- Use this skill to decide whether the step runs, execute it, request and process user input required by the step, and continue to the next step.
+- Read `planning_contract.md` when creating or updating the contents of a solution specification.
+- When a workflow step names another skill, read that skill and use it to perform the step.
+- Apply repository instructions while changing code, tests, databases, task lists, or workflow traces.
 
-Determine whether the request is:
+Files under `specs/spec-lifecycle/` define the planning process. They are not solution specifications for a particular task, so do not classify them as active, outdated, superseded, or archived solution specs.
 
-- trivial and local
-- non-trivial but mostly new behavior
-- non-trivial and refactoring existing behavior
-- non-trivial and a compatibility or migration slice
+## When To Use This Lifecycle
 
-Then classify its planning level:
+Use it when a task spans multiple files or responsibilities, changes an existing workflow, needs user-story or technical planning, may invalidate an older spec, or will be implemented from a reviewed solution specification.
 
-- `user-story only`: a journey/UI clarification that does not change system behavior yet;
-- `technical use case only`: internal behavior with no meaningful user-visible workflow;
-- `mixed`: user/application actions or visible states plus technical behavior required to make them true.
+Skip it for a genuinely local change that can be implemented safely without a meaningful plan. Also skip it for pure analysis or reference documents unless a specific section describes a workflow or state change that needs this lifecycle.
 
-Treat developer technical language as a possible source for an induced user story when the resulting change alters a user journey. Treat product-language details about system boundaries, authority, state ownership, or implementation constraints as technical use-case input rather than forcing them into the story.
+## Important Rules
 
-If the request is non-trivial, continue with this skill.
+- Preserve the user's concrete task language and existing authoritative spec content unless the current step requires a local correction.
+- Do not silently skip an optional step when its description requires a recorded reason.
+- Follow the step order in `workflow.md`; do not reconstruct the lifecycle from this skill or from specialized-skill instructions.
+- Keep the task's main solution spec and affected older specs synchronized as implementation proceeds.
 
-### 2. Find Existing Spec Context
+## How To Follow The Lifecycle
 
-Inspect `specs/` for related plans or specs.
+Each workflow step may use these fields:
 
-For each relevant spec, classify it as:
+- `Purpose`: why the step exists, what successful completion means, and which paused state is explicitly permitted. Use it as the completion check, not as execution logic.
+- `Run when`: condition that enables the step.
+- `Skip when`: condition that allows an optional step to be bypassed.
+- `Input`: state and files consumed by the step.
+- `Conversation state`: optional lifecycle state scoped to the current conversation and shared with later lifecycle tasks in that conversation.
+- `Skill`: specialized skill used to perform the step.
+- `Logic`: instructions written directly in the step, or supplementary instruction files linked from it, when no specialized skill is needed.
+- `Request next user input`: optional step-specific instructions for requesting user input and processing the response.
+- `Output`: state and files produced by the step.
+- `Record`: decisions or evidence that must be written down.
+- `Next`: following step, branch, or final workflow outcome.
 
-- `active`
-- `updated by current plan`
-- `partially outdated`
-- `superseded`
-- `archived`
+Every step must define `Purpose`. A step normally defines either `Skill` or `Logic`, not both. A step that may pause for a user response should define `Request next user input`. Step headings are stable identifiers; do not rely on step numbers when extending the workflow.
 
-Record the required action:
+Preserve workflow-declared `Conversation state` after a lifecycle task reaches a final outcome so later tasks in the same conversation can use it. Reset that state for a new conversation. Do not infer conversation state that the active workflow does not declare, and do not write it into solution artifacts unless the step's `Record` instructions require that.
 
-- `reuse`
-- `amend`
-- `mark outdated`
-- `replace`
-- `archive`
+When `Logic` links to supplementary instructions, resolve relative paths from the active `workflow.md` location and read each selected file completely before executing the step. If a referenced file is missing or cannot be read, report the error and keep the step incomplete instead of inventing fallback instructions.
 
-### 3. Choose The Specialized Planning Inputs
+Follow these instructions:
 
-Use `user-story-workflow-documentation` when the request needs a user journey, visible states, user/application actions, waits that affect user behavior, or E2E acceptance. Create or amend `specs/stories/<feature>_user_stories.md` as needed.
+1. Read `workflow.md` and `planning_contract.md` completely.
+2. If resuming an existing lifecycle, continue from its current unfinished step or permitted handoff. Otherwise, start with the first step defined by the active workflow chain.
+3. Find the detailed description of the current step.
+4. Read `Purpose` to understand what the step must accomplish before it can finish.
+5. Use the request, repository rules, existing files, earlier outputs, and declared conversation state to evaluate `Run when` and `Skip when`.
+6. Perform the step:
+   - if it names a `Skill`, read that skill completely and follow its instructions;
+   - if it contains `Logic`, follow those instructions directly.
+7. Update declared `Conversation state`, `Output`, and `Record` items before following `Next`.
+8. When skipping a step or branch, record the reason if its description requires one.
+9. Before leaving the step, confirm that its execution, output, and next transition fulfill its `Purpose`. Treat an incomplete result as a paused state only when `Purpose` permits it and the step defines how to request the next user input.
+10. Use `planning_contract.md` to interpret workflow arrows, branches, parallel states, refactoring transitions, typed workflows, and loops.
+11. When `Request next user input` instructs the step to request input, follow `Requesting And Processing User Input` and keep the current step active until the response is processed.
+12. Continue until the chain reaches a final outcome, the user selects a permitted stopping point, or the active step is awaiting required user input.
 
-Use `design-ux-guardrails` after the story is known when the request changes visible UI. Keep story-specific wireframes in the story, reusable geometry in `specs/ui/layout-wireframes.md`, and reusable visual/icon rules in `specs/ui/style-and-icons.md`.
+## Running A Skill-Backed Step
 
-Use `connected-code-mapping` when the task is non-local, crosses system boundaries, or changes authority, data shape, durable state, or propagation.
+A `Skill` field in `workflow.md` names the specialized skill that performs that step. Resolve the available skill by name, read it completely, and apply it only when the lifecycle selects that step.
 
-Use `code-logic-workflow-documentation` when the task first needs a reliable reverse-engineered explanation of existing runtime behavior before new planning can proceed.
+The connection between a lifecycle step and a specialized skill belongs in `workflow.md`. Do not add lifecycle step names or lifecycle ordering to the specialized skill itself.
 
-Use `layered-workflow-planning` to expand technical use cases and layers after the existing context is understood. Map story application steps to those use cases; do not repeat the full user journey inside the technical spec.
+If a named skill is unavailable or cannot be read, report that clearly. Continue without it only when the step itself or the user provides an explicit safe fallback; never silently substitute another procedure.
 
-If the target artifact has no workflow-bearing section, do not force it through the layered contract just because it is non-trivial.
+## Choosing And Skipping Steps
 
-These skills may be combined in this order:
+- Choose a branch from the current task state and existing evidence, not from arbitrary alternatives.
+- Write down a branch decision when the step requires it, usually in the task's decision log or relevant planning section.
+- A user may choose a permitted stopping point, but that choice does not remove prerequisite files required by the workflow or planning contract.
+- When skipping user-story work, UI synchronization, connected mapping, or another optional step, preserve the state required by the next step and record the skip reason when requested.
 
-1. reverse-document existing behavior when necessary
-2. map connected impacted surfaces when necessary
-3. create or amend a user story when the request has a user-visible journey
-4. review story UI states and shared UI contracts when visible UI changes
-5. write or refine technical use cases in the shared contract shape
+## Requesting And Processing User Input
 
-## Required Output Shape
+When the active step's `Request next user input` instructions call for input:
 
-The produced technical use-case plan and any related user story must follow their respective shapes in `planning/planning_contract.md`.
+1. Follow its instructions to request the next user input.
+2. Keep the current workflow step active while waiting for the response; do not follow `Next` unless the step explicitly says otherwise.
+3. Process the response for the same step, applying it to the relevant planning files, implementation state, and decisions as instructed.
+4. Continue according to the current step's instructions after the response is processed.
 
-That requirement applies to workflow-bearing specs and workflow-bearing sections, not to pure analysis documents.
+Do not restart from the workflow's first step unless the response materially replaces the task itself. Continue processing the current step otherwise.
 
-Use the contract as the single source of truth for top-level sections, use-case shape, optional layers, and question placement.
+```text
+| while the active step requests next user input:
+  active workflow step --request the input described by the step--> awaiting user response
+  --process the response for the same step--> updated active workflow step |
+```
 
-When scientific or mathematical logic needs formal notation, use KaTeX in technical Logic or Data layers as defined by the contract. Keep workflow lines as prose state transitions; do not embed formulas in state or transition labels.
+## Final Outcomes
 
-## Planning Loop
+The final outcomes mean:
 
-### Step 1. Create Or Update The Spec
+- `spec ready for user review`: the planning files and implementation checklist are ready, but implementation is not authorized by this branch.
+- `implemented and synchronized solution spec`: no authorized checklist tasks remain, required validation has completed, and affected planning files match the implemented behavior.
 
-Write or amend the plan/spec in `specs/`.
+## Before Finishing
 
-The artifact should include:
-
-- planning anchor and changed assumption
-- a story/use-case classification and links between the required levels
-- connected existing logic when needed
-- use cases with workflow lines, hierarchical numbering when that clarifies parent and child cases, and relevant layers
-- user-story mappings for material application steps when the request is mixed
-- story-specific UI states and shared UI-contract updates when the request changes visible UI
-- early input validation and the post-validation contracts that downstream steps may rely on when that boundary matters
-- `Implementation Logic` when declarative workflow layers are not enough to explain the coding path, or `Implementation Logic Proposal` when implementation detail should remain developer-owned
-- implementation notes when created functions or methods should mention the workflow step in their docstrings
-- local use-case ambiguities in `Use Case Questions` when they affect only one use case
-- an `Implementation checklist` with numbered checkbox tasks and current status markers
-- grouped open questions for general or escalated items
-- decision log entries for assumptions and spec status changes
-
-Wording rule for the produced spec:
-
-- preserve concrete task-native terms when they already identify distinct states, artifacts, actors, or inputs
-- do not swap those concrete terms for broader aliases that force the reader to infer whether the meaning stayed the same
-- prefer wording that reuses the user's own meaning-bearing words and phrases when they are already accurate for the workflow, state, or artifact being described
-- preserve wording that carries distinctions about role, state, scope, timing, ownership, comparison, or exceptions when those distinctions matter to the task
-- when introducing helper names or intermediate structures in the spec, name them after the concrete data they hold or the concrete transformation they perform
-- if a broader label is introduced for readability, define it immediately from the concrete inputs, outputs, persisted state, or boundary it refers to
-- if a shorter label is needed, introduce it only after naming the original concrete term and only when the shortened label does not erase distinctions
-- if a generated term would reasonably trigger a clarification question like "what is this referring to here?", keep the original wording or define the term immediately
-
-### Step 2. Batch Questions
-
-Follow `prompts/plan implementation in a loop.prompt.md`.
-
-Rules:
-
-- do not stop after each newly discovered ambiguity
-- collect a coherent batch of new plan-extension questions
-- continue working until the batch is ready
-- stop only for the grouped question batch or a truly blocking ambiguity
-
-Keep a question inside the relevant use case when it is local to that use case.
-
-Promote it into the top-level `Open questions` batch when it becomes cross-cutting, globally blocking, or ready for user escalation as part of the current batch.
-
-Question categories:
-
-- `blocking`: planning or implementation cannot continue correctly
-- `non-blocking`: the loop may continue under an explicit assumption if allowed
-
-### Step 3. Resume After Answers
-
-When the user answers the question batch:
-
-- update the same plan/spec
-- move resolved assumptions into `Decision log`
-- update `Implementation checklist`
-- continue planning or implementation from the same artifact
-
-### Step 4. Check Plan Readiness Before Implementation
-
-Before starting implementation, review the current plan/spec for completeness and consistency.
-
-The plan is clear enough to start implementation only when:
-
-- the changed behavior and planning anchor are specific enough to guide code changes
-- the relevant use cases and required layers are present for the slice being implemented
-- when the slice is user-visible, the relevant user story, its technical mappings, and its UI-state ownership are present
-- use-case numbering is explicit enough to distinguish top-level cases from parent-child refinements when the workflow needs that structure
-- validation boundaries and post-validation contracts are explicit enough when inner steps depend on stronger assumptions or should avoid redundant re-validation
-- important files, functions, types, tables, or workflow states are named when implementation depends on them
-- if the workflow description is still too declarative for coding, the plan adds `Implementation Logic` or explicitly leaves the algorithm developer-owned via `Implementation Logic Proposal` or omission
-- the `Implementation checklist` is actionable enough to execute without guessing the next major step and reflects actual status through checkbox markers
-- unresolved ambiguities are either captured as explicit assumptions or kept in `Open questions` / `Use Case Questions`
-- no local contradiction remains between use cases, layers, the implementation checklist, and the decision log
-
-If the plan is not clear enough:
-
-- amend the plan/spec first
-- add missing layers, details, or assumptions
-- batch new user questions when the missing detail cannot be derived safely
-- stop before implementation until the user reviews the plan update or answers the blocking questions
-
-This readiness check is the last planning gate before implementation starts.
-
-### Step 5. Keep Spec And Code In Sync
-
-As implementation lands:
-
-- update the current spec
-- update or mark older impacted specs as outdated or superseded
-- mention the workflow step in the docstring when a created function or method directly implements it
-- do not leave code green while affected specs remain stale
-
-## Implementation Checklist Rule
-
-The `Implementation checklist` should normally follow this sequence:
-
-1. [ ] spec maintenance or new spec creation
-2. [ ] shared state or shared helper updates
-3. [ ] runtime path updates
-4. [ ] propagation updates
-5. [ ] validation
-6. [ ] cleanup
-
-Spec maintenance is a first-class step, not cleanup.
-
-## Quality Checks
-
-- non-trivial work starts with a plan/spec update, not code edits
-- the plan is stored in `specs/`
-- mixed user-visible work distinguishes story-level workflows from technical use cases and keeps their mappings current
-- user-story UI states are synchronized with `specs/ui/` contracts through `design-ux-guardrails` when visible UI changes
-- related existing specs are scanned and classified
-- use-case layers stay under each use case
-- hierarchical use-case numbering is used when parent-child workflow relationships need to stay explicit
-- title and scope wording stays concrete and task-native rather than leading with generic meta-summary language
-- concrete task-native terms are preserved across workflow lines and layers; shorthand is introduced only when it is already established or is defined immediately without blurring distinctions
-- helper and intermediate-structure names in the spec stay concrete enough that the reader can infer their contents, operation, and preserved distinctions without translating from generic planning vocabulary
-- local questions may stay in `Use Case Questions`; general or escalated questions are grouped in the top-level `Open questions` section
-- plans capture early validation and the downstream contracts that follow from it when that simplifies the implementation slice
-- scientific formulas use KaTeX only where they clarify technical logic or data; workflow chains remain concise prose
-- declarative workflow plans gain `Implementation Logic` when implementation detail is required, or explicitly leave the algorithm to the developer via `Implementation Logic Proposal` or omission
-- implementation guidance captures when function or method docstrings should name the workflow step they implement
-- implementation starts only after an explicit plan-readiness check confirms the plan is complete and consistent enough for the active slice
-- if the readiness check finds missing detail or ambiguity, the plan is amended and/or the user is asked before implementation begins
-- the `Implementation checklist` uses numbered checkbox items and keeps spec maintenance in that checklist
-- refactoring updates use workflow refactoring syntax when helpful
-- implementation does not finish while affected specs remain stale
-
-## One-Line Heuristic
-
-For any non-trivial request that needs workflow-bearing planning: inspect existing specs, gather connected context, write the workflow-bearing plan or chapter in `specs/` using the shared contract, batch open questions, run a plan-readiness check, then implement while keeping specs synchronized with the code.
+- Both lifecycle files were read before starting.
+- The active workflow existed or was initialized visibly from `assets/default_workflow.md`; the bundled template was not used as a hidden fallback.
+- An existing active workflow was not overwritten automatically, and restoration occurred only when explicitly requested.
+- The current step came from `workflow.md`.
+- Every step has a concise `Purpose`, and its execution, output, and next transition fulfill that purpose.
+- Workflow notation and solution-spec structure follow `planning_contract.md`.
+- A skill-backed step used the skill named by the workflow without adding lifecycle knowledge to that specialized skill.
+- An inline step followed the `Logic` written in the workflow.
+- Required branch and skip decisions were recorded.
+- User input was requested and processed according to the active step's `Request next user input` instructions.
+- Workflow-declared conversation state was preserved across lifecycle tasks in the same conversation, reset for a new conversation, and kept out of solution artifacts unless the workflow required it there.
+- Lifecycle-policy files were excluded from solution-spec searches and status classification.
+- Work resumed from the interrupted step and existing files instead of restarting unnecessarily.
+- The implemented behavior and all affected planning files are synchronized.

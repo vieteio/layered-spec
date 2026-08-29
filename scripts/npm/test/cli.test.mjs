@@ -22,6 +22,8 @@ test("init writes a Codex project install and versioned manifest", async () => {
   assert.equal(manifest.package_version, "9.9.9");
   assert.equal(manifest.scope, "repo");
   assert.equal(manifest.files.length, 9);
+  await stat(path.join(project, ".agents", "skills", "spec-first-planning-loop", "assets", "default_workflow.md"));
+  await assert.rejects(stat(path.join(project, ".agents", "prompts")), { code: "ENOENT" });
   await stat(path.join(project, ".agents", "skills", "user-story-workflow-documentation", "SKILL.md"));
   await stat(path.join(project, ".agents", "skills", "design-ux-guardrails", "references", "design-system-sync.md"));
 });

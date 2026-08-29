@@ -13,6 +13,8 @@ Store generated plans and active specs in this folder:
 
 Use this folder as the default planning and spec registry unless a narrower location is explicitly required by the task.
 
+`specs/spec-lifecycle/` contains specification-lifecycle policy rather than generated solution specifications. Do not classify files in that folder with solution-spec lifecycle states such as `active`, `partially outdated`, `superseded`, or `archived`.
+
 ## Planning Levels
 
 Use the smallest level that preserves the requested behavior:
@@ -215,6 +217,28 @@ Refactoring transitions:
 Typed workflow syntax:
 
 `state 1: Type --step name--> state 2: Type`
+
+Loop workflows:
+
+```text
+| loop condition: input --step 1--> state --step 2--> outcome |
+```
+
+The text before the first `:` is the natural-language loop condition. The workflow after `:` repeats while that condition applies. If the loop condition does not apply before the first iteration, the loop performs no steps and its input state continues unchanged. Iterations are sequential unless the loop body explicitly uses parallel workflow syntax. The condition is descriptive text and does not require further formalization.
+
+Examples:
+
+```text
+| process each file: file --perform analysis--> report |
+```
+
+```text
+| while unfinished work items remain:
+  current work state --select next item--> selected item
+  --process item--> updated work state |
+```
+
+Place loop workflows in fenced text blocks or inline code so the enclosing `|` characters are not interpreted as a Markdown table.
 
 Refactoring syntax exists because implemented specs can become outdated after an implementation update. Use it when the plan changes an existing workflow rather than adding a net-new one.
 
