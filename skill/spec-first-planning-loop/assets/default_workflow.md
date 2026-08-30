@@ -188,25 +188,30 @@ Logic:
 | while the specification has not passed the completeness check:
   current specification and supporting planning artifacts
     --compare required scope with represented workflows, contracts, decisions, and checklist--> completeness findings
-    --resolve derivable omissions and record explicit exclusions or deferrals--> updated specification set |
+    --resolve directly implied omissions or record blocking open questions--> updated or paused specification set |
 ```
 
 1. Check that every applicable earlier lifecycle output is present in the correct artifact or has an explicit valid skip reason.
 2. Check that the requested behavior, relevant states and branches, technical use cases, implementation checklist, open questions, and related-spec actions are represented where applicable.
 3. Check that each implementation responsibility implied by the specification is covered by the checklist or explicitly deferred.
 4. Treat an explicit exclusion or deferral as complete only when its scope and reason are recorded and it does not contradict the user's required outcome.
-5. Resolve omissions from available evidence. Do not invent required behavior merely to make the check pass.
+5. Correct an omission autonomously only when a single, straightforward correction is directly implied by the user request and authoritative planning context, preserves their meaning, and introduces no material behavior or design decision.
+6. Treat missing representation of behavior already determined by authoritative context as correctable. Treat missing behavior whose meaning must be decided as unresolved.
+7. When user judgment is required, stop developing the correction and record the finding as a blocking question in `Open questions`. State what is missing, why the available authorities do not determine the correction, and which artifacts or behavior the answer will affect. Do not develop speculative alternatives beyond what is needed to make the question understandable.
+8. Do not treat the completeness check as passed while such questions remain unresolved.
 
 Request next user input:
-- Request the information or decision needed when an unresolved completeness finding cannot be resolved safely from the available task and repository context.
+- Before requesting input, write every unresolved completeness finding that requires user judgment as a blocking question in `Open questions` and keep this step active.
+- Request the information or decisions needed as one coherent question batch.
 - Process the response into the affected planning artifacts and resume the completeness check.
 
 Output:
-- Completeness-checked solution spec and synchronized supporting planning artifacts, with no unresolved completeness findings for the current scope.
+- While awaiting required user input, the specification with unresolved completeness findings recorded as blocking open questions.
+- After resolution, a completeness-checked solution spec and synchronized supporting planning artifacts, with no unresolved completeness findings for the current scope.
 - After the check passes, a concise user-visible chat summary of what the check added or changed, including material omissions resolved and explicit exclusions or deferrals. If nothing changed, state that the check passed without changes.
 
 Record:
-- Material omissions that were resolved, explicit exclusions or deferrals, and user decisions required by the check.
+- Material omissions that were resolved, explicit exclusions or deferrals, unresolved findings recorded as blocking questions, and user decisions required by the check.
 
 Next:
 - `Check specification consistency`.
@@ -231,25 +236,30 @@ Logic:
 | while the specification has not passed the consistency check:
   completeness-checked specification set
     --compare shared concepts, transitions, contracts, mappings, and decisions--> consistency findings
-    --resolve contradictions and synchronize affected artifacts--> updated specification set |
+    --apply authority-determined corrections or record blocking open questions--> updated or paused specification set |
 ```
 
 1. Compare repeated or connected concepts across the task language, planning anchor, connected context, technical use cases, checklist, open questions, decision log, and affected related specs.
 2. Check state and transition compatibility, terminology, scope, ownership, ordering, mappings, data and API contracts, assumptions, deferrals, and completion status where applicable.
 3. Distinguish an intentional planned change from a contradiction with observed existing behavior.
-4. Resolve findings using the user request, explicit user decisions, and repository rules as authorities. Do not silently choose between conflicting authoritative inputs.
-5. Synchronize every artifact affected by a correction rather than repairing only the location where the inconsistency was discovered.
+4. Correct an inconsistency autonomously only when a single, straightforward correction is directly implied by the user request and authoritative planning context, preserves their meaning, and introduces no material behavior or design decision.
+5. Treat mechanical synchronization to one clear authority as correctable. Treat conflicts between authoritative inputs or multiple materially different valid corrections as unresolved.
+6. When user judgment is required, stop developing the correction and record the finding as a blocking question in `Open questions`. State what conflicts, why the available authorities do not determine the correction, and which artifacts or behavior the answer will affect. Do not develop speculative alternatives beyond what is needed to make the question understandable.
+7. Synchronize every artifact affected by an authority-determined correction rather than repairing only the location where the inconsistency was discovered.
+8. Do not treat the consistency check as passed while such questions remain unresolved.
 
 Request next user input:
-- Request the decision needed when authoritative inputs conflict or more than one materially different correction remains valid.
+- Before requesting input, write every unresolved consistency finding that requires user judgment as a blocking question in `Open questions` and keep this step active.
+- Request the required decisions as one coherent question batch.
 - Process the response into every affected artifact and resume the consistency check.
 
 Output:
-- Complete and consistent reviewable solution spec with synchronized supporting planning artifacts.
+- While awaiting required user input, the specification with unresolved consistency findings recorded as blocking open questions.
+- After resolution, a complete and consistent reviewable solution spec with synchronized supporting planning artifacts.
 - After the check passes, a concise user-visible chat summary of what the check changed or synchronized, including material contradictions resolved and the affected artifacts or sections. If nothing changed, state that the check passed without changes.
 
 Record:
-- Material inconsistencies that were resolved, the authority used for each non-obvious correction, and user decisions required by the check.
+- Material inconsistencies that were resolved, the authority used for each non-obvious correction, unresolved findings recorded as blocking questions, and user decisions required by the check.
 
 Next:
 - `Check specification completeness` when resolving a consistency finding changed specification content.
