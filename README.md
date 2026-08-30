@@ -142,6 +142,8 @@ conditional branches: [branch1, branch2, branch3]
 parallel branches: (branch1, branch2, branch3)
 workflow refactoring: {workflow1} --refactoring step--> {workflow2}
 workflow loop: | loop condition: input --step name--> outcome |
+inline comment: // comment
+inline comment: # comment
 ```
 
 Place loop workflows in fenced text blocks or inline code so the enclosing `|` characters are not interpreted as a Markdown table.
@@ -150,14 +152,14 @@ Example:
 
 ```python
 state 1 --step name 1--> state 2 --step name 2--> [
-  conditional state 1 --branch 1 step--> branch 1 state,
-  conditional state 2 --branch 2 step--> branch 2 state
+  conditional state 1 --branch 1 step--> branch 1 state, // first state option
+  conditional state 2 --branch 2 step--> branch 2 state  // second state option
 ] --step name 3--> final state
 
 | process each file: file --perform analysis--> report |
 
 | while unfinished work items remain:
-  current work state --select next item--> selected item
+  current work state --select next item--> selected item # one item per iteration
   --process item--> updated work state |
 ```
 
