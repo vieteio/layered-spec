@@ -25,16 +25,27 @@ Compact layered syntax makes spec driven development concise, fast, and convenie
 ## Quick start
 
 1. Install spec skills
+
+Ask your AI-agent
+```
+Install skills from https://github.com/vieteio/layered-spec"
+```
+<details>
+<summary>Or install with npm</summary>
+
 ```bash
 npm install -g @viete-io/layered-spec@latest
 cd your-project
 layered-spec init
 ```
+
+</details>
+
 2. Describe task in a chat and add "Make spec for that" or "Update spec for that"
 
-3. Then review spec and edit it in chat with AI
+3. Review spec and edit it in the chat with AI
 
-4. When spec is ready, write in chat "Implement the spec" or "Implement spec update"
+4. When spec is ready, write "Implement the spec" or "Implement spec update"
 
 ### Spec-driven vibecoding
 
@@ -42,7 +53,7 @@ Skip spec review step.
 
 Limit your work to
 1. Describe task and add "Make spec for that"
-2. Next message in chat "Implement the spec"
+2. Message in the chat "Implement the spec"
 
 AI agent will decompose moderately level complexity tasks well into use cases with detailed workflow chains and then will generate code properly for well-decomposed tasks.
 
