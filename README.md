@@ -28,7 +28,7 @@ Compact layered syntax makes spec driven development concise, fast, and convenie
 
 Ask your AI-agent
 ```
-Install skills from https://github.com/vieteio/layered-spec"
+Install skills from https://github.com/vieteio/layered-spec
 ```
 <details>
 <summary>Or install with npm</summary>
