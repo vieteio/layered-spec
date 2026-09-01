@@ -9,10 +9,10 @@ task in chat
   --collect connected context when necessary--> grounded planning task
   --prepare layered technical use cases--> canonical solution spec
   --prepare implementation checklist--> reviewable solution spec with implementation checklist
-| while completeness and consistency checks are needed and the specification has not passed both checks:
+| while the specification for a complicated or large-scale task has not been verified against that task:
   reviewable solution spec with implementation checklist or corrected solution spec
     --check specification completeness--> completeness-checked solution spec
-    --check specification consistency--> reviewable solution spec |
+    --check specification consistency--> task-accurate reviewable solution spec |
   --select handoff-->
 [
   implementation is authorized
@@ -148,70 +148,62 @@ Logic:
 5. Keep current status markers accurate.
 
 Output:
-- Reviewable solution spec with implementation checklist, ready for the optional completeness and consistency loop.
+- Reviewable solution spec with implementation checklist, ready for verification against the task when applicable.
 
 Record:
 - Explicitly deferred implementation work and checklist status.
-- Whether the optional check loop was entered or skipped, and why.
+- Whether the verification loop was entered or skipped, and why.
 
 Next:
-- `Check specification completeness` when the check-loop condition applies.
+- `Check specification completeness` when the task is complicated or large-scale.
 - Otherwise, `Select the handoff`.
 
 ### Check specification completeness
 
 Purpose:
-- Ensure the solution specification and its supporting planning artifacts cover the task's required scope, applicable lifecycle outputs, and implementation work without silent omissions.
-- If required missing content cannot be derived safely, request and process user input before completing the check.
+- Verify that the generated or updated specification completely represents the solution established from the task and available planning context, without accidental omissions or scope drift.
+- When a completeness finding cannot be resolved from the established planning context or a reasonable non-blocking assumption, record it in `Open questions`; pause and request user input only when correct planning cannot continue without the answer.
 
 Run when:
-- Before the first iteration, run the check loop when one or more of these conditions apply:
-  - the task was described partially and material behavior was developed while preparing the specification;
-  - the specification contains material assumptions or non-obvious design decisions;
-  - several workflows, branches, responsibilities, contracts, or planning artifacts must agree;
-  - omissions or contradictions remain plausible;
-  - the user explicitly requested the checks.
-- Once the loop has started, keep it active until both checks have passed.
+- The specification was prepared for a complicated or large-scale task.
+- Once the verification loop has started, keep it active until both checks have passed or the active check is awaiting required user input.
 
 Skip when:
-- Before the first iteration, skip the entire check loop when the task and result are narrow and unambiguous, the specification contains no material inference, the checklist follows directly from it, and no meaningful cross-artifact reconciliation is required.
+- Before the first iteration, skip the verification loop when the task is not complicated or large-scale.
 
 Input:
-- Solution spec with implementation checklist or corrected solution spec.
-- User request and recorded decisions.
-- Supporting connected-context artifacts produced by earlier steps.
-- Planning contract and the recorded run or skip decisions for earlier lifecycle steps.
+- The task together with all planning context established for it before and during specification preparation.
+- The generated or updated specification and its supporting planning artifacts.
 
 Logic:
 
 ```text
 | while the specification has not passed the completeness check:
-  current specification and supporting planning artifacts
-    --compare required scope with represented workflows, contracts, decisions, and checklist--> completeness findings
-    --resolve directly implied omissions or record blocking open questions--> updated or paused specification set |
+  established task context and current specification set
+    --compare the prepared specification with the established solution--> completeness findings
+    --resolve findings from the established planning context--> updated or paused specification set |
 ```
 
-1. Check that every applicable earlier lifecycle output is present in the correct artifact or has an explicit valid skip reason.
-2. Check that the requested behavior, relevant states and branches, technical use cases, implementation checklist, open questions, and related-spec actions are represented where applicable.
-3. Check that each implementation responsibility implied by the specification is covered by the checklist or explicitly deferred.
-4. Treat an explicit exclusion or deferral as complete only when its scope and reason are recorded and it does not contradict the user's required outcome.
-5. Correct an omission autonomously only when a single, straightforward correction is directly implied by the user request and authoritative planning context, preserves their meaning, and introduces no material behavior or design decision.
-6. Treat missing representation of behavior already determined by authoritative context as correctable. Treat missing behavior whose meaning must be decided as unresolved.
-7. When user judgment is required, stop developing the correction and record the finding as a blocking question in `Open questions`. State what is missing, why the available authorities do not determine the correction, and which artifacts or behavior the answer will affect. Do not develop speculative alternatives beyond what is needed to make the question understandable.
-8. Do not treat the completeness check as passed while such questions remain unresolved.
+1. Treat the task as the authority for the requested outcome and scope. Use the planning context established during earlier lifecycle steps to interpret and elaborate it.
+2. Inspect the specification as a whole so content that should have been recognized as relevant is not missed.
+3. Check that the prepared specification and implementation checklist preserve the established solution without accidental omissions or scope drift.
+4. Reasonable non-blocking assumptions may be made and recorded when they preserve the requested outcome and are supported by the available context.
+5. Correct a finding autonomously only when its resolution follows from the established planning context or a reasonable non-blocking assumption.
+6. Do not introduce a new solution decision solely to make the specification pass the check.
+7. When a finding cannot be resolved from the established planning context or a reasonable non-blocking assumption, record it in `Open questions`. Classify it as blocking only when continuing would require an unsupported solution decision.
+8. Do not treat the completeness check as passed while a blocking completeness finding remains unresolved.
 
 Request next user input:
-- Before requesting input, write every unresolved completeness finding that requires user judgment as a blocking question in `Open questions` and keep this step active.
-- Request the information or decisions needed as one coherent question batch.
+- When blocking completeness findings remain, request the information needed to resolve them as one coherent question batch and keep this step active.
 - Process the response into the affected planning artifacts and resume the completeness check.
 
 Output:
-- While awaiting required user input, the specification with unresolved completeness findings recorded as blocking open questions.
-- After resolution, a completeness-checked solution spec and synchronized supporting planning artifacts, with no unresolved completeness findings for the current scope.
-- After the check passes, a concise user-visible chat summary of what the check added or changed, including material omissions resolved and explicit exclusions or deferrals. If nothing changed, state that the check passed without changes.
+- While awaiting required user input, the specification with unresolved blocking completeness findings recorded in `Open questions`.
+- After resolution, a completeness-checked solution spec with synchronized supporting planning artifacts.
+- After the check passes, a concise user-visible chat summary of the inaccuracies corrected. If nothing changed, state that the check passed without changes.
 
 Record:
-- Material omissions that were resolved, explicit exclusions or deferrals, unresolved findings recorded as blocking questions, and user decisions required by the check.
+- Completeness findings and their disposition.
 
 Next:
 - `Check specification consistency`.
@@ -219,47 +211,45 @@ Next:
 ### Check specification consistency
 
 Purpose:
-- Ensure the complete specification set expresses one compatible solution across the task requirements, recorded decisions, workflow states, artifact mappings, implementation checklist, and affected specifications.
-- If conflicting authoritative inputs cannot be reconciled safely, request and process user input before completing the check.
+- Verify that the specification as a whole consistently expresses the solution established during specification preparation.
+- When a consistency finding cannot be resolved from the established planning context or a reasonable non-blocking assumption, record it in `Open questions`; pause and request user input only when correct planning cannot continue without the answer.
 
 Run when:
 - `Check specification completeness` completed in the current check-loop iteration.
 
 Input:
-- Completeness-checked solution spec.
-- Supporting planning artifacts and related specifications.
-- User request, repository rules, and recorded decisions.
+- The task together with all planning context established for it before and during specification preparation.
+- The completeness-checked specification and its supporting planning artifacts.
 
 Logic:
 
 ```text
 | while the specification has not passed the consistency check:
-  completeness-checked specification set
-    --compare shared concepts, transitions, contracts, mappings, and decisions--> consistency findings
-    --apply authority-determined corrections or record blocking open questions--> updated or paused specification set |
+  established task context and completeness-checked specification set
+    --compare the specification with the established solution--> consistency findings
+    --resolve findings from the established planning context--> updated or paused specification set |
 ```
 
-1. Compare repeated or connected concepts across the task language, planning anchor, connected context, technical use cases, checklist, open questions, decision log, and affected related specs.
-2. Check state and transition compatibility, terminology, scope, ownership, ordering, mappings, data and API contracts, assumptions, deferrals, and completion status where applicable.
-3. Distinguish an intentional planned change from a contradiction with observed existing behavior.
-4. Correct an inconsistency autonomously only when a single, straightforward correction is directly implied by the user request and authoritative planning context, preserves their meaning, and introduces no material behavior or design decision.
-5. Treat mechanical synchronization to one clear authority as correctable. Treat conflicts between authoritative inputs or multiple materially different valid corrections as unresolved.
-6. When user judgment is required, stop developing the correction and record the finding as a blocking question in `Open questions`. State what conflicts, why the available authorities do not determine the correction, and which artifacts or behavior the answer will affect. Do not develop speculative alternatives beyond what is needed to make the question understandable.
-7. Synchronize every artifact affected by an authority-determined correction rather than repairing only the location where the inconsistency was discovered.
-8. Do not treat the consistency check as passed while such questions remain unresolved.
+1. Inspect the specification as a whole rather than limiting the check to content already identified as task-affected.
+2. Treat a finding as relevant only when it prevents the specification from accurately expressing the established solution.
+3. Preserve reasonable non-blocking assumptions that remain supported by the available context.
+4. Correct a finding autonomously only when its resolution follows from the established planning context or a reasonable non-blocking assumption, and synchronize every affected planning artifact.
+5. Do not introduce a new solution decision solely to make the specification pass the check.
+6. When a finding cannot be resolved from the established planning context or a reasonable non-blocking assumption, record it in `Open questions`. Classify it as blocking only when continuing would require an unsupported solution decision.
+7. Do not expand the task to resolve unrelated pre-existing issues.
+8. Do not treat the consistency check as passed while a blocking consistency finding remains unresolved.
 
 Request next user input:
-- Before requesting input, write every unresolved consistency finding that requires user judgment as a blocking question in `Open questions` and keep this step active.
-- Request the required decisions as one coherent question batch.
+- When blocking consistency findings remain, request the information needed to resolve them as one coherent question batch and keep this step active.
 - Process the response into every affected artifact and resume the consistency check.
 
 Output:
-- While awaiting required user input, the specification with unresolved consistency findings recorded as blocking open questions.
-- After resolution, a complete and consistent reviewable solution spec with synchronized supporting planning artifacts.
-- After the check passes, a concise user-visible chat summary of what the check changed or synchronized, including material contradictions resolved and the affected artifacts or sections. If nothing changed, state that the check passed without changes.
+- While awaiting required user input, the specification with unresolved blocking consistency findings recorded in `Open questions`.
+- After resolution, a task-accurate reviewable solution spec with synchronized supporting planning artifacts.
+- After the check passes, a concise user-visible chat summary of the inaccuracies corrected. If nothing changed, state that the check passed without changes.
 
 Record:
-- Material inconsistencies that were resolved, the authority used for each non-obvious correction, unresolved findings recorded as blocking questions, and user decisions required by the check.
+- Consistency findings and their disposition.
 
 Next:
 - `Check specification completeness` when resolving a consistency finding changed specification content.
@@ -271,7 +261,7 @@ Purpose:
 - Decide whether to stop for specification review or enter implementation using the task's readiness and the conversation-local implementation flow.
 
 Input:
-- Reviewable solution spec after the optional check loop was skipped or completed.
+- Reviewable solution spec after the verification loop was skipped or completed.
 - The user's current task request.
 - Any unresolved questions or material planning decisions.
 
@@ -284,7 +274,8 @@ Support the user's work as a flow. In a new conversation, prepare the first spec
 1. Honor the requested outcome. A request requiring an implementation change authorizes implementation; a request limited to specification preparation or review does not.
 2. When implementation is not authorized and the flow is inactive, stop after preparing the specification and request an implementation decision. A later decision resumes from the same specification and checklist.
 3. When implementation is authorized while the flow is inactive, activate the flow, notify the user about its conversation scope and stopping condition, and continue after any required user input has been processed.
-4. While the flow is active, proceed directly to implementation when the task and resulting specification are narrow and unambiguous, the check loop was skipped, and no material question remains. Otherwise, stop with the specification ready for review without deactivating the flow unless the user requests that it stop.
+4. While the flow is active, a later task that does not request implementation directly may proceed automatically when the task and resulting specification are narrow and unambiguous, no blocking question remains, and the user has not limited the requested outcome to specification work. Otherwise, stop with the specification ready for review without deactivating the flow unless the user requests that it stop.
+5. Whether the verification loop ran or was skipped does not itself authorize or prevent implementation.
 
 Request next user input:
 - When implementation requires confirmation, present the prepared specification and ask whether the user wants to proceed with its implementation.
