@@ -106,7 +106,7 @@ To return to the stable release, install `@latest` again. The selected package v
 Clone this repository, then run the existing Python installer from its root:
 
 ```bash
-python scripts/install_skillpack.py --host <host_name> 
+python scripts/install_skillpack.py --host <host_name>
 ```
 
 Requires Python 3.10 or later.
@@ -137,6 +137,8 @@ Use typed workflows to control data flow strictly.
 Recommended layers:
 
 - Workflow
+- Requirements and realization mappings
+- Invariants
 - Types and tables
 - Logic
 - Events and endpoints

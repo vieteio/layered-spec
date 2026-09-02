@@ -1,6 +1,8 @@
 ---
 name: connected-code-mapping
 description: "Use when: mapping a non-local code change from one anchor through connected backend, frontend, persistence, propagation, and test surfaces, especially when the result must support a workflow-bearing spec or workflow-bearing document section. Do not use this skill just to force layered output onto pure analysis or reference documents."
+metadata:
+  version: "0.2.2"
 argument-hint: "Describe the concrete anchor, the changed assumption, and whether the result should stay as mapping output or also feed a workflow-bearing spec or section."
 user-invocable: true
 ---
@@ -8,6 +10,8 @@ user-invocable: true
 # Connected Code Mapping
 
 Use this skill to plan non-local code changes that start from one concrete caller, endpoint, component, store event, or failing flow, then expand into all connected code that must move together.
+
+When this skill creates or edits a specification, follow `skill/layered-spec-core/references/skill-pack-versioning.md`.
 
 ## Use This Skill When
 
@@ -224,6 +228,8 @@ If this mapping work supports a broader planning artifact for a new or changed s
 - Open questions
 - Decision log
 
+When the broader specification separates requirements from their realizations, keep normative requirement chains in their owning use cases and preserve symmetric `Realized by` / `Realizes` mappings through every realizing use case. Map concrete code responsibilities to the implementation use cases that ultimately perform them. Record `Uses` when the internal logic of an implementation-use-case step relies on another declarative or implementation use case, including a reusable framework use case. Use the shared requirement and realization contract rather than treating hierarchical numbering alone as the mapping.
+
 Use workflow syntax only where it clarifies actual state transitions discovered from the mapping.
 
 If the broader artifact is mixed, keep non-workflow chapters in plain structure and emit layered syntax only for the section that carries workflow or state-transition detail.
@@ -232,7 +238,7 @@ Follow the shared artifact contract in `planning/planning_contract.md`.
 
 Do not restate workflow operators or layer syntax locally. Use the contract for exact operator and layer definitions.
 
-When mapped scientific logic needs a formal expression, put KaTeX in the receiving technical `Execution Logic`, `Implementation Logic`, `Logic Details`, or `Data` layer. Keep workflow lines, state names, and transition labels as prose so the map stays scannable.
+When mapped scientific logic needs a formal expression, put KaTeX in the receiving technical `Execution Logic`, `Implementation Logic`, `Logic Details`, `Data`, or `Invariants` layer. Keep workflow lines, state names, transition labels, and invariant outlines as prose so the map stays scannable.
 
 ## Output Format
 
@@ -299,10 +305,11 @@ A good result from this skill must satisfy all of these:
 - records early validation boundaries and downstream contracts when the mapped slice depends on them
 - leaves deferred work explicit
 - if layered output is requested, preserves mapping-first reasoning while staying syntax-compatible with `planning/planning_contract.md`
-- if layered output includes scientific formulas, places them in technical Logic or Data layers as KaTeX while keeping workflow chains prose-only
+- if layered output includes scientific formulas, places them in technical Logic, Data, or `Invariants` layers as KaTeX while keeping workflow chains and invariant outlines prose-only
 - if layered output is requested, uses `Implementation Logic` only when declarative workflow layers are insufficient and uses omission or `Implementation Logic Proposal` when the algorithm cannot be reconstructed confidently from existing code without developer clarification
 - if a `Tests` layer is emitted, it is tied to the mapped impact slice and stays compatible with the contract
 - records whether impacted specs remain authoritative, become outdated, or are superseded
+- separates observed implementation evidence from planned normative requirements, records symmetric requirement-to-realization mappings when used, and preserves implementation-step `Uses` references across framework boundaries
 
 ## Common Failure Modes
 

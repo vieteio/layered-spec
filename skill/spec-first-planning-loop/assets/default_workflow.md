@@ -1,5 +1,7 @@
 # Specification Lifecycle Workflow
 
+- Default workflow version: `0.2.2`
+
 ## Workflow Chain
 
 ```text

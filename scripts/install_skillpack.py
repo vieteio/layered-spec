@@ -13,8 +13,10 @@ from pathlib import Path
 
 from skillpack_hosts import (
     ALL_HOST_NAMES,
+    CANONICAL_CORE_REFERENCE_PATHS,
     CANONICAL_PLANNING_CONTRACT,
     CANONICAL_SKILL_PATHS,
+    CORE_REFERENCE_NAMES,
     DEFAULT_WORKFLOW,
     HOSTS,
     PLANNING_CONTRACT,
@@ -26,6 +28,7 @@ from skillpack_hosts import (
 MANIFEST_NAME = "layered-spec-skillpack.json"
 REQUIRED_FRONTMATTER_KEYS = ("name", "description")
 OPTIONAL_FRONTMATTER_KEYS = ("user-invocable", "argument-hint")
+METADATA_VERSION_KEY = "metadata.version"
 
 
 def repo_root() -> Path:
@@ -56,6 +59,10 @@ def validate_canonical_source(root: Path) -> list[Path]:
         root / "skill" / "spec-first-planning-loop" / "assets" / DEFAULT_WORKFLOW,
     ]
     required.extend(root / "skill" / name / "SKILL.md" for name in SKILL_NAMES)
+    required.extend(
+        root / "skill" / "layered-spec-core" / "references" / name
+        for name in CORE_REFERENCE_NAMES
+    )
     missing = [path for path in required if not path.is_file()]
     if missing:
         lines = "\n".join(f"  - {path}" for path in missing)
@@ -72,14 +79,20 @@ def parse_frontmatter(content: str) -> tuple[dict[str, str], str]:
         return {}, content
 
     frontmatter: dict[str, str] = {}
+    current_section: str | None = None
     for line in match.group(1).splitlines():
         if not line.strip() or line.strip().startswith("#"):
             continue
         key_match = re.match(r"^([A-Za-z0-9_-]+):\s*(.*)$", line)
-        if not key_match:
+        if key_match:
+            key, value = key_match.group(1), key_match.group(2).strip()
+            frontmatter[key] = value
+            current_section = key
             continue
-        key, value = key_match.group(1), key_match.group(2).strip()
-        frontmatter[key] = value
+        if current_section == "metadata":
+            version_match = re.match(r"^\s+version:\s*(.*)$", line)
+            if version_match:
+                frontmatter[METADATA_VERSION_KEY] = version_match.group(1).strip()
 
     body = content[match.end() :]
     return frontmatter, body
@@ -96,6 +109,10 @@ def normalize_frontmatter(frontmatter: dict[str, str], keep_user_invocable: bool
             raise ValueError(f"Missing required frontmatter field: {key}")
         normalized[key] = frontmatter[key]
 
+    if METADATA_VERSION_KEY not in frontmatter:
+        raise ValueError("Missing required frontmatter field: metadata.version")
+    normalized[METADATA_VERSION_KEY] = frontmatter[METADATA_VERSION_KEY]
+
     if keep_user_invocable:
         for key in OPTIONAL_FRONTMATTER_KEYS:
             if key in frontmatter:
@@ -107,7 +124,10 @@ def normalize_frontmatter(frontmatter: dict[str, str], keep_user_invocable: bool
 def render_frontmatter(frontmatter: dict[str, str]) -> str:
     lines = ["---"]
     for key, value in frontmatter.items():
-        lines.append(f"{key}: {value}")
+        if key == METADATA_VERSION_KEY:
+            lines.extend(("metadata:", f"  version: {value}"))
+        else:
+            lines.append(f"{key}: {value}")
     lines.append("---")
     return "\n".join(lines)
 
@@ -120,6 +140,10 @@ def build_rewrite_map(paths) -> list[tuple[str, str]]:
         skill_name = skill_path.split("/")[1]
         target = f"{paths.skills_ref}/{skill_name}/SKILL.md"
         replacements.append((skill_path, target))
+    for reference_path in CANONICAL_CORE_REFERENCE_PATHS:
+        reference_name = reference_path.rsplit("/", 1)[-1]
+        target = f"{paths.skills_ref}/layered-spec-core/references/{reference_name}"
+        replacements.append((reference_path, target))
     replacements.sort(key=lambda item: len(item[0]), reverse=True)
     return replacements
 
@@ -134,6 +158,7 @@ def rewrite_content(content: str, replacements: list[tuple[str, str]]) -> str:
 CANONICAL_PATH_PATTERNS = [
     re.compile(r"(?<![\w/.-])planning/planning_contract\.md"),
     re.compile(r"(?<![\w/.-])skill/[a-z0-9-]+/SKILL\.md"),
+    re.compile(r"(?<![\w/.-])skill/layered-spec-core/references/[a-z0-9-]+\.md"),
 ]
 
 NON_VSCODE_PATH_PATTERNS = [
@@ -209,6 +234,17 @@ def install_host(
         else:
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(output, encoding="utf-8", newline="\n")
+        written.append(target)
+
+    for reference_name in CORE_REFERENCE_NAMES:
+        source = root / "skill" / "layered-spec-core" / "references" / reference_name
+        target = paths.skills_dir / "layered-spec-core" / "references" / reference_name
+        reference_text = rewrite_content(source.read_text(encoding="utf-8"), replacements)
+        if dry_run:
+            print(f"[dry-run] would write {target}")
+        else:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(reference_text, encoding="utf-8", newline="\n")
         written.append(target)
 
     workflow_source = root / "skill" / "spec-first-planning-loop" / "assets" / DEFAULT_WORKFLOW

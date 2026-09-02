@@ -1,11 +1,15 @@
 ---
 name: layered-workflow-planning
 description: "Use when: planning or refining a workflow-bearing solution slice, use-case set, or document section that genuinely needs layered workflow syntax, typed workflows, branch or parallel states, execution logic, types, tables, events, or logic details. Do not use for pure analysis or reference documents with no workflow-bearing section."
+metadata:
+  version: "0.2.2"
 argument-hint: "Describe the workflow-bearing solution or document section, the use cases already written, the layers already filled, and what should be expanded next."
 user-invocable: true
 ---
 
 # Layered Workflow Planning
+
+When this skill creates or edits a specification, follow `skill/layered-spec-core/references/skill-pack-versioning.md`.
 
 ## When to Use
 - Plan a new solution before implementation when the target artifact needs explicit workflows, state changes, or step-owned logic
@@ -30,6 +34,7 @@ Produce a planning artifact that is:
 - iterative across multiple chat turns
 - structured around use cases
 - able to use hierarchical use-case numbering when parent and child cases need separate workflow treatment
+- able to choose between a direct implementation use case, an implementation use case with requirements, and a declarative use case with separate realizations
 - layered so different kinds of detail can be added independently
 - concise enough for review, but explicit enough for implementation planning
 - compatible with connected existing-code observations when a new workflow relies on old logic
@@ -69,8 +74,12 @@ The shared planning contract in `planning/planning_contract.md` is the single no
 - use-case shape
 - workflow operators and typed workflow syntax
 - recommended optional use-case layers
-- layer-specific syntax such as `Data`, `Types`, `Tables`, `Files And Functions`, `Tests`, and `Use Case Questions`
+- layer-specific syntax such as `Data`, `Types`, `Tables`, `Files And Functions`, `Tests`, `Invariants`, and `Use Case Questions`
 - question placement rules between local and top-level question sections
+
+When a specification needs a `Requirements` layer or implementation realization mappings, also read `skill/layered-spec-core/references/requirements-and-realization.md`. Keep detailed requirement and representation syntax there instead of duplicating it in this skill.
+
+When a use case needs meaningful state invariants or derivations between them, also read `skill/layered-spec-core/references/invariants.md`. Keep the detailed layer syntax and proof terminology there instead of duplicating them in this skill.
 
 This skill should not redefine those rules. Use the contract directly for exact syntax and output shape.
 
@@ -95,6 +104,22 @@ Typical examples:
 - one broad use case needs narrower algorithmic or persistence subflows that should stay visibly grouped
 
 Keep the hierarchy shallow and consistent unless deeper nesting materially improves readability.
+
+## Requirements And Realization Rule
+
+Choose the smallest structure that keeps required behavior and implementation logic clear.
+
+1. Start with one implementation use case. Keep only its workflow and logic layers when they completely describe the behavior.
+2. Add `Requirements` directly to that implementation use case when non-trivial conditions, invariant obligations, rejection rules, or required outcomes need explicit normative definitions but the implementation remains one coherent workflow.
+3. Introduce a separate declarative use case when its requirements and the implementation decomposition each need an independently understandable structure, normally because several use cases jointly realize the behavior.
+4. In either requirements-bearing form, use identified workflow chains when explicit inputs and outcomes improve clarity, EARS for natural-language behavioral requirements, a hierarchical contract when one umbrella obligation benefits from detailed clauses, and identified invariants, types, formulas, tables, or compatibility rules for non-transition constraints.
+5. Select composition, product, coproduct, loop, or separate chains from the actual relationship between requirements.
+6. When requirement ownership and realization are separate, add realization mappings by mapping requirements through `Realized by` and adding the symmetric `Realizes` mapping to every realizing use case. A realizing use case may itself be declarative and may contain `Realizes`, its own `Requirements`, and a further `Realized by` layer. Do not add self-referential mappings when one implementation use case owns its requirements.
+7. Use `Uses` on an implementation use case when one of its states or steps references another declarative or implementation use case.
+8. Keep reusable framework use cases separate when several callers use them. Use a declarative framework use case with separate realizations when the framework contract needs its own decomposition; otherwise an implementation framework use case may own its `Requirements` directly.
+9. When requirement representations are present, retain their source requirement IDs, declare their semantic relation, and preserve the meaning of the definition written directly under each requirement ID.
+
+Do not infer a normative requirement merely from current implementation behavior. Use the user request, product contract, authoritative specification, or an explicit planning decision as the requirement source.
 
 ## Language Rule
 
@@ -139,7 +164,7 @@ Typical signals:
 - the step depends on ordering, aggregation, batching, or other structural preprocessing
 - the developer already described intermediate states that should be preserved in the plan
 
-When this happens, prefer adding the detail in `Detailed Workflow`, `Execution Logic`, `Types`, `Data`, `Files And Functions`, or `Logic Details` according to the shared contract.
+When this happens, prefer adding the detail in `Detailed Workflow`, `Execution Logic`, `Types`, `Data`, `Files And Functions`, `Logic Details`, or `Invariants` according to the shared contract.
 
 When important constants, string templates, lists, matrices, tables, or other concrete structures drive the workflow, prefer a `Data` layer so those values stay explicit.
 
@@ -168,9 +193,19 @@ For each step, include:
 
 ## Scientific Formula Rule
 
-When a scientific or mathematical expression materially clarifies the implementation, render it as KaTeX in `Execution Logic`, `Implementation Logic`, `Logic Details`, or `Data`. Use `$...$` for a short inline expression and `$$...$$` for a standalone equation or derivation.
+When a scientific or mathematical expression materially clarifies the implementation, render it as KaTeX in `Execution Logic`, `Implementation Logic`, `Logic Details`, `Data`, or `Invariants`. Use `$...$` for a short inline expression and `$$...$$` for a standalone equation or derivation.
 
 Keep workflow lines, state names, transition labels, and branch labels as concise prose. Name the semantic transition there, then state the formula and its symbols, units, domains, and assumptions in the relevant logic layer. Do not introduce KaTeX merely for decoration.
+
+## Invariants Layer Rule
+
+Add `Invariants` only when selected workflow states have meaningful invariants whose preservation, assembly, or derivation materially clarifies the plan. Do not generate invariants for every state.
+
+Treat the layer as a selective parallel chain over the main workflow. Keep its outline concise, map each invariant to a meaningful workflow state, and map each derivation from its source invariant or invariants through the relevant workflow transition or transition span to its target invariant or invariants. Put long natural-language reasoning, formulas, pseudocode, or formal text in detailed entries below the outline.
+
+An invariant is not automatically a requirement. A requirement may reference an invariant owned by the same use case. When the invariant belongs to a realizing use case, keep the owning requirement self-contained, preserve the realization mappings, and let the invariant derivation identify the requirement it justifies. Natural-language reasoning may be a proof; use **verifiable proof** only for a formalism successfully checked by its verifier.
+
+Follow `skill/layered-spec-core/references/invariants.md` for exact syntax and boundaries.
 
 ## Implementation Logic Layer Rule
 
@@ -207,23 +242,36 @@ If the user only provided a few use cases or workflows:
 - add missing use cases
 - do not invent deep layers unless requested
 - if the surrounding document also contains non-workflow analysis or reference sections, keep those sections outside the layered use-case format
+- start with implementation use cases and introduce declarative parents only when requirements and implementation decomposition both need separate workflow structures
 
-### Stage 2: Fill Structural Layers
+### Stage 2: Fill Requirements And Structural Layers
 
 If the user started adding types, tables, or endpoints:
 
 - propagate that level of detail across the remaining relevant use cases
 - preserve naming consistency across layers
 
+If meaningful state invariants and their derivation are part of the solution, add an `Invariants` layer only to the affected use cases. Do not propagate it to unrelated states or use cases for structural uniformity.
+
 If concrete constants, templates, matrices, lists, or other structured values matter to the workflow, add a `Data` layer instead of burying those values in prose.
 
-### Stage 3: Fill Logic Layers
+When explicit requirements are needed:
+
+- add identified workflow chains, EARS requirements, hierarchical contracts, or non-transition constraints to the owning implementation use case when it remains coherent
+- keep static or quantitative requirements in the structure that expresses them most precisely
+- move requirements to a separate declarative use case only when a distinct realization decomposition is also needed
+- add `Realized by` only after the intended separate realizing use cases are identified
+
+### Stage 3: Add Realizations And Logic Layers
 
 If the user added execution logic, detailed workflow, or logic details for some use cases:
 
 - extend the same layer family to the remaining use cases
 - include important intermediate states and missing logic explicitly
 - add `Implementation Logic` when the existing logic remains declarative and coding would otherwise require guesswork
+- keep requirements and logic together when one implementation use case remains sufficient
+- add realizing use cases and symmetric `Realized by` / `Realizes` mappings when declarative requirements need several distinct realization workflows
+- add `Uses` when an implementation-use-case step references another use case, including a reusable framework use case
 
 ### Stage 4: Refine Or Normalize
 
@@ -233,6 +281,7 @@ If the user asks for improvement instead of expansion:
 - normalize layer names
 - remove duplication
 - preserve semantics
+- when requirement representations are present, verify their requirement coverage and source mappings
 
 ## Quality Checks
 
@@ -249,13 +298,23 @@ If the user asks for improvement instead of expansion:
 - Helper and intermediate-structure names stay close to the concrete data they hold, the concrete action they perform, and the user-visible distinctions they preserve
 - Existing-code observations are separated from planned new logic
 - Hierarchical numbering is used when parent and child use cases need separate but related workflow treatment
+- The specification uses the smallest sufficient structure: implementation workflow and logic alone, implementation with owned requirements, or a declarative use case with separate realization mappings
+- A `Requirements` layer stays on its implementation use case unless required behavior and implementation decomposition both benefit from separate structures
+- Declarative use cases use identified `Requirements` entries and explicit `Realized by` mappings when separate realizing use cases are present
+- Every realizing use case uses a symmetric `Realizes` mapping, regardless of whether it is declarative or implementation-oriented
+- A declarative realizing use case may contain `Realizes`, its own `Requirements`, and `Realized by`
+- `Uses` maps an implementation-use-case step to a referenced declarative or implementation use case without replacing realization mappings
+- Reusable framework use cases use either a declarative contract with separate realizations or one coherent implementation use case with owned requirements
+- Requirement representations retain source requirement IDs and declare whether they are equivalent, partial, examples, or another clearly defined relation
 - Early validation and post-validation contracts are captured when they simplify downstream logic or remove redundant validation
 - Execution Logic and Implementation Plan steps include Input, Outcome, Logic, External state, Config parameters, and Metrics
-- Scientific formulas use KaTeX in a technical Logic or Data layer when useful; workflow chains remain prose-only and scannable
+- Scientific formulas use KaTeX in a technical Logic, Data, or `Invariants` layer when useful; workflow chains and invariant outlines remain prose-only and scannable
+- `Invariants` is used only where selected state invariants and their derivations materially clarify the workflow, and its outline remains consistent with the detailed invariant and derivation entries
+- **verifiable proof** is used only when formal text was successfully checked by the corresponding verifier
 - `Implementation Logic` is added only when declarative workflow layers are insufficient for implementation, and `Implementation Logic Proposal` or omission is used when the algorithm should remain developer-owned
 - Complex algorithmic decompositions and intermediate structures are made explicit in the plan when they are needed for a correct or maintainable implementation
 - Output examples should stay thin and must not drift from the contract
 
 ## One-Line Heuristic
 
-Use the planning contract for exact shape, then expand one layer family at a time while preserving user-authored structure and separating planned behavior from observed existing logic.
+Use the planning contract for exact shape, choose the smallest sufficient use-case structure, then expand one layer family at a time while preserving user-authored structure and separating planned behavior from observed existing logic.

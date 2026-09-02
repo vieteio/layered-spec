@@ -1,12 +1,13 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { HOSTS, SKILL_NAMES, resolveHostPaths } from "./hosts.mjs";
+import { CORE_REFERENCE_NAMES, HOSTS, SKILL_NAMES, resolveHostPaths } from "./hosts.mjs";
 
 const MANIFEST_NAME = "layered-spec-skillpack.json";
 const SOURCE_REPOSITORY = "https://github.com/vieteio/layered-spec";
 const canonicalPathPatterns = [
   /(?<![\w/.-])planning\/planning_contract\.md/,
-  /(?<![\w/.-])skill\/[a-z0-9-]+\/SKILL\.md/
+  /(?<![\w/.-])skill\/[a-z0-9-]+\/SKILL\.md/,
+  /(?<![\w/.-])skill\/layered-spec-core\/references\/[a-z0-9-]+\.md/
 ];
 
 export async function installHosts({
@@ -44,6 +45,13 @@ async function installHost({ hostNames, paths, scope, targetRoot, sources, packa
     const normalized = normalizeSkillFrontmatter(rewritten, hostName);
     validateInstalledSkill(normalized, hostName);
     writes.push([path.join(paths.skillsDirectory, skillName, "SKILL.md"), normalized]);
+  }
+
+  for (const referenceName of CORE_REFERENCE_NAMES) {
+    writes.push([
+      path.join(paths.skillsDirectory, "layered-spec-core", "references", referenceName),
+      rewriteContent(sources.coreReferences.get(referenceName), replacements)
+    ]);
   }
 
   writes.push([
@@ -87,7 +95,14 @@ async function loadCanonicalSources(packageRoot) {
   for (const skillName of SKILL_NAMES) {
     skills.set(skillName, await readRequired(sourcePath("skill", skillName, "SKILL.md")));
   }
-  return { planning, defaultWorkflow, skills };
+  const coreReferences = new Map();
+  for (const referenceName of CORE_REFERENCE_NAMES) {
+    coreReferences.set(
+      referenceName,
+      await readRequired(sourcePath("skill", "layered-spec-core", "references", referenceName))
+    );
+  }
+  return { planning, defaultWorkflow, skills, coreReferences };
 }
 
 async function readRequired(file) {
@@ -102,7 +117,11 @@ async function readRequired(file) {
 function buildRewriteMap(paths) {
   const replacements = [
     ["planning/planning_contract.md", `${paths.planningReference}/planning_contract.md`],
-    ...SKILL_NAMES.map((name) => [`skill/${name}/SKILL.md`, `${paths.skillsReference}/${name}/SKILL.md`])
+    ...SKILL_NAMES.map((name) => [`skill/${name}/SKILL.md`, `${paths.skillsReference}/${name}/SKILL.md`]),
+    ...CORE_REFERENCE_NAMES.map((name) => [
+      `skill/layered-spec-core/references/${name}`,
+      `${paths.skillsReference}/layered-spec-core/references/${name}`
+    ])
   ];
   return replacements.sort(([left], [right]) => right.length - left.length);
 }
@@ -116,19 +135,39 @@ function normalizeSkillFrontmatter(content, hostName) {
   if (!match) throw new Error(`Skill source has no valid frontmatter for ${hostName}`);
 
   const fields = new Map();
+  let metadataVersion;
+  let currentSection;
   for (const line of match[1].split(/\r?\n/)) {
     const field = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
-    if (field) fields.set(field[1], field[2]);
+    if (field) {
+      fields.set(field[1], field[2]);
+      currentSection = field[1];
+      continue;
+    }
+    if (currentSection === "metadata") {
+      const version = line.match(/^\s+version:\s*(.*)$/);
+      if (version) metadataVersion = version[1];
+    }
   }
   for (const required of ["name", "description"]) {
     if (!fields.has(required)) throw new Error(`Skill frontmatter is missing ${required}`);
   }
+  if (!metadataVersion) throw new Error("Skill frontmatter is missing metadata.version");
 
   const keepUserInvocable = hostName === "vscode" || hostName === "cursor" || hostName === "claude";
   const keys = keepUserInvocable
     ? ["name", "description", "user-invocable", "argument-hint"]
     : ["name", "description"];
-  const frontmatter = ["---", ...keys.filter((key) => fields.has(key)).map((key) => `${key}: ${fields.get(key)}`), "---"].join("\n");
+  const frontmatterLines = ["---"];
+  for (const key of keys) {
+    if (!fields.has(key)) continue;
+    frontmatterLines.push(`${key}: ${fields.get(key)}`);
+    if (key === "description") {
+      frontmatterLines.push("metadata:", `  version: ${metadataVersion}`);
+    }
+  }
+  frontmatterLines.push("---");
+  const frontmatter = frontmatterLines.join("\n");
   return `${frontmatter}\n${content.slice(match[0].length).replace(/^\n+/, "")}`;
 }
 

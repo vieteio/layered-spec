@@ -4,6 +4,8 @@ This document defines the canonical shape for planning artifacts in this reposit
 
 Implemented plans become specs. Later implementation updates, refactorings, or compatibility slices may leave older specs partially outdated or fully superseded. Planning must therefore create new specs and keep affected existing specs synchronized.
 
+Specifications created or edited with this pack record the current skill-pack version as defined in `skill/layered-spec-core/references/skill-pack-versioning.md`.
+
 ## Primary Location
 
 
@@ -129,6 +131,24 @@ Rules:
 - Use-case-specific questions may be recorded in a use-case layer.
 - `Open questions` remains a top-level section for general, cross-use-case, or escalated question batches.
 
+### Requirements And Implementation Structure
+
+Use the smallest use-case structure that preserves both the required behavior and the implementation logic:
+
+1. Use one implementation use case with its workflow and `Logic` layers when they describe the behavior completely. Do not add `Requirements` or a declarative parent only for structural uniformity.
+2. Add `Requirements` directly to the implementation use case when non-trivial conditions, invariant obligations, rejection rules, or required outcomes need an explicit normative definition but one implementation workflow remains coherent. The use case's workflow and logic implement its own requirements; do not add self-referential `Realized by` or `Realizes` mappings.
+3. Introduce a declarative use case with separate realization mappings when the required behavior and its implementation decomposition each need an independently understandable structure, normally because several use cases jointly realize the behavior. Map the requirements through `Realized by`, and add the symmetric `Realizes` mapping to each realizing use case. A realizing use case may itself be declarative and may therefore contain `Realizes`, its own `Requirements`, and a further `Realized by` layer.
+
+The `Requirements` layer may specify declarative behavior through EARS requirements, identified workflow chains, hierarchical contracts, or identified non-transition constraints. A hierarchical contract uses a parent requirement as its umbrella obligation and descendant requirement IDs as its clauses. Each requirement has a stable ID.
+
+Hierarchical numbering expresses containment; it does not replace explicit realization mappings. When requirements belong to a separate declarative use case, that use case maps them through `Realized by`, and every realizing use case provides the symmetric `Realizes` mapping. A reusable framework use case remains separately identified; an implementation use case whose behavior relies on it references it through `Uses`.
+
+For each requirement ID, the definition written directly in `Requirements` is authoritative. Optional duplicate or translated representations must reference that ID and preserve its meaning. The definition may be an EARS requirement, a workflow chain, a hierarchical contract entry or clause, or an identified non-transition constraint. EARS, Gherkin, RIDDL, or other representations also declare their format and semantic relation in `Requirement representations`; the contract does not require one scenario or translation syntax.
+
+Read `skill/layered-spec-core/references/requirements-and-realization.md` when a specification uses a `Requirements` layer, separate declarative and realizing use cases, `Realized by`, `Realizes`, `Uses`, framework boundaries, or external requirement representations.
+
+Read `skill/layered-spec-core/references/invariants.md` when a use case uses an `Invariants` layer to record invariants for selected states or derive later state invariants from earlier ones.
+
 ### Common Use-Case Layers
 
 Use these layer names when they help:
@@ -142,14 +162,32 @@ Use these layer names when they help:
 - `Tables`
 - `Data`
 - `Detailed Workflow`
+- `Invariants`
 - `Logic Details`
 - `Observed Existing Logic`
 - `Input Validation And Contracts`
 - `Tests`
 - `Validation`
 - `Use Case Questions`
+- `Requirements`
+- `Realized by`
+- `Realizes`
+- `Uses`
+- `Requirement representations`
 
 Use additional layer names only when they communicate a distinct responsibility clearly.
+
+### Invariants Layer Syntax
+
+Use `Invariants` when selected workflow states have meaningful invariants and the derivation of later state invariants should be explicit. It is a selective parallel chain over the main workflow and does not require an invariant for every state.
+
+Keep a concise invariant outline in the layer, then place long invariant definitions, assumptions, calculations, proofs, and formal text in its detailed state-invariant and derivation entries. A derivation identifies its source invariant or invariants, target invariant or invariants, and the workflow transition or transition span that establishes the target.
+
+Invariants and derivations may use natural language, mathematical notation, pseudocode, Lean, or another named formalism. Natural-language reasoning may be a proof, justification, or proof sketch. Call it a **verifiable proof** only when it is expressed in a formalism and successfully verified by the corresponding checker.
+
+An invariant is not automatically a normative requirement. A requirement may reference an invariant owned by the same use case when satisfying that invariant is required. When an invariant belongs to a realizing use case, keep the owning requirement self-contained, retain the realization mappings, and let the invariant derivation identify the requirement it justifies.
+
+Follow `skill/layered-spec-core/references/invariants.md` for the exact shape, identifiers, workflow mapping, proof terminology, requirement relationship, and technical-use-case boundary.
 
 ### Early Validation And Contract Rule
 
@@ -216,9 +254,9 @@ Refactoring syntax exists because implemented specs can become outdated after an
 
 Use KaTeX only when a scientific or mathematical expression materially clarifies a technical rule, algorithm, invariant, transformation, or data definition. Keep ordinary implementation prose in plain language.
 
-Put formulas primarily in `Execution Logic`, `Implementation Logic`, `Logic Details`, or `Data`. Use inline KaTeX (`$...$`) for a short expression within a sentence and display KaTeX (`$$...$$`) for a standalone equation, derivation, or multi-line aligned expression.
+Put formulas primarily in `Execution Logic`, `Implementation Logic`, `Logic Details`, `Data`, or `Invariants`. Use inline KaTeX (`$...$`) for a short expression within a sentence and display KaTeX (`$$...$$`) for a standalone equation, derivation, or multi-line aligned expression.
 
-Do not put KaTeX in workflow lines, transition labels, branch labels, or workflow-state names. Those chains must remain scannable state-to-state prose. Give the chain a concise semantic state or step name, then place the formula in the relevant Logic layer and refer to the named state or quantity there.
+Do not put KaTeX in workflow lines, transition labels, branch labels, or workflow-state names. Those chains must remain scannable state-to-state prose. Give the chain a concise semantic state or step name, then place the formula in the relevant detailed layer and refer to the named state or quantity there.
 
 For example:
 
@@ -266,6 +304,7 @@ Prefer capturing this detail in one or more of these layers when useful:
 - `Data`
 - `Files And Functions`
 - `Logic Details`
+- `Invariants`
 
 ### Implementation Logic Layer Rule
 
@@ -355,6 +394,7 @@ Use this shape for the `Tests` layer:
 Tests:
 optional test file name
  - description: test 1 description
+   requirements: optional requirement ids
    input: input description
    workflow: state 1 with given input --one or several steps--> final state 1
    expected outcome: expected output or exception description
@@ -365,6 +405,7 @@ Rules:
 - The optional test file name line may be omitted.
 - At least one of `description` or `workflow` must be present for each test entry.
 - If `workflow` is present, `input` and `expected outcome` should usually be present as well.
+- When a test verifies identified requirements, add their IDs to the test entry. A scenario or external representation does not replace its canonical requirement unless equivalent coverage is explicitly declared and validated.
 
 ## Implementation Checklist
 
@@ -396,6 +437,8 @@ When more execution detail is needed, each step should include:
 - `Metrics`
 
 Spec maintenance tasks belong here. If a plan updates behavior already described in an existing spec, include the spec update or supersession step in the implementation checklist rather than leaving it as optional cleanup.
+
+When requirement mappings are present, retain the requirement IDs satisfied by each implementation task so checklist completion can be traced back to normative behavior.
 
 If implementation is expected to create a function or method that matches a use-case workflow step, note in that implementation step that the docstring should name the workflow link.
 
@@ -450,11 +493,20 @@ A valid planning artifact should satisfy all of these:
 - includes spec maintenance in the implementation checklist when relevant
 - records code-to-spec traceability when implementation boundaries map cleanly to use-case workflow steps
 - uses workflow operators consistently, including refactoring syntax when updating an existing implementation path
-- uses KaTeX for scientific formulas only where it clarifies technical logic or data, while keeping workflow chains as readable prose
+- uses KaTeX for scientific formulas only where it clarifies technical logic, data, or invariants, while keeping workflow chains and invariant outlines as readable prose
+- uses `Invariants` only for meaningful workflow states, keeps its outline concise, and maps every derivation from identified source invariants through workflow logic to identified target invariants
+- reserves **verifiable proof** for formal text successfully checked by its corresponding verifier
 - uses hierarchical use-case numbering when parent and child use cases need distinct workflow treatment
 - plans early validation and the post-validation contract when later workflow steps depend on stronger assumptions
 - uses `Implementation Logic` only when algorithmic detail is needed beyond declarative workflow behavior, and uses `Implementation Logic Proposal` or omission when the implementation should stay developer-owned
 - introduces non-trivial decompositions and intermediate algorithmic structures in the plan when implementation quality depends on them
+- uses the smallest sufficient use-case structure and does not introduce a declarative parent when one implementation use case remains clear
+- keeps non-trivial requirements on the owning implementation use case when separate declarative requirements and realizing use cases are unnecessary
+- uses identified requirement entries and symmetric `Realized by` / `Realizes` mappings when required behavior and its realization both need separate structures
+- permits a declarative realizing use case to contain `Realizes`, its own `Requirements`, and `Realized by`
+- uses `Uses` to map implementation-use-case steps to referenced declarative or implementation use cases, including reusable framework boundaries
+- keeps the definition under each requirement ID as the meaning that optional duplicate or translated representations must preserve
+- checks that every requirement is implemented by its owning use case or is realized, explicitly deferred, or declared outside implementation ownership; every realization mapping is symmetric, and non-deferred declarative requirements eventually reach implementation coverage
 - uses direct task-native wording in `Title and scope` and avoids abstract boilerplate
 - groups `Title and scope` by conceptual subchange rather than raw edit order when multiple related changes are involved
 - keeps `Title and scope` readable by using one compact lead sentence + an optional second sentence when detail is needed

@@ -9,6 +9,12 @@ export const SKILL_NAMES = [
   "code-logic-workflow-documentation"
 ];
 
+export const CORE_REFERENCE_NAMES = [
+  "requirements-and-realization.md",
+  "invariants.md",
+  "skill-pack-versioning.md"
+];
+
 const host = (displayName, repo, user) => ({ displayName, repo, user });
 
 export const HOSTS = {

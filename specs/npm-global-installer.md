@@ -1,5 +1,7 @@
 # Title and scope
 
+- Last edited with skill pack: `0.2.2`
+
 Distribute layered-spec as `@viete-io/layered-spec` so a user can install the CLI with `npm install -g @viete-io/layered-spec@latest`, enter a project, and run `layered-spec init` without cloning this repository. `init` defaults to all supported hosts in the current project, while `--host <host>` remains available for a one-host installation. A completed non-dry-run `init` also gives a best-effort notice when npm has a newer version on the matching stable or prerelease channel.
 
 ## Planning anchor
@@ -23,13 +25,13 @@ Distribute layered-spec as `@viete-io/layered-spec` so a user can install the CL
 
 ### 2. Canonical source and transformation
 
-- Canonical artifacts are `skill/*/SKILL.md`, `planning/planning_contract.md`, and `prompts/plan implementation in a loop.prompt.md`.
+- Canonical artifacts are `skill/*/SKILL.md`, shared references under `skill/layered-spec-core/references/`, `planning/planning_contract.md`, and the bundled default workflow under `skill/spec-first-planning-loop/assets/`.
 - `validate_canonical_source`, `build_rewrite_map`, `rewrite_content`, `normalize_frontmatter`, and `validate_installed_skill` enforce source existence, rewrite host-local references, preserve allowed frontmatter, and reject stale paths.
 - The package must include exactly these canonical assets; the npm `files` allowlist must exclude examples, generated installations, local agent state, and repository-only documents by default.
 
 ### 3. Filesystem output and compatibility
 
-- `install_host` writes planning guidance, loop prompt, one `SKILL.md` per skill, and `layered-spec-skillpack.json` into host-specific directories.
+- `install_host` writes planning guidance, one `SKILL.md` per skill, shared layered-spec references, the bundled default workflow, and `layered-spec-skillpack.json` into host-specific directories.
 - The manifest records `source_repo`, `git_revision`, timestamp, host, scope, and installed files. Under npm distribution, `source_repo` should become the public repository URL and the manifest needs a `package_name` and `package_version` to identify the installed release.
 - Repo scope is intentionally caller-selected through `--target-root`; user scope resolves from the current user's home directory.
 
@@ -55,7 +57,7 @@ Distribute layered-spec as `@viete-io/layered-spec` so a user can install the CL
 
 ### 1. Install layered-spec skills into the user configuration
 
-project working directory --`layered-spec init --host <host|all>`--> host-specific skills, planning contract, prompt, and versioned manifest in that project
+project working directory --`layered-spec init --host <host|all>`--> host-specific skills, shared references, planning contract, default workflow, and versioned manifest in that project
 
 Input Validation And Contracts:
 
@@ -66,7 +68,7 @@ Input Validation And Contracts:
 Execution Logic:
 
 1. Resolve package-root canonical assets rather than a cloned repository root.
-2. Load host path metadata, rewrite internal links for that host, validate the rewritten skill content, and create target parent directories.
+2. Load host path metadata, rewrite internal links for that host, preserve the shared skill-pack version in normalized frontmatter, validate the rewritten skill content, and create target parent directories.
 3. Write all artifacts with UTF-8 and normalized LF line endings, then write a manifest containing package provenance.
 4. Print the selected host, scope, and concrete output paths.
 
@@ -77,7 +79,7 @@ Files And Functions:
 - implemented: `scripts/npm/src/cli.mjs#main` — parse and validate command input.
 - implemented: `scripts/npm/src/installer.mjs#installHost` — implement the workflow above; its docstring links it to Use case 1.
 - implemented: `scripts/npm/src/hosts.mjs#HOSTS` — canonical host metadata ported from `scripts/skillpack_hosts.py`.
-- existing: `skill/`, `planning/`, `prompts/` — package-owned canonical source assets.
+- existing: `skill/` and `planning/` — package-owned canonical skills, shared references, default workflow, and planning contract.
 
 Tests:
 
@@ -157,7 +159,7 @@ package metadata invariants:
 | default registry tag | `latest` |
 | publish access | public |
 | engine | chosen supported Node LTS range |
-| package assets | `scripts/npm/bin/`, `scripts/npm/src/`, `skill/`, `planning/`, `prompts/`, `README.md`, `LICENSE` |
+| package assets | `scripts/npm/bin/`, `scripts/npm/src/`, `skill/`, `planning/`, `README.md`, `LICENSE` |
 
 Tests:
 
@@ -233,6 +235,7 @@ Tests:
 9. [x] Amend this spec with the post-install npm update-notice workflow, its cache boundary, the stable/prerelease channel rule, and the explicit no-check controls.
 10. [x] Add the cache-backed best-effort update checker and call it from real `init` runs after filesystem installation succeeds.
 11. [x] Add CLI and update-check regression tests, then update the README and CLI help with the opt-out behavior.
+12. [x] Publishable `0.2.2` sources include requirements and realization guidance, invariants, shared skill/spec versioning, installer delivery of core references, and preservation of `metadata.version` in installed skills.
 
 ## Open questions
 
@@ -256,3 +259,4 @@ Tests:
 - 2026-07-14: Existing unrelated specs remain active and unchanged; this new spec is the only authoritative plan for npm distribution.
 - 2026-08-24: Stable packages compare against npm `latest`; prereleases compare against `next`. Registry access is best-effort and cache-backed so local skill installation remains reliable offline.
 - 2026-08-24: Implement the update notice with a 24-hour user-cache entry and a one-second registry timeout. `init` writes skill files before the advisory lookup, and `--dry-run` plus `--no-update-check` make no lookup or cache write.
+- 2026-09-02: Version `0.2.2` adds shared requirements/realization, invariants, and versioning references. Both installers copy those references for every host and preserve the common skill-pack version in installed skill frontmatter.

@@ -1,11 +1,15 @@
 ---
 name: spec-first-planning-loop
 description: "Use for non-trivial coding tasks that should be planned through repository technical solution specifications before implementation. Initialize and follow the repository's customizable specification lifecycle, gather connected code context, request and process required user input, restore the bundled workflow only when explicitly requested, and keep planning files synchronized with implementation. Do not use for trivial local changes or pure analysis and reference documents that do not describe a process or state change."
+metadata:
+  version: "0.2.2"
 argument-hint: "Describe the task, known code entry point or failing behavior, existing solution spec if any, and whether you want planning only or implementation after the spec."
 user-invocable: true
 ---
 
 # Spec-First Planning Loop
+
+When this skill creates or edits a specification, follow `skill/layered-spec-core/references/skill-pack-versioning.md`.
 
 For non-trivial tasks, this repository uses solution specifications to describe the intended change before implementation.
 
@@ -17,8 +21,8 @@ The active lifecycle chain and its step descriptions are stored in `specs/spec-l
 
 ## Workflow Template And Active File
 
-- `assets/default_workflow.md` is the bundled default template.
-- `specs/spec-lifecycle/workflow.md` is the only active lifecycle workflow.
+- `assets/default_workflow.md` is the bundled default template and records its skill-pack version as `Default workflow version`.
+- `specs/spec-lifecycle/workflow.md` is the only active lifecycle workflow and records the default-workflow version from which it was created or with which it was most recently synchronized.
 
 Before starting a specification lifecycle:
 
@@ -28,6 +32,8 @@ Before starting a specification lifecycle:
 4. If initialization fails, report the error and stop instead of silently executing the bundled template.
 
 Treat changes to the bundled template as defaults for future initialization only. Never propagate them automatically into an existing active workflow.
+
+Do not change the active workflow's recorded default-workflow version during ordinary customization. Update it only when the active workflow is initialized from, explicitly synchronized with, or explicitly restored from that bundled default version.
 
 Restore the bundled default only when the user explicitly requests restoration. Before replacing an existing active workflow, show or summarize its differences from the bundled default and ensure the current version is recoverable through version control or a user-approved backup. After restoration, continue to treat the restored active file as the sole authority.
 
@@ -152,6 +158,7 @@ The final outcomes mean:
 
 - Both lifecycle files were read before starting.
 - The active workflow existed or was initialized visibly from `assets/default_workflow.md`; the bundled template was not used as a hidden fallback.
+- The active workflow records the default-workflow version from which it was created or with which it was most recently synchronized.
 - An existing active workflow was not overwritten automatically, and restoration occurred only when explicitly requested.
 - The current step came from `workflow.md`.
 - Every step has a concise `Purpose`, and its execution, output, and next transition fulfill that purpose.
