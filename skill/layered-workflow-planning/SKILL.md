@@ -81,6 +81,8 @@ When a specification needs a `Requirements` layer or implementation realization 
 
 When a use case needs meaningful state invariants or derivations between them, also read `skill/layered-spec-core/references/invariants.md`. Keep the detailed layer syntax and proof terminology there instead of duplicating them in this skill.
 
+When a workflow directly or mutually invokes itself, dispatches over recursive data variants, or needs explicit base-case, progress, cycle, or depth-limit treatment, read `skill/layered-spec-core/references/recursive-workflows.md` and apply its recursive-family rules and templates.
+
 This skill should not redefine those rules. Use the contract directly for exact syntax and output shape.
 
 Minimal reminder:
@@ -105,6 +107,14 @@ Typical examples:
 
 Keep the hierarchy shallow and consistent unless deeper nesting materially improves readability.
 
+## Recursive Workflow Rule
+
+Treat recursion as explicit invocation between workflow chains, not as a loop operator.
+
+Generate one workflow chain for each distinct recursive step body and show every recursive call with its target chain label or use-case id. Keep compact related chains in one use case under `Detailed Workflow`; use hierarchical child use cases when recursive variants have substantial independent logic, contracts, errors, or tests.
+
+An individual step may delegate without a local exit, but every recursive family must identify a reachable base or exit case and a progress measure. Specify cycle or depth-limit behavior when finite descent is not guaranteed by the input contract. Use self-referential or mutually referential `Uses` mappings for recursive use-case invocation without treating those mappings as realization.
+
 ## Requirements And Realization Rule
 
 Choose the smallest structure that keeps required behavior and implementation logic clear.
@@ -113,7 +123,7 @@ Choose the smallest structure that keeps required behavior and implementation lo
 2. Add `Requirements` directly to that implementation use case when non-trivial conditions, invariant obligations, rejection rules, or required outcomes need explicit normative definitions but the implementation remains one coherent workflow.
 3. Introduce a separate declarative use case when its requirements and the implementation decomposition each need an independently understandable structure, normally because several use cases jointly realize the behavior.
 4. In either requirements-bearing form, use identified workflow chains when explicit inputs and outcomes improve clarity, EARS for natural-language behavioral requirements, a hierarchical contract when one umbrella obligation benefits from detailed clauses, and identified invariants, types, formulas, tables, or compatibility rules for non-transition constraints.
-5. Select composition, product, coproduct, loop, or separate chains from the actual relationship between requirements.
+5. Select composition, product, coproduct, loop, recursive calls, or separate chains from the actual relationship between requirements.
 6. When requirement ownership and realization are separate, add realization mappings by mapping requirements through `Realized by` and adding the symmetric `Realizes` mapping to every realizing use case. A realizing use case may itself be declarative and may contain `Realizes`, its own `Requirements`, and a further `Realized by` layer. Do not add self-referential mappings when one implementation use case owns its requirements.
 7. Use `Uses` on an implementation use case when one of its states or steps references another declarative or implementation use case.
 8. Keep reusable framework use cases separate when several callers use them. Use a declarative framework use case with separate realizations when the framework contract needs its own decomposition; otherwise an implementation framework use case may own its `Requirements` directly.
@@ -298,6 +308,7 @@ If the user asks for improvement instead of expansion:
 - Helper and intermediate-structure names stay close to the concrete data they hold, the concrete action they perform, and the user-visible distinctions they preserve
 - Existing-code observations are separated from planned new logic
 - Hierarchical numbering is used when parent and child use cases need separate but related workflow treatment
+- Recursive workflows give every distinct recursive step body its own chain, name each call target, and record family-level exit and progress behavior
 - The specification uses the smallest sufficient structure: implementation workflow and logic alone, implementation with owned requirements, or a declarative use case with separate realization mappings
 - A `Requirements` layer stays on its implementation use case unless required behavior and implementation decomposition both benefit from separate structures
 - Declarative use cases use identified `Requirements` entries and explicit `Realized by` mappings when separate realizing use cases are present

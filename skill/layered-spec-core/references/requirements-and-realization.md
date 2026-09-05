@@ -98,9 +98,12 @@ Preserve an identifier when wording is clarified without changing its meaning. A
 - Use product when several required calculations or effects participate together.
 - Use coproduct when one decision has alternative cases or outcomes.
 - Use a loop when required behavior repeats while a stated condition applies.
+- Use an explicit recursive call when a required transition invokes the same workflow chain or another chain in one mutually recursive family.
 - Use separate requirement chains when obligations are independent rather than alternatives.
 
 Do not flatten consecutive stages, simultaneous obligations, and rejection behavior into one coproduct merely because they were originally written as separate requirement sentences.
+
+Recursion does not introduce another delimiter. Use the ordinary workflow operators for each recursive step body, name every recursive call target, and follow `recursive-workflows.md` for compact versus hierarchical decomposition and family-level termination rules.
 
 ### Non-Workflow Requirements
 
@@ -192,6 +195,8 @@ The target may be either:
 
 Use the first form when the framework contract and its realizations each need independently understandable structure. Use the second form when a separate declarative framework use case would add no clarity. Several callers may use the same separately identified framework use case or framework specification; do not duplicate its requirements or realizations under each caller.
 
+For recursive invocation, a `Uses` entry may target the same implementation use case or another use case that eventually calls back. Such self-referential or mutually referential `Uses` mappings describe the recursive call graph and are valid when the recursive family has a reachable exit plus a progress, cycle, or depth-limit contract. This does not relax the prohibition on cycles in `Realized by` / `Realizes` mappings.
+
 ## Requirement Representations
 
 Use `Requirement representations` when requirements are translated into another syntax for review, parsing, test generation, code generation, analysis, or visualization.
@@ -259,6 +264,7 @@ A complete specification satisfies these checks:
 - every non-deferred declarative requirement is eventually covered by an implementation use case, directly or through further realizing use cases, unless it is declared outside implementation ownership;
 - realization mappings do not form cycles;
 - every `Uses` entry belongs to an implementation use case, identifies the source step or state, and resolves to an existing declarative or implementation use case;
+- every cyclic `Uses` group represents an intentional recursive family with explicit call targets, a reachable exit, and progress, cycle, or depth-limit behavior;
 - requirements and their owning implementation workflow or mapped realizing workflows agree on input, outcome, ordering, failure, and ownership semantics;
 - every requirement that references an invariant resolves to that invariant, and its owning or realizing workflow agrees with the invariant derivation;
 - every required test or scenario identifies the requirements it covers;

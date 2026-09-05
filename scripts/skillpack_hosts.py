@@ -20,6 +20,7 @@ DEFAULT_WORKFLOW = "default_workflow.md"
 CORE_REFERENCE_NAMES = (
     "requirements-and-realization.md",
     "invariants.md",
+    "recursive-workflows.md",
     "skill-pack-versioning.md",
 )
 

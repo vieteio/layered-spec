@@ -111,7 +111,7 @@ Follow these instructions:
 7. Update declared `Conversation state`, `Output`, and `Record` items before following `Next`.
 8. When skipping a step or branch, record the reason if its description requires one.
 9. Before leaving the step, confirm that its execution, output, and next transition fulfill its `Purpose`. Treat an incomplete result as a paused state only when `Purpose` permits it and the step defines how to request the next user input.
-10. Use `planning_contract.md` to interpret workflow arrows, branches, parallel states, refactoring transitions, typed workflows, and loops.
+10. Use `planning_contract.md` to interpret workflow arrows, branches, parallel states, refactoring transitions, typed workflows, loops, and recursive calls.
 11. When `Request next user input` instructs the step to request input, follow `Requesting And Processing User Input` and keep the current step active until the response is processed.
 12. Continue until the chain reaches a final outcome, the user selects a permitted stopping point, or the active step is awaiting required user input.
 

@@ -18,23 +18,29 @@ test("init writes a Codex project install and versioned manifest", async () => {
   assert.match(skill, /metadata:\n  version: "0\.2\.2"/);
   assert.match(skill, /Requirements And Realization Rule/);
   assert.match(skill, /Invariants Layer Rule/);
+  assert.match(skill, /Recursive Workflow Rule/);
   assert.match(skill, /\.agents\/skills\/layered-spec-core\/references\/skill-pack-versioning\.md/);
+  assert.match(skill, /\.agents\/skills\/layered-spec-core\/references\/recursive-workflows\.md/);
   assert.doesNotMatch(skill, /`planning\/planning_contract\.md`/);
 
   const planningContract = await readFile(path.join(project, ".agents", "planning", "planning_contract.md"), "utf8");
   assert.match(planningContract, /Requirements And Implementation Structure/);
   assert.match(planningContract, /Invariants Layer Syntax/);
   assert.match(planningContract, /\.agents\/skills\/layered-spec-core\/references\/requirements-and-realization\.md/);
+  assert.match(planningContract, /\.agents\/skills\/layered-spec-core\/references\/recursive-workflows\.md/);
   assert.doesNotMatch(planningContract, /skill\/layered-spec-core\/references/);
   assert.doesNotMatch(planningContract, /user stor|solution basis|basis selection|UX layer/i);
 
   const requirementsReference = await readFile(path.join(project, ".agents", "skills", "layered-spec-core", "references", "requirements-and-realization.md"), "utf8");
   const invariantsReference = await readFile(path.join(project, ".agents", "skills", "layered-spec-core", "references", "invariants.md"), "utf8");
+  const recursiveWorkflowsReference = await readFile(path.join(project, ".agents", "skills", "layered-spec-core", "references", "recursive-workflows.md"), "utf8");
   const versioningReference = await readFile(path.join(project, ".agents", "skills", "layered-spec-core", "references", "skill-pack-versioning.md"), "utf8");
   assert.match(requirementsReference, /Declarative And Implementation Use Cases/);
-  assert.match(invariantsReference, /Invariants:\n- Outline:/);
+  assert.match(invariantsReference, /Invariants:\r?\n- Outline:/);
+  assert.match(recursiveWorkflowsReference, /Template 2: Compact Mutual Recursion/);
+  assert.match(recursiveWorkflowsReference, /Template 6: Guarded Graph Recursion/);
   assert.match(versioningReference, /Last edited with skill pack/);
-  assert.doesNotMatch(`${requirementsReference}\n${invariantsReference}`, /user stor|solution basis|basis selection|UX layer/i);
+  assert.doesNotMatch(`${requirementsReference}\n${invariantsReference}\n${recursiveWorkflowsReference}`, /user stor|solution basis|basis selection|UX layer/i);
 
   const lifecycleSkill = await readFile(path.join(project, ".agents", "skills", "spec-first-planning-loop", "SKILL.md"), "utf8");
   assert.match(lifecycleSkill, /specs\/spec-lifecycle\/workflow\.md/);
@@ -50,7 +56,7 @@ test("init writes a Codex project install and versioned manifest", async () => {
   assert.equal(manifest.package_name, "@viete-io/layered-spec");
   assert.equal(manifest.package_version, "9.9.9");
   assert.equal(manifest.scope, "repo");
-  assert.equal(manifest.files.length, 9);
+  assert.equal(manifest.files.length, 10);
 });
 
 test("init defaults to all hosts in repo scope and combines shared configuration paths", async () => {

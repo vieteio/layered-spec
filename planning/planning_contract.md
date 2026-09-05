@@ -149,6 +149,8 @@ Read `skill/layered-spec-core/references/requirements-and-realization.md` when a
 
 Read `skill/layered-spec-core/references/invariants.md` when a use case uses an `Invariants` layer to record invariants for selected states or derive later state invariants from earlier ones.
 
+Read `skill/layered-spec-core/references/recursive-workflows.md` when a workflow directly or mutually invokes itself, dispatches over recursive data variants, or needs explicit base-case, progress, cycle, or depth-limit treatment.
+
 ### Common Use-Case Layers
 
 Use these layer names when they help:
@@ -247,6 +249,20 @@ Examples:
 ```
 
 Place loop workflows in fenced text blocks or inline code so the enclosing `|` characters are not interpreted as a Markdown table.
+
+Recursive workflows use the existing composition, coproduct, product, loop, typed-state, and use-case-reference syntax. Do not introduce a recursion delimiter or represent recursion as a loop merely because execution repeats.
+
+Show a recursive call as a normal transition whose step names the called chain or use case:
+
+`recursive input --apply recursive-step-a recursively--> recursive result`
+
+For compact recursion, place one separately labeled workflow chain per distinct recursive step body in `Detailed Workflow`, then reference those labels from call transitions. For larger recursion, give the dispatcher a parent use case and give materially distinct recursive step bodies hierarchical child use cases. Use `Uses` to map a call transition to another use case; self-referential and mutually referential `Uses` mappings are valid when they describe recursive invocation rather than realization.
+
+A recursive step may terminate locally, call itself, call another recursive step, or delegate without its own exit. The recursive family as a whole must identify at least one reachable base or exit case and a progress measure such as descent to a strict substructure, fewer remaining elements, consumed input, or decreasing depth. When the data may contain cycles or unbounded references, specify cycle or depth-limit behavior explicitly.
+
+Use a coproduct for type-directed dispatch and alternative base or recursive cases. Use composition for ordered recursive calls. Use a product only when recursive branches are independent and participate together. A loop may contain recursive dispatch when processing a collection, but the loop and recursive call remain separate structures.
+
+Detailed templates for direct structural recursion, compact mutual recursion, hierarchical type dispatch, multiple recursive children, and guarded graph traversal are in `skill/layered-spec-core/references/recursive-workflows.md`.
 
 Refactoring syntax exists because implemented specs can become outdated after an implementation update. Use it when the plan changes an existing workflow rather than adding a net-new one.
 
@@ -493,6 +509,8 @@ A valid planning artifact should satisfy all of these:
 - includes spec maintenance in the implementation checklist when relevant
 - records code-to-spec traceability when implementation boundaries map cleanly to use-case workflow steps
 - uses workflow operators consistently, including refactoring syntax when updating an existing implementation path
+- gives every distinct recursive step body its own workflow chain and names the target of every recursive call
+- records a reachable base or exit case plus a progress, cycle, or depth-limit contract for every recursive family
 - uses KaTeX for scientific formulas only where it clarifies technical logic, data, or invariants, while keeping workflow chains and invariant outlines as readable prose
 - uses `Invariants` only for meaningful workflow states, keeps its outline concise, and maps every derivation from identified source invariants through workflow logic to identified target invariants
 - reserves **verifiable proof** for formal text successfully checked by its corresponding verifier
