@@ -15,7 +15,7 @@ test("init writes a Codex project install and versioned manifest", async () => {
 
   const skill = await readFile(path.join(project, ".agents", "skills", "layered-workflow-planning", "SKILL.md"), "utf8");
   assert.match(skill, /\.agents\/planning\/planning_contract\.md/);
-  assert.match(skill, /metadata:\n  version: "0\.2\.3"/);
+  assert.match(skill, /metadata:\n  version: "0\.2\.2"/);
   assert.match(skill, /Requirements And Realization Rule/);
   assert.match(skill, /Invariants Layer Rule/);
   assert.match(skill, /Recursive Workflow Rule/);
@@ -47,7 +47,7 @@ test("init writes a Codex project install and versioned manifest", async () => {
   assert.doesNotMatch(lifecycleSkill, /user stor|solution basis|basis selection/i);
 
   const workflowTemplate = await readFile(path.join(project, ".agents", "skills", "spec-first-planning-loop", "assets", "default_workflow.md"), "utf8");
-  assert.match(workflowTemplate, /Default workflow version: `0\.2\.3`/);
+  assert.match(workflowTemplate, /Default workflow version: `0\.2\.2`/);
   assert.match(workflowTemplate, /Check specification completeness/);
   assert.match(workflowTemplate, /Check specification consistency/);
   assert.doesNotMatch(workflowTemplate, /user stor|solution basis|basis selection/i);
