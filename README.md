@@ -74,6 +74,7 @@ Canonical skill sources live under:
 
 Spec lifecycle files live under:
 - `specs/spec-lifecycle/workflow.md` — repository lifecycle workflow that users can review and customize
+- `specs/spec-lifecycle/workflow.json` — workflow settings; validation preferences live in its `validation` section
 
 Describe a task in chat with an AI agent and ask it to create a spec. Review the spec and refine it in chat. When the spec is correct, ask the agent to implement it in a loop.
 
@@ -185,15 +186,17 @@ state 1 --step name 1--> state 2 --step name 2--> [
 ### Layered use cases
 
 ```md
-### 1. use_case_name
+## Use cases
+
+### 1. Use case name
 workflow
-Layer_1_name: layer content
+
+Layer_1_name:
+layer content
+
 Layer_2_name:
 multi line
 layer content
-Layer_3_name: multi line
-layer
-content
 ```
 
 #### Type or table layer syntax
