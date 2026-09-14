@@ -15,7 +15,37 @@ Store generated plans and active specs in this folder:
 
 Use this folder as the default planning and spec registry unless a narrower location is explicitly required by the task.
 
+Use these locations:
+
+- `specs/<simple-solution>.md` for a solution with no candidate evaluation;
+- `specs/<solution-name>/spec.md` for a solution with task development artifacts;
+- `specs/task-contexts/CTX-NNNN-<task-slug>.md` for reusable shared context assembled for one logical task;
+- `specs/<solution-name>/candidates/<basis-name>.md` for focused basis candidates;
+- `specs/<solution-name>/candidates/comparison.md` for the basis comparison;
+- `specs/architecture/template.md` for the active repository ADR template;
+- `specs/architecture/ADR-NNNN-<short-title>.md` for an architectural decision record.
+
 `specs/spec-lifecycle/` contains specification-lifecycle policy rather than generated solution specifications. Do not classify files in that folder with solution-spec lifecycle states such as `active`, `partially outdated`, `superseded`, or `archived`.
+
+`specs/architecture/` contains the active ADR template and architectural decision records rather than solution specifications. Exclude the directory from solution-spec lifecycle classification, and exclude `architecture/template.md` from ADR discovery. Keep this directory flat until a later architecture-organization decision introduces narrower subdirectories.
+
+`specs/task-contexts/` contains task-scoped reusable context rather than solution specifications. Read `skill/layered-spec-core/references/task-context.md` for its file shape, stable identifiers, reuse boundary, and legacy compatibility rules. A task context is not an exclusive source or a certification that every artifact has sufficient context.
+
+Existing `specs/<solution-name>/connected_context.md` files remain valid legacy evidence artifacts. Do not migrate them automatically. New task development uses task context when shared context is useful rather than creating another solution-local `connected_context.md`.
+
+When an existing single-file solution spec needs candidate evaluation, move its full content to `<solution-name>/spec.md`, then leave a short compatibility pointer at the original path. Preserve the content before replacing the old file.
+
+## Terms
+
+- `task`: the request, problem, or desired change.
+- `solution`: the intended response to a task; it can be a new capability, refactoring, compatibility slice, or broader application logic.
+- `solution spec`: the planning artifact that describes a solution.
+- `basis`: a technology, API, protocol, framework, algorithm, or approach that supplies composable workflow steps.
+- `candidate`: a focused partial solution that evaluates one basis for one decision scope.
+- `decision reach`: whether one selected concern is `solution-local` or `architectural`.
+- `ADR`: the authoritative record for one architecturally significant selected concern and its rationale.
+- `task context`: optional reusable directives, evidence, findings, affected-artifact mappings, and gaps collected for one logical task.
+- `basis state`: whether a basis is `confirmed`, `proposed` for implementation-backed validation, or `deferred` without a justified working basis.
 
 
 ## Artifact Lifecycle
@@ -36,6 +66,8 @@ Allowed maintenance actions:
 - `replace`
 - `archive`
 
+ADRs use their own status inside each record, such as `proposed`, `accepted`, or `superseded`. Do not apply solution-spec lifecycle states to ADRs. A proposed ADR is pending rather than an authoritative existing-system constraint. When an accepted decision changes, create a superseding ADR and preserve the earlier record.
+
 ## Required Top-Level Sections
 
 Every non-trivial planning artifact should use these top-level sections in this order:
@@ -43,10 +75,11 @@ Every non-trivial planning artifact should use these top-level sections in this 
 1. `Title and scope`
 2. `Planning anchor`
 3. `Connected groups or observed existing logic`
-4. `Use cases`
-5. `Implementation checklist`
-6. `Open questions`
-7. `Decision log`
+4. `Task development` when a material basis decision was evaluated
+5. `Use cases`
+6. `Implementation checklist`
+7. `Open questions`
+8. `Decision log`
 
 Do not add `Validation` or `Tests` as fixed top-level sections. Those belong under the relevant use case when needed.
 
@@ -76,6 +109,7 @@ The `Planning anchor` section should record:
 - the changed assumption or compatibility rule behind the change
 - why the work is non-local when applicable
 - impacted specs already present in `specs/`
+- relevant ADRs under `specs/architecture/`, their status, and whether they constrain or may be superseded by the task
 - preliminary spec action per impacted spec: `reuse`, `amend`, `mark outdated`, `replace`, or `archive`
 
 ## Connected Groups Or Observed Existing Logic
@@ -91,6 +125,7 @@ When connected-code mapping is needed, group existing context by responsibility.
 5. Frontend consumers
 6. Validation
 7. Specs
+8. Governing architecture decisions
 
 The `Specs` group should list:
 
@@ -98,7 +133,65 @@ The `Specs` group should list:
 - why each spec is connected to the planning anchor
 - whether it remains authoritative or must be updated, marked outdated, or superseded
 
+The `Governing architecture decisions` group should list:
+
+- each relevant ADR and its status;
+- the affected decision concern;
+- how an accepted ADR constrains the task, or why changed evidence may require a superseding decision;
+- the specifications that consume the decision.
+
 When the task is local and full connected mapping is unnecessary, this section may instead contain `Observed Existing Logic` with focused notes only.
+
+When task context is available, reuse its relevant directives, findings, and evidence and cite stable identifiers where provenance is useful. Supplement it with original or additional sources whenever this spec needs context that is absent, incomplete, ambiguous, stale, or artifact-specific. Keep information local here when it has no expected cross-artifact consumer. Write newly discovered information back to an in-scope task context only when it is useful to several artifacts or corrects shared understanding.
+
+This section is written directly into the spec. Do not create an intermediate materialized context-view artifact. A task-context file is reusable input rather than a completeness boundary, so the artifact owner remains responsible for this section whether or not task context exists.
+
+## Task development
+
+Use `task development` in prose and `## Task development` as the section heading. Include it only when a solution has two or more reasonable bases whose selection materially changes workflow behavior, policy compliance, operational metrics, or architecture. It is not required when the basis is already fixed by task requirements, repository policy, or an authoritative existing-system contract.
+
+Record each concern's basis state as:
+
+- `confirmed`: available evidence supports selection and complete dependent use cases;
+- `proposed`: one basis is justified as an implementation proposal, but implementation must produce evidence defined by stable validation requirements in the consuming spec;
+- `deferred`: available evidence does not justify a working basis, so dependent use cases remain blocked while unrelated planning may continue.
+
+Classify every selected concern independently as `solution-local` or `architectural` and assign it exactly one authoritative record. A composed basis set may contain concerns with different reach.
+
+For a confirmed or proposed solution-local concern, the canonical solution spec records:
+
+- decision scope and non-negotiable constraints;
+- basis state, selected or proposed basis, and `solution-local` decision reach;
+- that the current spec is authoritative;
+- candidate and comparison artifact links;
+- the use cases that consume the selected capabilities.
+
+For a confirmed or proposed architectural concern, one ADR under `specs/architecture/` owns the context, drivers, considered bases, decision, consequences, evidence, and affected specs. `architecture-decision-recording` owns ADR creation and lifecycle; basis evaluation hands the concern to it instead of creating the ADR itself. A consuming spec records:
+
+- decision scope and `architectural` reach;
+- a relative link to the governing ADR;
+- the candidate comparison link;
+- only local application consequences or parameters;
+- the use cases that consume the selected capabilities.
+
+Do not duplicate one decision's rationale in its ADR and consuming specs. Split ownership only when the architectural concern and the solution-local concern are distinct; never create two authoritative copies of the same concern.
+
+Candidate files are focused evaluation slices rather than complete specs. `solution-basis-evaluation` owns their workflow shape, comparison criteria, and migration procedure.
+
+Candidate evaluation may select multiple compatible bases for different solution concerns. Use cases assemble selected capabilities from their authoritative local records or governing ADRs and do not silently reopen a recorded decision.
+
+When a spec consumes a proposed basis, add stable basis-validation requirements to its owning `Requirements` layer and include their execution in the implementation checklist. State the evidence to produce, confirmation criteria, and reconsideration criteria. Basis-validation execution and result processing are separate follow-up work in this version; after implementation, ask the user whether required basis validation should be performed.
+
+Do not create an ADR or selected-basis record for a deferred concern.
+
+Task-development stages have these dependency constraints:
+
+- `Solution-basis candidate development and comparison`: candidates and comparisons cite available evidence, including task-context identifiers when consumed. Task context is reusable input rather than a prerequisite or completeness guarantee.
+- `Task-development summary`: the comparison is complete; every concern has a basis state and allowed planning scope; and every confirmed or proposed concern has a classified decision reach and authoritative local record or ADR handoff.
+- `Use-case completion`: confirmed or proposed basis capabilities consumed by each use case are defined from their authoritative local record or governing ADR. Proposed-basis consumers include their validation requirements. Deferred-basis consumers remain blocked.
+- `Dependent-stage completion`: outputs from every prerequisite stage are persisted and verified before the dependent stage is completed.
+
+Do not present a deferred basis as selected or complete a use case that depends on it. Obtain context from all relevant available sources rather than treating task-context presence or absence as the completeness test.
 
 ## Use Cases
 
@@ -490,6 +583,11 @@ A valid planning artifact should satisfy all of these:
 - treats implemented plans as specs that may need later maintenance
 - scans existing specs when the task changes existing behavior or refactors a workflow
 - records which specs stay authoritative and which become outdated or superseded
+- discovers relevant ADRs, preserves their lifecycle state, and references architectural rationale instead of duplicating it
+- records every evaluated concern as confirmed, proposed, or deferred with exactly one allowed decision destination
+- includes stable validation requirements when a spec consumes a proposed basis
+- leaves deferred-basis-dependent use cases blocked without blocking unrelated planning
+- treats task context as reusable shared evidence rather than a completeness boundary or exclusive source
 - includes spec maintenance in the implementation checklist when relevant
 - records code-to-spec traceability when implementation boundaries map cleanly to use-case workflow steps
 - uses workflow operators consistently, including refactoring syntax when updating an existing implementation path

@@ -1,19 +1,20 @@
 ---
 name: spec-first-planning-loop
-description: "Use for non-trivial coding tasks that should be planned through repository technical solution specifications before implementation. Initialize and follow the repository's customizable specification lifecycle, gather connected code context, request and process required user input, restore the bundled workflow only when explicitly requested, and keep planning files synchronized with implementation. Do not use for trivial local changes or pure analysis and reference documents that do not describe a process or state change."
+description: "Use for non-trivial coding tasks that should be planned through repository solution specifications before implementation. Initialize and follow the repository's customizable specification lifecycle, gather shared task context, evaluate material solution bases, resolve architectural decisions, request and process required user input, and keep planning files synchronized with implementation. Do not use for trivial local changes or pure analysis and reference documents that do not describe a process or state change."
 metadata:
-  version: "0.2.2"
-argument-hint: "Describe the task, known code entry point or failing behavior, existing solution spec if any, and whether you want planning only or implementation after the spec."
-user-invocable: true
+  version: "0.2.3"
 ---
 
 # Spec-First Planning Loop
 
 When this skill creates or edits a specification, follow `skill/layered-spec-core/references/skill-pack-versioning.md`.
 
-For non-trivial tasks, this repository uses solution specifications to describe the intended change before implementation.
+For non-trivial tasks, this repository may use task context, architecture decision records, basis artifacts, and solution specifications to describe the intended change before implementation.
 
-Solution specifications describe technical workflows, connected code, solution decisions, implementation details, and the implementation checklist.
+- Task context preserves reusable directives, evidence, findings, and affected-artifact mappings for one logical task without becoming a completeness boundary.
+- ADRs own architecturally significant decisions and their rationale.
+- Basis artifacts compare materially different solution approaches before dependent use cases are completed.
+- Solution specifications describe workflows, connected code, solution-local decisions, implementation details, and the implementation checklist.
 
 The specification lifecycle describes how to turn a task description into a solution specification, prepare it for review, implement the approved specification, and keep the planning files synchronized with the code.
 
@@ -52,12 +53,14 @@ After ensuring that the active workflow exists, read both authoritative files co
 
 - `specs/spec-lifecycle/workflow.md` describes the active lifecycle chain and every available step.
 - `planning/planning_contract.md` describes the format used inside solution specifications, including workflow notation, layers, and section structure.
+- `skill/layered-spec-core/references/task-context.md` describes optional reusable task-context files and their sharing boundary.
 
 Use them together:
 
 - Read the active `workflow.md` to determine what step comes next, why it exists, what it consumes, and what it must produce.
 - Use this skill to decide whether the step runs, execute it, request and process user input required by the step, and continue to the next step.
 - Read `planning_contract.md` when creating or updating the contents of a solution specification.
+- Read `task-context.md` when the workflow creates, resumes, or updates shared task context.
 - When a workflow step names another skill, read that skill and use it to perform the step.
 - Apply repository instructions while changing code, tests, databases, task lists, or workflow traces.
 
@@ -72,6 +75,9 @@ Skip it for a genuinely local change that can be implemented safely without a me
 ## Important Rules
 
 - Preserve the user's concrete task language and existing authoritative spec content unless the current step requires a local correction.
+- Treat task context as reusable shared grounding rather than an exclusive source or certification that later artifacts have sufficient context.
+- Preserve one task-context file across clarifications and continuations of the same logical task, update its revision when shared content changes materially, and create a new context only when the requested outcome is materially replaced.
+- Keep each artifact-producing skill responsible for obtaining any additional context needed by its output.
 - Do not silently skip an optional step when its description requires a recorded reason.
 - Follow the step order in `workflow.md`; do not reconstruct the lifecycle from this skill or from specialized-skill instructions.
 - Keep the task's main solution spec and affected older specs synchronized as implementation proceeds.
@@ -128,7 +134,7 @@ If a named skill is unavailable or cannot be read, report that clearly. Continue
 - Choose a branch from the current task state and existing evidence, not from arbitrary alternatives.
 - Write down a branch decision when the step requires it, usually in the task's decision log or relevant planning section.
 - A user may choose a permitted stopping point, but that choice does not remove prerequisite files required by the workflow or planning contract.
-- When skipping connected mapping or another optional step, preserve the state required by the next step and record the skip reason when requested.
+- When skipping basis evaluation, ADR work, connected mapping, durable reverse documentation, or another optional branch, preserve the state required by the next step and record the skip reason when requested.
 
 ## Requesting And Processing User Input
 
@@ -151,8 +157,8 @@ Do not restart from the workflow's first step unless the response materially rep
 
 The final outcomes mean:
 
-- `spec ready for user review`: the planning files and implementation checklist are ready, but implementation is not authorized by this branch.
-- `implemented and synchronized solution spec`: no authorized checklist tasks remain, required validation has completed, and affected planning files match the implemented behavior.
+- `planning artifacts ready for user review`: the applicable planning files and implementation checklist are ready, but implementation is not authorized by this branch.
+- `implemented and synchronized planning artifact set`: no authorized checklist tasks remain, ordinary implementation validation has completed, and affected planning files match the implemented behavior. Proposed-basis validation is performed only through a separately authorized follow-up.
 
 ## Before Finishing
 
@@ -166,6 +172,8 @@ The final outcomes mean:
 - A skill-backed step used the skill named by the workflow without adding lifecycle knowledge to that specialized skill.
 - An inline step followed the `Logic` written in the workflow.
 - Required branch and skip decisions were recorded.
+- Task context, when used, was treated as reusable shared context rather than the completeness boundary for any artifact.
+- Each artifact skill remained responsible for its own additional context acquisition and output correctness.
 - User input was requested and processed according to the active step's `Request next user input` instructions.
 - Workflow-declared conversation state was preserved across lifecycle tasks in the same conversation, reset for a new conversation, and kept out of solution artifacts unless the workflow required it there.
 - Lifecycle-policy files were excluded from solution-spec searches and status classification.

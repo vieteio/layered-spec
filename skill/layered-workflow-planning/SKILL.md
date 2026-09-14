@@ -2,9 +2,7 @@
 name: layered-workflow-planning
 description: "Use when: planning or refining a workflow-bearing solution slice, use-case set, or document section that genuinely needs layered workflow syntax, typed workflows, branch or parallel states, execution logic, types, tables, events, or logic details. Do not use for pure analysis or reference documents with no workflow-bearing section."
 metadata:
-  version: "0.2.2"
-argument-hint: "Describe the workflow-bearing solution or document section, the use cases already written, the layers already filled, and what should be expanded next."
-user-invocable: true
+  version: "0.2.3"
 ---
 
 # Layered Workflow Planning
@@ -38,6 +36,8 @@ Produce a planning artifact that is:
 - layered so different kinds of detail can be added independently
 - concise enough for review, but explicit enough for implementation planning
 - compatible with connected existing-code observations when a new workflow relies on old logic
+- able to consume confirmed or proposed basis decisions and defer only the use cases that depend on a deferred basis
+- able to reuse shared task context without depending on it
 - aligned with `planning/planning_contract.md`
 - stored under `specs/` unless a narrower task-specific location is required
 
@@ -48,6 +48,22 @@ Do not collapse all planning detail into one prose block.
 Do not force the whole document into layered syntax when only one chapter needs workflow structure.
 
 Follow the shared planning artifact contract in `planning/planning_contract.md`.
+
+When a solution spec contains `Task development`, consume the comparison and the recorded state of each concern. A confirmed or proposed concern resolves to an authoritative local record or governing ADR; a deferred concern has no selected-basis record and blocks only dependent use cases. Preserve comparison and governing-ADR links without duplicating their rationale. A proposed-basis consumer must own stable validation requirements that state the evidence, confirmation criteria, and reconsideration criteria. Do not present a proposed basis as confirmed or a deferred basis as selected.
+
+## Context Acquisition And Reuse
+
+Construct each planning artifact from the relevant context available for the task. Sources may include the user request, existing specifications, ADRs, basis artifacts, source code, tests, configuration, documentation, and an optional task-context file under `specs/task-contexts/`.
+
+A task-context file is reusable shared context, not a completeness guarantee or exclusive source. Reuse its relevant directives, findings, and evidence, then inspect original or additional sources whenever the artifact requires information that the shared context does not contain.
+
+This skill remains responsible for the sufficiency and correctness of the artifact it creates or updates.
+
+Keep information local to the artifact when it has no expected cross-artifact consumer. When an available task context is in scope, write back a newly discovered finding only when it is useful to another artifact or changes shared understanding on which other artifacts depend. Write context directly into `Connected groups or observed existing logic`; do not create an intermediate materialized context-view artifact.
+
+When invoked by an orchestrated lifecycle, consume the artifacts and constraints supplied by that lifecycle. Do not depend on particular workflow step names, ordering, or conversation states, and do not require a workflow file or task-context file when invoked standalone.
+
+Read `skill/layered-spec-core/references/task-context.md` when consuming or updating task context. The shared planning contract remains the owner of the spec's exact structure.
 
 Represent each use case as:
 
@@ -76,6 +92,7 @@ The shared planning contract in `planning/planning_contract.md` is the single no
 - recommended optional use-case layers
 - layer-specific syntax such as `Data`, `Types`, `Tables`, `Files And Functions`, `Tests`, `Invariants`, and `Use Case Questions`
 - question placement rules between local and top-level question sections
+- solution-local versus architectural decision ownership and ADR-reference rules
 
 When a specification needs a `Requirements` layer or implementation realization mappings, also read `skill/layered-spec-core/references/requirements-and-realization.md`. Keep detailed requirement and representation syntax there instead of duplicating it in this skill.
 
@@ -297,6 +314,14 @@ If the user asks for improvement instead of expansion:
 - Workflow lines and deeper layers keep concrete task terms unless a new alias is defined immediately and remains semantically exact
 - Helper and intermediate-structure names stay close to the concrete data they hold, the concrete action they perform, and the user-visible distinctions they preserve
 - Existing-code observations are separated from planned new logic
+- Use cases consume selected basis capabilities when task development evaluated a material solution choice
+- Every confirmed or proposed concern consumed by a use case resolves to one authoritative local record or governing ADR
+- Proposed-basis consumers include stable validation requirements and do not claim that the basis is confirmed
+- Deferred-basis concerns block only their dependent use cases and are never presented as selected
+- Architectural rationale is referenced from ADRs rather than duplicated in consuming specifications
+- Task context is reused when available but is never treated as an exclusive source or completeness guarantee
+- Artifact-local context stays in the spec, while shared findings are written back only when another artifact is expected to benefit
+- Standalone use does not require a lifecycle workflow or task-context file
 - Hierarchical numbering is used when parent and child use cases need separate but related workflow treatment
 - The specification uses the smallest sufficient structure: implementation workflow and logic alone, implementation with owned requirements, or a declarative use case with separate realization mappings
 - A `Requirements` layer stays on its implementation use case unless required behavior and implementation decomposition both benefit from separate structures

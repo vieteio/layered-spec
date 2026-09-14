@@ -1,6 +1,6 @@
 # Requirements And Use-Case Realization
 
-Use this reference when a technical specification needs identified requirements or needs to distinguish required behavior from the implementation workflows that make it true.
+Use this reference when a solution specification needs identified requirements or needs to distinguish required behavior from the implementation workflows that make it true.
 
 ## Progressive Structure Selection
 

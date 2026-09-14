@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { CORE_REFERENCE_NAMES, HOSTS, SKILL_NAMES, resolveHostPaths } from "./hosts.mjs";
+import { CORE_REFERENCE_NAMES, HOSTS, SKILL_NAMES, SKILL_RESOURCE_PATHS, resolveHostPaths } from "./hosts.mjs";
 
 const MANIFEST_NAME = "layered-spec-skillpack.json";
 const SOURCE_REPOSITORY = "https://github.com/vieteio/layered-spec";
@@ -54,6 +54,14 @@ async function installHost({ hostNames, paths, scope, targetRoot, sources, packa
     ]);
   }
 
+  for (const resourcePath of SKILL_RESOURCE_PATHS) {
+    const resourceKey = resourcePath.join("/");
+    writes.push([
+      path.join(paths.skillsDirectory, ...resourcePath),
+      rewriteContent(sources.skillResources.get(resourceKey), replacements)
+    ]);
+  }
+
   writes.push([
     path.join(paths.skillsDirectory, "spec-first-planning-loop", "assets", "default_workflow.md"),
     rewriteContent(sources.defaultWorkflow, replacements)
@@ -102,7 +110,11 @@ async function loadCanonicalSources(packageRoot) {
       await readRequired(sourcePath("skill", "layered-spec-core", "references", referenceName))
     );
   }
-  return { planning, defaultWorkflow, skills, coreReferences };
+  const skillResources = new Map();
+  for (const resourcePath of SKILL_RESOURCE_PATHS) {
+    skillResources.set(resourcePath.join("/"), await readRequired(sourcePath("skill", ...resourcePath)));
+  }
+  return { planning, defaultWorkflow, skills, coreReferences, skillResources };
 }
 
 async function readRequired(file) {

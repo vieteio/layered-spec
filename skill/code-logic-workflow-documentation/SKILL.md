@@ -2,9 +2,7 @@
 name: code-logic-workflow-documentation
 description: 'Use when: extracting an existing code path into a workflow-bearing document with workflow steps, state transitions, type or table definitions, and reference mappings. Do not use for pure analysis or reference documents that do not describe code-path behavior. In mixed documents, use this skill only for the workflow-bearing chapter.'
 metadata:
-  version: "0.2.2"
-argument-hint: 'Describe the concrete code path, entrypoint, and the workflow-bearing document or chapter that should be documented.'
-user-invocable: true
+  version: "0.2.3"
 ---
 
 # Code Logic Workflow Documentation
@@ -31,6 +29,8 @@ When this skill creates or edits a specification, follow `skill/layered-spec-cor
 - A state-name dictionary mapping workflow labels to definition headings
 - Optional named layers such as `Data`, `Types`, `Tables`, `Detailed Workflow`, `Invariants`, `Logic Details`, `Observed Existing Logic`, `Realizes`, `Uses`, `Input Validation And Contracts`, `Implementation Logic`, `Implementation Logic Proposal`, and `Tests` when the user wants compatibility with planning artifacts that follow `planning/planning_contract.md`
 
+When a task-context file is supplied, the documented workflow may also contribute evidence and artifact-neutral findings likely to be reused by several task artifacts. Task context is optional; standalone documentation never requires or creates it implicitly.
+
 ## Procedure
 1. Find the entrypoint and trace the call graph through the relevant code path.
 2. Identify the concrete states in the workflow.
@@ -47,6 +47,12 @@ Keep the same naming across definitions, workflow steps, and lookup sections unl
 If the workflow has meaningful parent and child subflows, use hierarchical use-case numbering when emitting compatibility output that follows the shared planning contract.
 
 Reverse documentation describes observed behavior and implementation. Do not promote an observed code path or observed invariant into a normative `Requirements` entry solely because the code currently behaves that way. When an authoritative planned specification already provides requirement IDs, the documented implementation may use `Realizes` to map concrete workflows and symbols back to those requirements. When a documented implementation step calls or delegates to another specified use case, it may use `Uses` to map that step to the referenced declarative or implementation use case.
+
+## Task-Context Contribution
+
+When an in-scope task-context path is supplied, read `skill/layered-spec-core/references/task-context.md`. Link the durable observed-workflow document from that context and add only the evidence and findings likely to be reused by another ADR, basis comparison, spec, or verification pass. Keep the complete workflow definitions, state traces, structures, and navigation aids in the reverse-documentation artifact.
+
+If documentation work corrects shared task understanding, update the task context and its affected-artifact references. Details needed only to make the reverse-documentation artifact standalone may remain local. When no task context is supplied, produce the requested documentation without requiring one.
 
 ## Workflow Syntax Compatibility
 
@@ -177,6 +183,8 @@ Transition: <how state changes>
 - `Implementation Logic` is used only when declarative workflow layers are not enough to explain the implementation, and `Implementation Logic Proposal` or omission is used when the full algorithm is not recoverable yet from the existing code and needs developer clarification
 - Scientific formulas that clarify observed logic use KaTeX in a technical Logic, Data, or `Invariants` layer; workflow schemas stay prose-only and scannable
 - If a `Tests` layer is used, it reflects the documented behavior rather than speculative future behavior and each test entry includes at least `description` or `workflow`
+- A supplied task context receives reusable evidence and findings rather than a copy of the complete reverse-documentation artifact
+- Standalone use does not require a task-context file
 
 ## Common Variations
 - If the user wants production terminology, rename the document terms while leaving code references unchanged

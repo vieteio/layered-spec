@@ -15,42 +15,77 @@ test("init writes a Codex project install and versioned manifest", async () => {
 
   const skill = await readFile(path.join(project, ".agents", "skills", "layered-workflow-planning", "SKILL.md"), "utf8");
   assert.match(skill, /\.agents\/planning\/planning_contract\.md/);
-  assert.match(skill, /metadata:\n  version: "0\.2\.2"/);
+  assert.match(skill, /metadata:\n  version: "0\.2\.3"/);
   assert.match(skill, /Requirements And Realization Rule/);
   assert.match(skill, /Invariants Layer Rule/);
+  assert.match(skill, /Context Acquisition And Reuse/);
   assert.match(skill, /\.agents\/skills\/layered-spec-core\/references\/skill-pack-versioning\.md/);
   assert.doesNotMatch(skill, /`planning\/planning_contract\.md`/);
 
   const planningContract = await readFile(path.join(project, ".agents", "planning", "planning_contract.md"), "utf8");
   assert.match(planningContract, /Requirements And Implementation Structure/);
   assert.match(planningContract, /Invariants Layer Syntax/);
+  assert.match(planningContract, /## Task development/);
+  assert.match(planningContract, /solution specification/);
+  assert.doesNotMatch(planningContract, /technical spec/i);
+  assert.match(planningContract, /specs\/task-contexts\//);
+  assert.match(planningContract, /specs\/architecture\//);
   assert.match(planningContract, /\.agents\/skills\/layered-spec-core\/references\/requirements-and-realization\.md/);
   assert.doesNotMatch(planningContract, /skill\/layered-spec-core\/references/);
-  assert.doesNotMatch(planningContract, /user stor|solution basis|basis selection|UX layer/i);
+  assert.doesNotMatch(planningContract, /user-story-workflow-documentation|design-ux-guardrails/i);
 
   const requirementsReference = await readFile(path.join(project, ".agents", "skills", "layered-spec-core", "references", "requirements-and-realization.md"), "utf8");
   const invariantsReference = await readFile(path.join(project, ".agents", "skills", "layered-spec-core", "references", "invariants.md"), "utf8");
   const versioningReference = await readFile(path.join(project, ".agents", "skills", "layered-spec-core", "references", "skill-pack-versioning.md"), "utf8");
+  const taskContextReference = await readFile(path.join(project, ".agents", "skills", "layered-spec-core", "references", "task-context.md"), "utf8");
   assert.match(requirementsReference, /Declarative And Implementation Use Cases/);
-  assert.match(invariantsReference, /Invariants:\n- Outline:/);
+  assert.match(requirementsReference, /solution specification/);
+  assert.doesNotMatch(requirementsReference, /implementation\s+spec/i);
+  assert.match(invariantsReference, /Invariants:\r?\n- Outline:/);
   assert.match(versioningReference, /Last edited with skill pack/);
-  assert.doesNotMatch(`${requirementsReference}\n${invariantsReference}`, /user stor|solution basis|basis selection|UX layer/i);
+  assert.match(taskContextReference, /reusable shared context/);
+  assert.doesNotMatch(`${requirementsReference}\n${invariantsReference}`, /user-story-workflow-documentation|design-ux-guardrails/i);
 
   const lifecycleSkill = await readFile(path.join(project, ".agents", "skills", "spec-first-planning-loop", "SKILL.md"), "utf8");
   assert.match(lifecycleSkill, /specs\/spec-lifecycle\/workflow\.md/);
-  assert.doesNotMatch(lifecycleSkill, /user stor|solution basis|basis selection/i);
+  assert.match(lifecycleSkill, /Task context preserves reusable directives/);
+  assert.match(lifecycleSkill, /architecture decision records/);
+  assert.match(lifecycleSkill, /repository solution specifications/);
+  assert.doesNotMatch(lifecycleSkill, /implementation\s+spec/i);
+
+  const basisSkill = await readFile(path.join(project, ".agents", "skills", "solution-basis-evaluation", "SKILL.md"), "utf8");
+  const basisReference = await readFile(path.join(project, ".agents", "skills", "solution-basis-evaluation", "references", "candidate-artifacts.md"), "utf8");
+  assert.match(basisSkill, /confirmed.*proposed.*deferred/s);
+  assert.match(basisSkill, /architecture-decision-recording/);
+  assert.match(basisReference, /focused evaluation slice/);
+
+  const adrSkill = await readFile(path.join(project, ".agents", "skills", "architecture-decision-recording", "SKILL.md"), "utf8");
+  const adrLifecycle = await readFile(path.join(project, ".agents", "skills", "architecture-decision-recording", "references", "adr-lifecycle.md"), "utf8");
+  const adrTemplate = await readFile(path.join(project, ".agents", "skills", "architecture-decision-recording", "assets", "default_adr_template.md"), "utf8");
+  assert.match(adrSkill, /specs\/architecture\//);
+  assert.match(adrLifecycle, /`accepted`: the repository decision process has accepted the decision/);
+  assert.match(adrLifecycle, /not yet an authoritative repository constraint/);
+  assert.match(adrTemplate, /Default ADR template version: 0\.2\.3/);
+
+  const taskContextEvidence = await readFile(path.join(project, ".agents", "skills", "connected-code-mapping", "references", "task-context-evidence.md"), "utf8");
+  assert.match(taskContextEvidence, /Use stable task-context identifiers/);
 
   const workflowTemplate = await readFile(path.join(project, ".agents", "skills", "spec-first-planning-loop", "assets", "default_workflow.md"), "utf8");
-  assert.match(workflowTemplate, /Default workflow version: `0\.2\.2`/);
+  assert.match(workflowTemplate, /Default workflow version: `0\.2\.3`/);
+  assert.match(workflowTemplate, /Build task context/);
+  assert.match(workflowTemplate, /Evaluate solution basis/);
+  assert.match(workflowTemplate, /Resolve architecture decisions/);
+  assert.match(workflowTemplate, /canonical solution specification/);
+  assert.doesNotMatch(workflowTemplate, /implementation\s+spec/i);
   assert.match(workflowTemplate, /Check specification completeness/);
   assert.match(workflowTemplate, /Check specification consistency/);
-  assert.doesNotMatch(workflowTemplate, /user stor|solution basis|basis selection/i);
+  assert.doesNotMatch(workflowTemplate, /user stor|design-ux|UX layer/i);
 
   const manifest = JSON.parse(await readFile(path.join(project, ".agents", "layered-spec-skillpack.json"), "utf8"));
   assert.equal(manifest.package_name, "@viete-io/layered-spec");
   assert.equal(manifest.package_version, "9.9.9");
   assert.equal(manifest.scope, "repo");
-  assert.equal(manifest.files.length, 9);
+  assert.equal(manifest.files.length, 16);
 });
 
 test("init defaults to all hosts in repo scope and combines shared configuration paths", async () => {

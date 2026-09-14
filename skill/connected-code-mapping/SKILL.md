@@ -2,9 +2,7 @@
 name: connected-code-mapping
 description: "Use when: mapping a non-local code change from one anchor through connected backend, frontend, persistence, propagation, and test surfaces, especially when the result must support a workflow-bearing spec or workflow-bearing document section. Do not use this skill just to force layered output onto pure analysis or reference documents."
 metadata:
-  version: "0.2.2"
-argument-hint: "Describe the concrete anchor, the changed assumption, and whether the result should stay as mapping output or also feed a workflow-bearing spec or section."
-user-invocable: true
+  version: "0.2.3"
 ---
 
 # Connected Code Mapping
@@ -34,11 +32,13 @@ Build a mapping-first plan that:
 
 - finds connected parts of the codebase affected by one change
 - finds relevant existing specs affected by the same change
+- finds relevant ADRs that constrain the change or may need supersession
 - describes context for each connected group
 - plans updates by responsibility instead of by file list
 - prevents partial fixes where one caller changes but its loaders, persistence, propagation, or tests remain stale
 - prevents code changes from silently leaving repository specs outdated
 - can be summarized into layered workflow planning sections when the broader solution plan or one chapter of a mixed document genuinely needs workflow-bearing format
+- contributes reusable existing-system evidence and findings to a supplied task context when several artifacts may consume them
 
 ## Core Rule
 
@@ -65,6 +65,7 @@ At minimum, identify:
 
 Helpful optional inputs:
 
+- an existing task-context file under `specs/task-contexts/`
 - related tables
 - related stores or components
 - existing plan documents
@@ -84,9 +85,9 @@ Record:
 Result:
 - one precise anchor defining the slice
 
-### 2. Scan Spec Context
+### 2. Scan Spec And ADR Context
 
-Before expanding the rest of the connected map, inspect `specs/` for relevant plans or specs.
+Before expanding the rest of the connected map, inspect `specs/` for relevant plans or specs and `specs/architecture/` for relevant ADRs. Exclude `architecture/template.md` from ADR discovery and exclude the architecture directory from solution-spec lifecycle classification.
 
 For each relevant spec, record:
 
@@ -96,6 +97,25 @@ For each relevant spec, record:
 - required action: `reuse`, `amend`, `mark outdated`, `replace`, or `archive`
 
 If no relevant spec exists, record that explicitly.
+
+For each relevant ADR, record:
+
+- file name and status;
+- affected decision concern;
+- why it constrains the anchor or may require supersession;
+- consuming specifications known from the record, task context, or current mapping.
+
+Treat an accepted ADR whose context remains valid as authoritative. Treat a proposed ADR as pending. Preserve superseded ADRs as historical evidence and follow their replacement links.
+
+When the mapping supports task development, record observed constraints and reusable capabilities that make a basis reasonable, disqualify it, or limit its integration. Cite code, configuration, platform contracts, or authoritative existing specs. Do not select a basis in this mapping output.
+
+### Task-Context Contribution
+
+When an orchestrated workflow supplies a task-context path, read [task-context-evidence.md](references/task-context-evidence.md) and add connected evidence, artifact-neutral findings, concern relationships, and affected-surface mappings that are likely to be reused by several task artifacts. Keep details needed only by the requested mapping or one consuming artifact in that output.
+
+Task context is an optional reusable input and output, not a completeness boundary. When invoked standalone or without a task-context path, produce the requested connected map without requiring or creating a task-context file.
+
+Do not create a new `<solution-name>/connected_context.md`. Existing files at that legacy path remain valid evidence and may be cited without migration.
 
 ### 3. Build A Connected-Part Map
 
@@ -142,6 +162,15 @@ Map connected parts into these responsibility groups:
    - plans or specs in `specs/`
    - spec status and required updates
 
+8. Governing architecture decisions
+   - relevant ADRs and statuses
+   - affected concerns, constraints, and supersession implications
+   - consuming specifications
+
+9. Solution-basis context, when task development evaluates alternatives
+   - observed constraints, capabilities, and integration boundaries for each candidate basis
+   - evidence that favors, disqualifies, or limits a basis
+
 ### 4. Describe Context Per Group
 
 For each connected group, capture:
@@ -168,6 +197,12 @@ For the `Specs` group, also capture:
 - whether the spec is still authoritative for the impacted workflow
 - whether the new work is a refinement, compatibility slice, or refactoring of an existing implementation
 - whether the existing spec must be amended, marked outdated, or superseded
+
+For the `Governing architecture decisions` group, capture whether each ADR is proposed, accepted, or superseded; the evidence that makes it relevant; and whether the task must preserve it or evaluate a superseding decision. Do not copy the ADR's rationale into the connected map.
+
+For the `Solution-basis context` group, identify the decision scope, affected workflow concern, evidence, and consequence for each candidate. This group feeds `solution-basis-evaluation`; it does not replace candidate workflows or the comparison artifact.
+
+When contributing reusable findings to task context, follow the `Task-Context Contribution` rule above. Do not require all mapping detail to be copied into shared context.
 
 ### 5. State The Compatibility Strategy
 
@@ -221,6 +256,7 @@ If this mapping work supports a broader planning artifact for a new or changed s
 
 - Planning anchor
 - Connected groups or observed existing logic
+- Solution-basis context, when the output supports task development
 - Use cases
 - Input Validation And Contracts
 - Implementation Logic
@@ -251,6 +287,7 @@ When using this skill, produce a plan or planning note with these sections.
 - exact entry point
 - exact stale assumption
 - impacted specs and their required action
+- relevant ADRs, their status, and their effect on the planning anchor
 
 ### Connected groups or observed existing logic
 
@@ -265,6 +302,10 @@ For each group:
 - validation
 
 For the `Specs` group, include status and required action for each matched spec.
+
+When the mapping feeds task development, add a concise `### Solution-basis context` subsection. Each entry must identify the decision scope, candidate basis, observed constraint or reusable capability, evidence, and consequence. Do not rank or select the candidates here; `solution-basis-evaluation` owns that comparison.
+
+Write the `Solution-basis context` subsection into the requested mapping or spec. When a task-context path was supplied, also contribute the evidence and artifact-neutral findings likely to be reused by the comparison, ADR, or another spec. Do not materialize a separate context-view artifact.
 
 ### Use cases
 
@@ -296,6 +337,7 @@ A good result from this skill must satisfy all of these:
 
 - starts from one concrete caller or stale assumption
 - scans `specs/` for connected specs before finalizing the plan
+- scans `specs/architecture/` for relevant ADRs and excludes `template.md`
 - maps connected code by responsibility, not just by file search results
 - includes backend, frontend, data, and test context where relevant
 - includes spec context where relevant
@@ -309,6 +351,9 @@ A good result from this skill must satisfy all of these:
 - if layered output is requested, uses `Implementation Logic` only when declarative workflow layers are insufficient and uses omission or `Implementation Logic Proposal` when the algorithm cannot be reconstructed confidently from existing code without developer clarification
 - if a `Tests` layer is emitted, it is tied to the mapped impact slice and stays compatible with the contract
 - records whether impacted specs remain authoritative, become outdated, or are superseded
+- when task development is affected, identifies evidence-backed basis constraints without treating current implementation as the automatic decision
+- treats accepted ADRs as authoritative constraints while keeping proposed and superseded records status-aware
+- contributes only reusable findings to a supplied task context and remains fully usable without one
 - separates observed implementation evidence from planned normative requirements, records symmetric requirement-to-realization mappings when used, and preserves implementation-step `Uses` references across framework boundaries
 
 ## Common Failure Modes
