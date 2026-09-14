@@ -22,6 +22,22 @@ Invariants:
   I3 @ completed result
   ```
 
+- Rationale:
+
+  - `N1`:
+    - note: Canonicalization should preserve the accepted meaning of the input.
+    - assessment: supported
+    - used by: D1
+  - `N2`:
+    - note: A canonical input should be sufficient to construct a complete result.
+    - assessment: qualified
+    - qualification: Completeness also depends on the construction step covering every required result element.
+    - used by: D2
+  - `N3`:
+    - note: Successful input validation alone guarantees a complete result.
+    - assessment: rejected
+    - reason: Validation constrains the input but does not construct the result; completeness requires separate construction reasoning.
+
 - Definitions:
 
   - `Valid(x)`: `x` satisfies the accepted input constraints.
@@ -44,12 +60,43 @@ Invariants:
     - justification: Construction consumes the canonical input and establishes every required result element.
 ````
 
-`Invariants:` is the layer label. Its first-level list items—`Outline`, `Definitions`, `State invariants`, and `Derivations`—are internal subsections, not additional use-case layers. Indent each subsection's content beneath its list item, as shown above; do not write internal subsection labels as unindented peers of `Invariants:`. Omit any internal subsection that adds no value. Keep the outline concise and put long invariant definitions, assumptions, calculations, proofs, and formal text in the detailed entries below it.
+`Invariants:` is the layer label. Its first-level list items—`Outline`, `Rationale`, `Definitions`, `State invariants`, and `Derivations`—are internal subsections, not additional use-case layers. Indent each subsection's content beneath its list item, as shown above; do not write internal subsection labels as unindented peers of `Invariants:`. Omit any internal subsection that adds no value. Keep the outline concise and put long rationale, invariant definitions, assumptions, calculations, proofs, and formal text in the detailed entries below it.
+
+## Rationale
+
+Use the optional `Rationale` subsection when a developer supplies ideas explaining why proposed solution logic should work or why a direction should lead to a correct solution. A rationale is input to solution and proof development; it is not itself an invariant or an accepted derivation.
+
+Preserve the supplied meaning rather than silently rewriting it into a correct argument. Give a rationale note a stable local identifier such as `N1` when an assessment, derivation, decision, or question refers to it.
+
+Assess each retained rationale note with one of these values:
+
+- `supported`: the rationale is correct and relevant enough to guide invariant selection or derivation;
+- `qualified`: part of the rationale is useful after an explicit correction, limitation, or additional condition;
+- `unsupported`: available information does not establish the rationale, but does not show it to be incorrect;
+- `rejected`: the rationale is completely incorrect, and the correct justification, solution, or direction is different.
+
+For `qualified`, state the qualification. For `unsupported` or `rejected`, state the reason; for `rejected`, identify the replacement justification, solution, or direction when it is known. Only `supported` and explicitly qualified parts may be cited by `used by` as inputs to derivations. Every derivation must remain understandable and justified without treating a rationale note or its assessment as proof.
+
+An assessment records the planning judgment supported by currently available reasoning and evidence. It is not formal verification and does not make a rationale a verifiable proof.
+
+A note that is not referenced can omit its identifier:
+
+```md
+- Rationale:
+  - note: This direction still needs evidence.
+    - assessment: unsupported
+    - reason: The required measurements are not available.
+```
+
+Indent continuation text, nested lists and fenced blocks beneath the field they belong to.
+
+Use comma-separated derivation references in `used by`, for example `D1, UC4/D4.1` or `other.md#use-case Build/D2`.
 
 ## Identifiers And Workflow Mapping
 
 - Give invariant checkpoints stable local identifiers such as `I4.1` when they are referenced by a derivation, requirement, test, or another artifact.
 - Give non-trivial derivations stable local identifiers such as `D4.1`.
+- Give retained rationale notes stable local identifiers such as `N4.1` when they are referenced by an assessment, derivation, decision, or question.
 - Qualify cross-use-case or cross-artifact references with their owner, for example `UC4/I4.1`.
 - Associate every invariant with a state named in the main workflow or identify the corresponding use-case state unambiguously.
 - Associate every derivation with the workflow transition or consecutive transition span whose logic establishes the target invariant.
@@ -99,6 +146,8 @@ A technical use case may use `Invariants` for application-owned, algorithmic, re
 - Every invariant belongs to a meaningful named workflow state.
 - Every derivation identifies its source invariant or invariants, target invariant or invariants, and corresponding workflow transition or transition span.
 - The outline agrees with the detailed invariant and derivation entries.
+- Every retained rationale note has an assessment; qualified notes state their qualification, unsupported or rejected notes state their reason, and rejected notes identify the replacement justification, solution, or direction when known.
+- Only supported rationale and explicitly qualified parts are cited by derivations, and rationale never substitutes for derivation reasoning.
 - Long formal or natural-language reasoning stays below the outline.
 - Only normative invariant obligations are referenced from `Requirements`.
 - A proof is described as verifiable only when successful formal verification is recorded.

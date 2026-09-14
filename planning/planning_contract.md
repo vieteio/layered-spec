@@ -185,6 +185,8 @@ Use `Invariants` when selected workflow states have meaningful invariants and th
 
 Keep a concise invariant outline in the layer, then place long invariant definitions, assumptions, calculations, proofs, and formal text in its detailed state-invariant and derivation entries. A derivation identifies its source invariant or invariants, target invariant or invariants, and the workflow transition or transition span that establishes the target.
 
+When a developer supplies ideas for why the solution logic or direction should work, preserve them in an optional `Rationale` subsection and assess each retained note as `supported`, `qualified`, `unsupported`, or `rejected`. Supported rationale and explicitly qualified parts may guide invariant selection and derivation. A rejected rationale is completely incorrect and requires a different justification, solution, or direction. Rationale does not replace the reasoning in a derivation.
+
 Invariants and derivations may use natural language, mathematical notation, pseudocode, Lean, or another named formalism. Natural-language reasoning may be a proof, justification, or proof sketch. Call it a **verifiable proof** only when it is expressed in a formalism and successfully verified by the corresponding checker.
 
 An invariant is not automatically a normative requirement. A requirement may reference an invariant owned by the same use case when satisfying that invariant is required. When an invariant belongs to a realizing use case, keep the owning requirement self-contained, retain the realization mappings, and let the invariant derivation identify the requirement it justifies.
@@ -523,6 +525,7 @@ A valid planning artifact should satisfy all of these:
 - records a reachable base or exit case plus a progress, cycle, or depth-limit contract for every recursive family
 - uses KaTeX for scientific formulas only where it clarifies technical logic, data, or invariants, while keeping workflow chains and invariant outlines as readable prose
 - uses `Invariants` only for meaningful workflow states, keeps its outline concise, and maps every derivation from identified source invariants through workflow logic to identified target invariants
+- preserves supplied solution rationale separately from invariants and derivations, assesses retained notes, and prevents unsupported or rejected rationale from being used as derivation support
 - reserves **verifiable proof** for formal text successfully checked by its corresponding verifier
 - uses hierarchical use-case numbering when parent and child use cases need distinct workflow treatment
 - plans early validation and the post-validation contract when later workflow steps depend on stronger assumptions

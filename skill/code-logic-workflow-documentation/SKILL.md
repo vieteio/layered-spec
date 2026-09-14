@@ -58,6 +58,8 @@ That includes hierarchical use-case numbering when parent and child workflow cas
 
 When observed state invariants and their derivation are meaningful, use an `Invariants` layer and follow `skill/layered-spec-core/references/invariants.md`. Keep a concise outline mapped to the documented workflow and place long invariant definitions, calculations, natural-language proofs, or formal text in detailed entries below it.
 
+When supplied rationale accompanies the code path, keep it in the `Rationale` subsection and assess it against the observed workflow. The existence of code does not make the rationale supported. Mark completely incorrect rationale as `rejected`, explain the mismatch, and keep the observed or required replacement justification, solution, or direction distinct.
+
 Keep documented workflow schemas, state names, and transition labels in concise prose even when the code implements scientific logic. Put relevant KaTeX equations in `Logic Details`, `Execution Logic`, `Implementation Logic`, `Data`, or `Invariants`, with notation definitions and assumptions close to the equation. Use `$...$` inline and `$$...$$` for standalone formulas.
 
 ## Tests Layer Compatibility
@@ -128,7 +130,7 @@ Detailed Workflow:
 <Optional typed workflow when intermediate state structure matters>
 
 Invariants:
-<Optional selected state invariants, concise invariant outline, and detailed preservation or derivation reasoning>
+<Optional rationale assessment, selected state invariants, concise invariant outline, and detailed preservation or derivation reasoning>
 
 Logic Details:
 <Optional rules or missing logic not obvious from the trace>
@@ -172,6 +174,7 @@ Transition: <how state changes>
 - Observed workflows remain distinguishable from normative requirements; `Realizes` mappings are added only when their requirement source already exists
 - `Uses` identifies observed calls or delegation to an existing specified use case without claiming requirement realization
 - An observed `Invariants` layer maps only meaningful state invariants and their derivations to the documented workflow without silently promoting them into requirements
+- Supplied rationale is assessed separately from observed behavior and derivations; unsupported or rejected rationale is not presented as implementation justification
 - **verifiable proof** is used only when formal text was successfully checked by the corresponding verifier
 - Early validation boundaries and their downstream contracts are documented when later workflow steps rely on stronger assumptions
 - `Implementation Logic` is used only when declarative workflow layers are not enough to explain the implementation, and `Implementation Logic Proposal` or omission is used when the full algorithm is not recoverable yet from the existing code and needs developer clarification
