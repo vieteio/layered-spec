@@ -14,13 +14,19 @@ First 1-3 layers are for review by a user, remaining layers are for reliable cod
 
 Compact layered syntax makes spec driven development concise, fast, and convenient.
 
-## New! Layered-spec is partially rewritten using layered-spec
+## New! `Requirements` and `Invariants` layers are added into layered-spec.
 
-1. Layered-spec lifecycle is now described using layered-specs's own syntax. It is stored in your project's `/specs` folder at `specs/spec-lifecycle/workflow.md`, where it is explicit, easy to review, and fully customizable. You can extend layered-spec now with steps from your own workflow, such as BDD testing and PR preparation.
+### Requirements
 
-2. As the first lifecycle customization, this update adds specification completeness and consistency checks. These checks reduce the need for manual spec review and editing.
+Layered-spec now supports explicit requirements. For complex products, requirements provide a clear source of truth for the behavior that must be implemented and make development easier to manage as the product evolves.
 
-3. Loop syntax was added to support the changes above, making the layered-spec syntax minimally complete.
+The new `Requirements` layer records normative behavior separately from implementation details. Declarative use cases provide a higher level of abstraction: they can define requirements without prescribing an implementation, then map those requirements to one or more realizing use cases when implementation details are needed.
+
+### Invariants
+
+The new `Invariants` layer describes properties that must hold at selected workflow states and shows how transition logic derives each outcome invariant from earlier invariants.
+
+Invariant definitions and derivations may use natural language, mathematical notation, pseudocode, Lean, or another named formalism. When formal verification is useful, an AI agent can generate the derivation in Lean and run a proof checker, making it possible to verify the corresponding specification logic.
 
 ## Quick start
 
@@ -68,6 +74,7 @@ Canonical skill sources live under:
 
 Spec lifecycle files live under:
 - `specs/spec-lifecycle/workflow.md` — repository lifecycle workflow that users can review and customize
+- `specs/spec-lifecycle/workflow.json` — workflow settings; validation preferences live in its `validation` section
 
 Describe a task in chat with an AI agent and ask it to create a spec. Review the spec and refine it in chat. When the spec is correct, ask the agent to implement it in a loop.
 
@@ -106,7 +113,7 @@ To return to the stable release, install `@latest` again. The selected package v
 Clone this repository, then run the existing Python installer from its root:
 
 ```bash
-python scripts/install_skillpack.py --host <host_name> 
+python scripts/install_skillpack.py --host <host_name>
 ```
 
 Requires Python 3.10 or later.
@@ -137,6 +144,8 @@ Use typed workflows to control data flow strictly.
 Recommended layers:
 
 - Workflow
+- Requirements and realization mappings
+- Invariants
 - Types and tables
 - Logic
 - Events and endpoints
@@ -177,15 +186,17 @@ state 1 --step name 1--> state 2 --step name 2--> [
 ### Layered use cases
 
 ```md
-### 1. use_case_name
+## Use cases
+
+### 1. Use case name
 workflow
-Layer_1_name: layer content
+
+Layer_1_name:
+layer content
+
 Layer_2_name:
 multi line
 layer content
-Layer_3_name: multi line
-layer
-content
 ```
 
 #### Type or table layer syntax

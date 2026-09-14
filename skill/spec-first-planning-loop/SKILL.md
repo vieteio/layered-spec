@@ -1,11 +1,15 @@
 ---
 name: spec-first-planning-loop
 description: "Use for non-trivial coding tasks that should be planned through repository technical solution specifications before implementation. Initialize and follow the repository's customizable specification lifecycle, gather connected code context, request and process required user input, restore the bundled workflow only when explicitly requested, and keep planning files synchronized with implementation. Do not use for trivial local changes or pure analysis and reference documents that do not describe a process or state change."
+metadata:
+  version: "0.2.2"
 argument-hint: "Describe the task, known code entry point or failing behavior, existing solution spec if any, and whether you want planning only or implementation after the spec."
 user-invocable: true
 ---
 
 # Spec-First Planning Loop
+
+When this skill creates or edits a specification, follow `skill/layered-spec-core/references/skill-pack-versioning.md`.
 
 For non-trivial tasks, this repository uses solution specifications to describe the intended change before implementation.
 
@@ -17,8 +21,9 @@ The active lifecycle chain and its step descriptions are stored in `specs/spec-l
 
 ## Workflow Template And Active File
 
-- `assets/default_workflow.md` is the bundled default template.
-- `specs/spec-lifecycle/workflow.md` is the only active lifecycle workflow.
+- `assets/default_workflow.md` is the bundled default template and records its skill-pack version as `Default workflow version`.
+- [assets/default_workflow.json](assets/default_workflow.json) supplies defaults for `workflow.json` beside the active workflow. Follow the configuration initialization rules in `skill/layered-spec-core/references/validation.md`; preserve existing settings when updating or restoring the workflow.
+- `specs/spec-lifecycle/workflow.md` is the only active lifecycle workflow and records the default-workflow version from which it was created or with which it was most recently synchronized.
 
 Before starting a specification lifecycle:
 
@@ -28,6 +33,8 @@ Before starting a specification lifecycle:
 4. If initialization fails, report the error and stop instead of silently executing the bundled template.
 
 Treat changes to the bundled template as defaults for future initialization only. Never propagate them automatically into an existing active workflow.
+
+Do not change the active workflow's recorded default-workflow version during ordinary customization. Update it only when the active workflow is initialized from, explicitly synchronized with, or explicitly restored from that bundled default version.
 
 Restore the bundled default only when the user explicitly requests restoration. Before replacing an existing active workflow, show or summarize its differences from the bundled default and ensure the current version is recoverable through version control or a user-approved backup. After restoration, continue to treat the restored active file as the sole authority.
 
@@ -69,6 +76,8 @@ Skip it for a genuinely local change that can be implemented safely without a me
 - Do not silently skip an optional step when its description requires a recorded reason.
 - Follow the step order in `workflow.md`; do not reconstruct the lifecycle from this skill or from specialized-skill instructions.
 - Keep the task's main solution spec and affected older specs synchronized as implementation proceeds.
+- When placing a workflow chain in an answer, comments may be used according to the syntax in `planning/planning_contract.md`.
+- Do not use comments in workflow chains written to specifications.
 
 ## How To Follow The Lifecycle
 
@@ -105,7 +114,7 @@ Follow these instructions:
 7. Update declared `Conversation state`, `Output`, and `Record` items before following `Next`.
 8. When skipping a step or branch, record the reason if its description requires one.
 9. Before leaving the step, confirm that its execution, output, and next transition fulfill its `Purpose`. Treat an incomplete result as a paused state only when `Purpose` permits it and the step defines how to request the next user input.
-10. Use `planning_contract.md` to interpret workflow arrows, branches, parallel states, refactoring transitions, typed workflows, and loops.
+10. Use `planning_contract.md` to interpret workflow arrows, branches, parallel states, refactoring transitions, typed workflows, loops, and recursive calls.
 11. When `Request next user input` instructs the step to request input, follow `Requesting And Processing User Input` and keep the current step active until the response is processed.
 12. Continue until the chain reaches a final outcome, the user selects a permitted stopping point, or the active step is awaiting required user input.
 
@@ -152,6 +161,7 @@ The final outcomes mean:
 
 - Both lifecycle files were read before starting.
 - The active workflow existed or was initialized visibly from `assets/default_workflow.md`; the bundled template was not used as a hidden fallback.
+- The active workflow records the default-workflow version from which it was created or with which it was most recently synchronized.
 - An existing active workflow was not overwritten automatically, and restoration occurred only when explicitly requested.
 - The current step came from `workflow.md`.
 - Every step has a concise `Purpose`, and its execution, output, and next transition fulfill that purpose.
