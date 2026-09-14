@@ -98,9 +98,12 @@ Preserve an identifier when wording is clarified without changing its meaning. A
 - Use product when several required calculations or effects participate together.
 - Use coproduct when one decision has alternative cases or outcomes.
 - Use a loop when required behavior repeats while a stated condition applies.
+- Use a recursive call when a step applies the same workflow family to a smaller or otherwise progressing subproblem. Give every distinct recursive step body its own identified workflow chain.
 - Use separate requirement chains when obligations are independent rather than alternatives.
 
 Do not flatten consecutive stages, simultaneous obligations, and rejection behavior into one coproduct merely because they were originally written as separate requirement sentences.
+
+Do not flatten recursive variants into one opaque step. Keep dispatch, base cases, and recursive call targets explicit. Follow [recursive-workflows.md](recursive-workflows.md) for compact and hierarchical templates, mutual recursion, progress measures, and cycle or depth-limit behavior.
 
 ### Non-Workflow Requirements
 
@@ -177,6 +180,8 @@ An implementation use case that provides shared infrastructure without directly 
 ## Uses And Framework Boundaries
 
 Use `Uses` when the internal logic of an implementation-use-case step relies on another use case. `Uses` identifies that reliance on the referenced use case; it does not by itself claim that the caller realizes the referenced requirements.
+
+Self-referential and mutually referential `Uses` mappings are valid when they describe recursive invocation. This does not relax the prohibition on cycles in `Realized by` / `Realizes` mappings: recursion is an execution relationship, while realization remains an acyclic ownership and implementation relationship.
 
 Map the workflow step that delegates to or depends on the referenced use case:
 
@@ -259,6 +264,7 @@ A complete specification satisfies these checks:
 - every non-deferred declarative requirement is eventually covered by an implementation use case, directly or through further realizing use cases, unless it is declared outside implementation ownership;
 - realization mappings do not form cycles;
 - every `Uses` entry belongs to an implementation use case, identifies the source step or state, and resolves to an existing declarative or implementation use case;
+- every cyclic group formed by recursive `Uses` mappings has at least one reachable base or exit case and an explicit progress measure, plus cycle or depth-limit behavior when its data may be cyclic or unbounded;
 - requirements and their owning implementation workflow or mapped realizing workflows agree on input, outcome, ordering, failure, and ownership semantics;
 - every requirement that references an invariant resolves to that invariant, and its owning or realizing workflow agrees with the invariant derivation;
 - every required test or scenario identifies the requirements it covers;
