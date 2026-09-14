@@ -12,6 +12,8 @@ user-invocable: true
 When this skill creates or edits a specification, follow `skill/layered-spec-core/references/skill-pack-versioning.md`.
 
 ## When to Use
+After creating or updating structured use cases, follow `skill/layered-spec-core/references/validation.md`, including saved validation preferences, installation approval and permitted skips. This also applies outside the specification lifecycle.
+
 - Plan a new solution before implementation when the target artifact needs explicit workflows, state changes, or step-owned logic
 - Expand user-provided workflow-bearing use cases into a complete set of workflows
 - Fill missing layers for workflows the user has already started
@@ -123,7 +125,7 @@ Choose the smallest structure that keeps required behavior and implementation lo
 2. Add `Requirements` directly to that implementation use case when non-trivial conditions, invariant obligations, rejection rules, or required outcomes need explicit normative definitions but the implementation remains one coherent workflow.
 3. Introduce a separate declarative use case when its requirements and the implementation decomposition each need an independently understandable structure, normally because several use cases jointly realize the behavior.
 4. In either requirements-bearing form, use identified workflow chains when explicit inputs and outcomes improve clarity, EARS for natural-language behavioral requirements, a hierarchical contract when one umbrella obligation benefits from detailed clauses, and identified invariants, types, formulas, tables, or compatibility rules for non-transition constraints.
-5. Select composition, product, coproduct, loop, recursive calls, or separate chains from the actual relationship between requirements.
+5. Select composition, parallel branching, conditional branching, loops, recursive calls, or separate chains from the actual relationship between requirements.
 6. When requirement ownership and realization are separate, add realization mappings by mapping requirements through `Realized by` and adding the symmetric `Realizes` mapping to every realizing use case. A realizing use case may itself be declarative and may contain `Realizes`, its own `Requirements`, and a further `Realized by` layer. Do not add self-referential mappings when one implementation use case owns its requirements.
 7. Use `Uses` on an implementation use case when one of its states or steps references another declarative or implementation use case.
 8. Keep reusable framework use cases separate when several callers use them. Use a declarative framework use case with separate realizations when the framework contract needs its own decomposition; otherwise an implementation framework use case may own its `Requirements` directly.

@@ -18,6 +18,7 @@ from skillpack_hosts import (
     CANONICAL_SKILL_PATHS,
     CORE_REFERENCE_NAMES,
     DEFAULT_WORKFLOW,
+    DEFAULT_WORKFLOW_CONFIG,
     HOSTS,
     PLANNING_CONTRACT,
     SKILL_NAMES,
@@ -57,17 +58,28 @@ def validate_canonical_source(root: Path) -> list[Path]:
     required = [
         root / "planning" / PLANNING_CONTRACT,
         root / "skill" / "spec-first-planning-loop" / "assets" / DEFAULT_WORKFLOW,
+        root / "skill" / "spec-first-planning-loop" / "assets" / DEFAULT_WORKFLOW_CONFIG,
     ]
     required.extend(root / "skill" / name / "SKILL.md" for name in SKILL_NAMES)
     required.extend(
         root / "skill" / "layered-spec-core" / "references" / name
         for name in CORE_REFERENCE_NAMES
     )
+    required.extend(runtime_sources(root))
     missing = [path for path in required if not path.is_file()]
     if missing:
         lines = "\n".join(f"  - {path}" for path in missing)
         raise SystemExit(f"Missing canonical source files:\n{lines}")
     return required
+
+
+def runtime_sources(root: Path) -> list[Path]:
+    """Select portable source files without development files or generated caches."""
+    core = root / "skill" / "layered-spec-core"
+    required = [core / "requirements.txt", core / "scripts" / "validate_specs.py",
+                core / "scripts" / "spec_validation" / "__init__.py"]
+    modules = sorted((core / "scripts" / "spec_validation").glob("*.py"))
+    return list(dict.fromkeys([*required, *modules]))
 
 
 def parse_frontmatter(content: str) -> tuple[dict[str, str], str]:
@@ -135,6 +147,7 @@ def render_frontmatter(frontmatter: dict[str, str]) -> str:
 def build_rewrite_map(paths) -> list[tuple[str, str]]:
     replacements = [
         (CANONICAL_PLANNING_CONTRACT, f"{paths.planning_ref}/{PLANNING_CONTRACT}"),
+        ("skill/layered-spec-core/", f"{paths.skills_ref}/layered-spec-core/"),
     ]
     for skill_path in CANONICAL_SKILL_PATHS:
         skill_name = skill_path.split("/")[1]
@@ -159,6 +172,7 @@ CANONICAL_PATH_PATTERNS = [
     re.compile(r"(?<![\w/.-])planning/planning_contract\.md"),
     re.compile(r"(?<![\w/.-])skill/[a-z0-9-]+/SKILL\.md"),
     re.compile(r"(?<![\w/.-])skill/layered-spec-core/references/[a-z0-9-]+\.md"),
+    re.compile(r"(?<![\w/.-])skill/layered-spec-core/(?:scripts/|requirements\.txt)"),
 ]
 
 NON_VSCODE_PATH_PATTERNS = [
@@ -247,6 +261,17 @@ def install_host(
             target.write_text(reference_text, encoding="utf-8", newline="\n")
         written.append(target)
 
+    # Runtime sources become installed bytes; only Markdown instructions need path rewriting.
+    core_source = root / "skill" / "layered-spec-core"
+    for source in runtime_sources(root):
+        target = paths.skills_dir / "layered-spec-core" / source.relative_to(core_source)
+        if dry_run:
+            print(f"[dry-run] would write {target}")
+        else:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(source.read_bytes())
+        written.append(target)
+
     workflow_source = root / "skill" / "spec-first-planning-loop" / "assets" / DEFAULT_WORKFLOW
     workflow_target = paths.skills_dir / "spec-first-planning-loop" / "assets" / DEFAULT_WORKFLOW
     workflow_text = rewrite_content(workflow_source.read_text(encoding="utf-8"), replacements)
@@ -256,6 +281,15 @@ def install_host(
         workflow_target.parent.mkdir(parents=True, exist_ok=True)
         workflow_target.write_text(workflow_text, encoding="utf-8", newline="\n")
     written.append(workflow_target)
+
+    # Ship initial settings as an asset; project configuration belongs to the user.
+    config_source = workflow_source.with_name(DEFAULT_WORKFLOW_CONFIG)
+    config_target = workflow_target.with_name(DEFAULT_WORKFLOW_CONFIG)
+    if dry_run:
+        print(f"[dry-run] would write {config_target}")
+    else:
+        config_target.write_bytes(config_source.read_bytes())
+    written.append(config_target)
 
     install_root = target_root or root
     if scope == "repo":

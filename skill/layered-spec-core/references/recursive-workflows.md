@@ -27,11 +27,15 @@ When generating a recursive workflow:
 
 An individual recursive step does not need a local exit when it delegates to another step. The whole self-recursive or mutually recursive family still needs a reachable exit and a termination contract.
 
+`Detailed Workflow:` may freely mix explanations, ordinary Markdown lists, and workflow chains. Indent standalone unformatted workflow names as internal labels beneath the layer, following `planning/planning_contract.md`. Ordinary continuation text may be unindented. Named bullet blocks below are one supported form, not a mandatory whole-layer template. Chains may also be standalone paragraphs or bullets, follow local subheadings, or occupy fenced `text`/`workflow` blocks. Main and detailed chains use the same workflow notation. Blank lines within grouped branches do not end the chain, and a following arrow continues it. Keep examples mentioned inside prose in inline code or quotations so they are distinct from standalone workflow declarations. Each fenced workflow block contains one chain; separate multiple plain-text chains with paragraphs or named blocks.
+
+Give named chains unique labels within their use case. Make every recursive call's target clear and explain why the recursive family can terminate.
+
 ## Operator Selection
 
 - Use composition when recursive calls or their continuations are ordered.
-- Use a coproduct for type-directed dispatch or alternative base and recursive cases.
-- Use a product when independent recursive branches participate together.
+- Use conditional branching for type-directed dispatch or alternative base and recursive cases.
+- Use parallel branching when independent recursive branches participate together.
 - Use a loop when a collection is iterated; keep any recursive call inside the loop explicit.
 - Use separate chains when recursive obligations are related by calls rather than by sequence, choice, or parallel participation.
 
@@ -54,7 +58,7 @@ sequence: Sequence
 ]
 
 Uses:
-- process tail recursively -> UCN
+- "process tail recursively" -> UCN
 
 Logic Details:
 - Base case: the sequence is empty.
@@ -137,7 +141,7 @@ element_a
 ]
 
 Uses:
-- process inner B -> UCN.2
+- "process inner B" -> UCN.2
 
 ### N.2 Process element B
 element_b
@@ -149,7 +153,7 @@ nested_result
 result
 
 Uses:
-- dispatch nested element recursively -> UCN
+- "dispatch nested element recursively" -> UCN
 
 ### N.3 Process element C
 element_c --produce terminal result--> result
@@ -159,7 +163,7 @@ The parent owns type dispatch. Each child owns one recursive variant's logic. Ca
 
 ## Template 4: Multiple Recursive Children
 
-Use a product when child computations are independent and their results participate together:
+Use parallel branching when child computations are independent and their results participate together:
 
 ```text
 branch(left, right)
@@ -184,11 +188,11 @@ child_results
 branch_result
 ```
 
-Do not use product merely because a node has several children. Select it only when the recursive child computations are independent in the workflow semantics.
+Do not use parallel branching merely because a node has several children. Select it only when the recursive child computations are independent in the workflow semantics.
 
 ## Template 5: Collection Iteration With Recursive Dispatch
 
-When a recursive structure contains a collection of child variants, use a loop for collection iteration and a coproduct for each child's type dispatch:
+When a recursive structure contains a collection of child variants, use a loop for collection iteration and conditional branching for each child's type dispatch:
 
 ```text
 | for each child element:
@@ -229,7 +233,7 @@ node + active_path
 ]
 
 Uses:
-- process descendants recursively -> UCN
+- "process descendants recursively" -> UCN
 
 Logic Details:
 - Base case: the node has no descendants, or a previously completed node has a reusable result.
@@ -243,7 +247,7 @@ Use a completed-result cache only when reuse is part of the actual behavior. Do 
 
 - Every distinct recursive step body has one owning workflow chain.
 - Every recursive call names its target chain or use case.
-- Type-directed dispatch uses a coproduct rather than a flat list of simultaneously processed variants.
+- Type-directed dispatch uses conditional branching rather than a flat list of simultaneously processed variants.
 - Collection iteration and recursion remain separate structures.
 - Every recursive family has at least one reachable base or exit case.
 - Every recursive family states a progress measure or explicit cycle/depth-limit behavior.

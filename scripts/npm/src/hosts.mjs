@@ -13,7 +13,8 @@ export const CORE_REFERENCE_NAMES = [
   "requirements-and-realization.md",
   "invariants.md",
   "recursive-workflows.md",
-  "skill-pack-versioning.md"
+  "skill-pack-versioning.md",
+  "validation.md"
 ];
 
 const host = (displayName, repo, user) => ({ displayName, repo, user });

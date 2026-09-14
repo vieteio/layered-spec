@@ -17,11 +17,13 @@ SKILL_NAMES = (
 
 PLANNING_CONTRACT = "planning_contract.md"
 DEFAULT_WORKFLOW = "default_workflow.md"
+DEFAULT_WORKFLOW_CONFIG = "default_workflow.json"
 CORE_REFERENCE_NAMES = (
     "requirements-and-realization.md",
     "invariants.md",
     "recursive-workflows.md",
     "skill-pack-versioning.md",
+    "validation.md",
 )
 
 # Canonical source paths (posix-style strings used inside skill text).

@@ -1,6 +1,8 @@
 # Requirements And Use-Case Realization
 
-Use this reference when a technical specification needs identified requirements or needs to distinguish required behavior from the implementation workflows that make it true.
+Use this reference when a solution specification needs identified requirements or needs to distinguish required behavior from the implementation workflows that make it true.
+
+Follow `planning/planning_contract.md` for use-case headings and layer boundaries. Inline `R4.1: definition` is valid; when the definition starts below, indent the marker by two spaces (`  R4.1:`). Ordinary definition lines may be unindented. The general `Requirement: <identifier>` form remains available for arbitrary identifiers.
 
 ## Progressive Structure Selection
 
@@ -50,19 +52,19 @@ Keep a local realization under its parent when that placement communicates owner
 
 ## Requirements Layer
 
-The `Requirements` layer specifies declarative behavior through EARS requirements, identified workflow chains, hierarchical contracts, or identified non-transition constraints. Chains make required inputs and outcomes explicit; EARS expresses behavior in controlled natural language. A hierarchical contract uses a parent requirement as its umbrella obligation and descendant requirement IDs as its clauses. Keep the contract and its clauses under the owning use case. Each requirement has a stable ID.
+The `Requirements` layer specifies the declarative use case behavior through EARS requirements, identified workflow chains, hierarchical contracts, or identified non-transition constraints. Chains make required inputs and outcomes explicit; EARS expresses the behavior in controlled natural language. A hierarchical contract uses a parent requirement as its umbrella obligation and descendant requirement IDs as its clauses. Keep the contract and its clauses under the owning use case. Each requirement has a stable ID.
 
-Use stable identifiers such as `R4.1`, where `4` is the owning use-case number and `1` is the local requirement number.
+Prefer stable conventional identifiers such as `R4.1` when they fit the document. Any nonempty exact identifier is valid: declare it with a standalone `Requirement: 4.1` or `Requirement: Configuration requirement`, followed by its definition. `4.1` and `R4.1` are distinct; arbitrary bare colon labels do not declare requirements. Identified requirements may also be defined in their appropriate standard or extension layer.
 
 ```md
 Requirements:
 
-R4.1:
+  R4.1:
 accepted input
 --construct every required result element-->
 complete result
 
-R4.2:
+  R4.2:
 complete result
 --validate publication constraints-->
 publishable result
@@ -73,18 +75,18 @@ Use the optional form names `contract`, `EARS`, and `chain` when they make the r
 ```md
 Requirements:
 
-R4.3 contract:
+  R4.3 contract:
 A result is published only when it is complete.
 
-R4.3.1 EARS:
+  R4.3.1 EARS:
 When validation finds a missing required element, the system SHALL reject the result.
 
-R4.3.2 chain:
+  R4.3.2 chain:
 validated complete result
 --atomically publish the result-->
 committed result
 
-R4.3.3:
+  R4.3.3:
 A rejected result leaves the previously committed state unchanged.
 ```
 
@@ -95,15 +97,15 @@ Preserve an identifier when wording is clarified without changing its meaning. A
 ### Select Operators From Meaning
 
 - Use composition when one required transition follows another.
-- Use product when several required calculations or effects participate together.
-- Use coproduct when one decision has alternative cases or outcomes.
+- Use parallel branching when several required calculations or effects participate together.
+- Use conditional branching when one decision has alternative cases or outcomes.
 - Use a loop when required behavior repeats while a stated condition applies.
 - Use an explicit recursive call when a required transition invokes the same workflow chain or another chain in one mutually recursive family.
 - Use separate requirement chains when obligations are independent rather than alternatives.
 
-Do not flatten consecutive stages, simultaneous obligations, and rejection behavior into one coproduct merely because they were originally written as separate requirement sentences.
+Do not flatten consecutive stages, simultaneous obligations, and rejection behavior into one conditional group merely because they were originally written as separate requirement sentences.
 
-Recursion does not introduce another delimiter. Use the ordinary workflow operators for each recursive step body, name every recursive call target, and follow `recursive-workflows.md` for compact versus hierarchical decomposition and family-level termination rules.
+Recursion does not introduce another delimiter. Use the ordinary workflow operators for each recursive step body, name every recursive call target, and follow [recursive-workflows.md](recursive-workflows.md) for compact versus hierarchical decomposition and family-level termination rules.
 
 ### Non-Workflow Requirements
 
@@ -129,7 +131,7 @@ An invariant is not normative merely because it appears in `Invariants`. When th
 ```md
 Requirements:
 
-R1:
+  R1:
 A completed result satisfies `I3`.
 ```
 
@@ -158,7 +160,13 @@ Realizes:
 - UC4/R4.1
 ```
 
-The owning use-case prefix may be omitted when the requirement owner is unambiguous in the same local use-case group. Qualify the owner for cross-spec mappings or whenever another requirement could have the same local ID.
+Prefer owner-qualified reverse references. Prefer `UC4/R4.1` when both identifiers have conventional formats. Equivalent number/title spellings include `use-case 4/R4.1` and `use-case Render/requirement R4.1`; arbitrary requirement IDs use `use-case 4/requirement 4.1` or `use-case Render/requirement Configuration requirement`. Preserve exact title and identifier spelling, including case; `4.1` and `R4.1` are distinct. Use owner-omitted reverse references only when they identify one requirement unambiguously within the local numbered group.
+
+Quote a title or identifier containing reference delimiters such as `/`, `,`, `#` or `->`, for example `use-case "Render/Preview"/requirement "Input/output"`. Quote an entirely numeric-looking title to distinguish it from a use-case number. Individual references may be enclosed in backticks.
+
+Across files, use `relative/path.md#<reference>`, relative to the referring document, with `/` path separators and percent-encoded spaces in the path. For example, `shared%20rules.md#UC4/R4.1` refers to a requirement in a neighboring file. Use planning-document references rather than web URLs or machine-specific absolute paths.
+
+Before renaming or renumbering an owner or requirement, identify its incoming references and record which declaration each refers to. Update affected references, including reciprocal and cross-file records, then check that they still name the intended declarations. Unchanged aliases may stay unchanged. Reusing an old name or number must not redirect an existing reference to a different declaration.
 
 A declarative realizing use case may map an upstream requirement into its own more detailed requirements:
 
@@ -181,11 +189,11 @@ An implementation use case that provides shared infrastructure without directly 
 
 Use `Uses` when the internal logic of an implementation-use-case step relies on another use case. `Uses` identifies that reliance on the referenced use case; it does not by itself claim that the caller realizes the referenced requirements.
 
-Map the workflow step that delegates to or depends on the referenced use case:
+In an implementation use case, map the workflow step that delegates to or depends on the referenced use case:
 
 ```md
 Uses:
-- validate and commit operation -> UC7
+- "validate and commit operation" -> UC7
 ```
 
 The target may be either:
@@ -313,12 +321,12 @@ publishable result
 
 Requirements:
 
-R4.1:
+  R4.1:
 normalized input
 --construct all required elements-->
 complete candidate
 
-R4.2:
+  R4.2:
 complete candidate
 --validate publication constraints-->
 publishable result
@@ -334,4 +342,5 @@ complete candidate
 
 Realizes:
 - R4.1
+
 ```

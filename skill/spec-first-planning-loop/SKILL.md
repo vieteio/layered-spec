@@ -22,6 +22,7 @@ The active lifecycle chain and its step descriptions are stored in `specs/spec-l
 ## Workflow Template And Active File
 
 - `assets/default_workflow.md` is the bundled default template and records its skill-pack version as `Default workflow version`.
+- [assets/default_workflow.json](assets/default_workflow.json) supplies defaults for `workflow.json` beside the active workflow. Follow the configuration initialization rules in `skill/layered-spec-core/references/validation.md`; preserve existing settings when updating or restoring the workflow.
 - `specs/spec-lifecycle/workflow.md` is the only active lifecycle workflow and records the default-workflow version from which it was created or with which it was most recently synchronized.
 
 Before starting a specification lifecycle:

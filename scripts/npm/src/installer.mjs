@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { CORE_REFERENCE_NAMES, HOSTS, SKILL_NAMES, resolveHostPaths } from "./hosts.mjs";
 
@@ -7,7 +7,8 @@ const SOURCE_REPOSITORY = "https://github.com/vieteio/layered-spec";
 const canonicalPathPatterns = [
   /(?<![\w/.-])planning\/planning_contract\.md/,
   /(?<![\w/.-])skill\/[a-z0-9-]+\/SKILL\.md/,
-  /(?<![\w/.-])skill\/layered-spec-core\/references\/[a-z0-9-]+\.md/
+  /(?<![\w/.-])skill\/layered-spec-core\/references\/[a-z0-9-]+\.md/,
+  /(?<![\w/.-])skill\/layered-spec-core\/(?:scripts\/|requirements\.txt)/
 ];
 
 export async function installHosts({
@@ -54,9 +55,18 @@ async function installHost({ hostNames, paths, scope, targetRoot, sources, packa
     ]);
   }
 
+  // Runtime buffers preserve source bytes; Markdown alone receives host path rewrites.
+  for (const [relativePath, content] of sources.runtime) {
+    writes.push([path.join(paths.skillsDirectory, "layered-spec-core", relativePath), content]);
+  }
+
   writes.push([
     path.join(paths.skillsDirectory, "spec-first-planning-loop", "assets", "default_workflow.md"),
     rewriteContent(sources.defaultWorkflow, replacements)
+  ]);
+  writes.push([
+    path.join(paths.skillsDirectory, "spec-first-planning-loop", "assets", "default_workflow.json"),
+    sources.defaultWorkflowConfig
   ]);
 
   const allFiles = writes.map(([file]) => file);
@@ -91,6 +101,7 @@ async function loadCanonicalSources(packageRoot) {
   const sourcePath = (...parts) => path.join(packageRoot, ...parts);
   const planning = await readRequired(sourcePath("planning", "planning_contract.md"));
   const defaultWorkflow = await readRequired(sourcePath("skill", "spec-first-planning-loop", "assets", "default_workflow.md"));
+  const defaultWorkflowConfig = await readFile(sourcePath("skill", "spec-first-planning-loop", "assets", "default_workflow.json"));
   const skills = new Map();
   for (const skillName of SKILL_NAMES) {
     skills.set(skillName, await readRequired(sourcePath("skill", skillName, "SKILL.md")));
@@ -102,7 +113,20 @@ async function loadCanonicalSources(packageRoot) {
       await readRequired(sourcePath("skill", "layered-spec-core", "references", referenceName))
     );
   }
-  return { planning, defaultWorkflow, skills, coreReferences };
+  const core = sourcePath("skill", "layered-spec-core");
+  const moduleDirectory = path.join(core, "scripts", "spec_validation");
+  const modules = (await readdir(moduleDirectory, { withFileTypes: true }))
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".py"))
+    .map((entry) => `scripts/spec_validation/${entry.name}`).sort();
+  const runtimePaths = new Set([
+    "requirements.txt", "scripts/validate_specs.py",
+    "scripts/spec_validation/__init__.py", ...modules
+  ]);
+  const runtime = new Map();
+  for (const relativePath of runtimePaths) {
+    runtime.set(relativePath, await readFile(path.join(core, relativePath)));
+  }
+  return { planning, defaultWorkflow, defaultWorkflowConfig, skills, coreReferences, runtime };
 }
 
 async function readRequired(file) {
@@ -117,6 +141,7 @@ async function readRequired(file) {
 function buildRewriteMap(paths) {
   const replacements = [
     ["planning/planning_contract.md", `${paths.planningReference}/planning_contract.md`],
+    ["skill/layered-spec-core/", `${paths.skillsReference}/layered-spec-core/`],
     ...SKILL_NAMES.map((name) => [`skill/${name}/SKILL.md`, `${paths.skillsReference}/${name}/SKILL.md`]),
     ...CORE_REFERENCE_NAMES.map((name) => [
       `skill/layered-spec-core/references/${name}`,

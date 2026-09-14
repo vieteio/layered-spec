@@ -15,7 +15,7 @@ test("init writes a Codex project install and versioned manifest", async () => {
 
   const skill = await readFile(path.join(project, ".agents", "skills", "layered-workflow-planning", "SKILL.md"), "utf8");
   assert.match(skill, /\.agents\/planning\/planning_contract\.md/);
-  assert.match(skill, /metadata:\n  version: "0\.2\.2"/);
+  assert.match(skill, /metadata:\n  version: "0\.2\.3"/);
   assert.match(skill, /Requirements And Realization Rule/);
   assert.match(skill, /Invariants Layer Rule/);
   assert.match(skill, /Recursive Workflow Rule/);
@@ -47,7 +47,7 @@ test("init writes a Codex project install and versioned manifest", async () => {
   assert.doesNotMatch(lifecycleSkill, /user stor|solution basis|basis selection/i);
 
   const workflowTemplate = await readFile(path.join(project, ".agents", "skills", "spec-first-planning-loop", "assets", "default_workflow.md"), "utf8");
-  assert.match(workflowTemplate, /Default workflow version: `0\.2\.2`/);
+  assert.match(workflowTemplate, /Default workflow version: `0\.2\.3`/);
   assert.match(workflowTemplate, /Check specification completeness/);
   assert.match(workflowTemplate, /Check specification consistency/);
   assert.doesNotMatch(workflowTemplate, /user stor|solution basis|basis selection/i);
@@ -56,7 +56,19 @@ test("init writes a Codex project install and versioned manifest", async () => {
   assert.equal(manifest.package_name, "@viete-io/layered-spec");
   assert.equal(manifest.package_version, "9.9.9");
   assert.equal(manifest.scope, "repo");
-  assert.equal(manifest.files.length, 10);
+  for (const relativePath of ["requirements.txt", "scripts/validate_specs.py", "scripts/spec_validation/parser.py"]) {
+    const installedPath = `.agents/skills/layered-spec-core/${relativePath}`;
+    assert.ok(manifest.files.includes(installedPath));
+    await stat(path.join(project, installedPath));
+  }
+  assert.ok(manifest.files.every((file) => !/tests\/|__pycache__|requirements-dev|runtime-reference/.test(file)));
+  for (const relativePath of ["scripts/render_specs.py", "scripts/spec_validation/rendering.py", "scripts/spec_validation/roundtrip.py"]) {
+    await assert.rejects(stat(path.join(project, ".agents/skills/layered-spec-core", relativePath)));
+  }
+  const validation = await readFile(path.join(project, ".agents/skills/layered-spec-core/references/validation.md"), "utf8");
+  assert.match(validation, /\.agents\/skills\/layered-spec-core\/scripts\/validate_specs\.py/);
+  assert.match(validation, /\.agents\/skills\/layered-spec-core\/requirements\.txt/);
+  assert.doesNotMatch(validation, /(?<![\w/.-])skill\//);
 });
 
 test("init defaults to all hosts in repo scope and combines shared configuration paths", async () => {
@@ -84,6 +96,15 @@ test("init supports all hosts in user scope", async () => {
     stat(path.join(home, ".agents", "skills", "layered-workflow-planning", "SKILL.md")),
     stat(path.join(home, ".gemini", "config", "skills", "layered-workflow-planning", "SKILL.md"))
   ]);
+  for (const prefix of [".copilot", ".cursor", ".claude", ".agents", ".gemini/config"]) {
+    const core = path.join(home, prefix, "skills/layered-spec-core");
+    await stat(path.join(core, "scripts/validate_specs.py"));
+    const config = JSON.parse(await readFile(path.join(home, prefix, "skills/spec-first-planning-loop/assets/default_workflow.json"), "utf8"));
+    assert.equal(config.validation.installation.decision, "ask");
+    const validation = await readFile(path.join(core, "references/validation.md"), "utf8");
+    assert.ok(validation.includes(`~/${prefix}/skills/layered-spec-core/scripts/validate_specs.py`));
+    assert.ok(validation.includes(`~/${prefix}/skills/layered-spec-core/requirements.txt`));
+  }
 });
 
 test("dry run creates no project files", async () => {

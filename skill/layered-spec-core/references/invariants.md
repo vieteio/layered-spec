@@ -127,7 +127,7 @@ When a requirement and invariant belong to the same use case, the requirement ma
 ```md
 Requirements:
 
-R1:
+  R1:
 A completed result satisfies `I3`.
 ```
 

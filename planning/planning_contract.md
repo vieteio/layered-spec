@@ -102,30 +102,38 @@ When the task is local and full connected mapping is unnecessary, this section m
 
 ## Use Cases
 
-Represent planning detail under numbered use cases. Use-case numbering may be hierarchical when a parent use case is refined into narrower subcases. Each use case begins with the use case name, then the workflow line, then optional layers.
+Represent planning detail under level-three use-case headings inside `## Use cases`. Numbers are optional; when present they may be hierarchical. Each use case begins with its exact title and optional number, then the workflow line, then optional layers. Use `### 4. Render`, `### UC4 — Render`, or `### Render`. Quote the entire title when a numeric-looking title should be treated as a name rather than a number.
 
 Use this shape:
 
 ```md
+## Use cases
+
 ### 1. Use case name
 initial state --step name--> next state
+
 Layer_1_name:
 layer content
+
 Layer_2_name:
 layer content
 
 ### 1.1 Child use case name
 child state --step name--> child next state
+
 Layer_name:
 layer content
 ```
 
 Rules:
 
-- The workflow line appears immediately under the use case name.
+- The workflow line or fenced `text`/`workflow` block appears immediately under the use case name.
 - The workflow line does not use a `Workflow:` label.
 - Layers are grouped directly under their use case.
 - Individual layers are not rendered as markdown headers.
+- Start each layer with a capitalized standalone column-zero `<layer name>:` and a preceding blank line. Precede it with a blank line unless it is the first body content. Use the standard names below, with an uppercase first letter; capitalization of the remaining words may vary. Use `Extension/<name>:` for custom layers.
+- Indent standalone internal labels by two spaces, for example `  Input:` or `  Rules:`. Ordinary continuation text may be unindented; indent any continuation line that would itself look like a layer label. Inline `Input: some text` needs no indentation because text follows the colon.
+- Headings and labels inside code, quotations, list items or HTML belong to that Markdown content. Close literal blocks before resuming document declarations.
 - Use hierarchical numbering such as `1`, `1.1`, `1.2`, `2` when a child use case refines the parent scope instead of introducing an unrelated top-level concern.
 - Keep hierarchical numbering shallow and consistent unless deeper nesting materially improves clarity.
 - Use-case-specific questions may be recorded in a use-case layer.
@@ -178,6 +186,10 @@ Use these layer names when they help:
 - `Requirement representations`
 
 Use additional layer names only when they communicate a distinct responsibility clearly.
+
+### Optional Layer Subsections
+
+Any layer may use optional named subsections: write `- Name:` beneath the layer label and indent its content beneath that item. A sibling subsection ends the preceding one; deeper labels remain content. Subsections retain the parent layer's rules, so grouped requirements, mappings and workflows keep their meaning. In `Detailed Workflow`, a name immediately followed by a chain still names that workflow; place explanatory prose first when grouping mixed text and workflows. Ordinary bullets and fenced examples remain available when a subsection is not intended.
 
 ### Invariants Layer Syntax
 
@@ -252,7 +264,7 @@ Examples:
 
 Place loop workflows in fenced text blocks or inline code so the enclosing `|` characters are not interpreted as a Markdown table.
 
-Recursive workflows use the existing composition, coproduct, product, loop, typed-state, and use-case-reference syntax. Do not introduce a recursion delimiter or represent recursion as a loop merely because execution repeats.
+Recursive workflows use the existing composition, conditional, parallel, loop, typed-state, and use-case-reference syntax. Do not introduce a recursion delimiter or represent recursion as a loop merely because execution repeats.
 
 Show a recursive call as a normal transition whose step names the called chain or use case:
 
@@ -262,7 +274,7 @@ For compact recursion, place one separately labeled workflow chain per distinct 
 
 A recursive step may terminate locally, call itself, call another recursive step, or delegate without its own exit. The recursive family as a whole must identify at least one reachable base or exit case and a progress measure such as descent to a strict substructure, fewer remaining elements, consumed input, or decreasing depth. When the data may contain cycles or unbounded references, specify cycle or depth-limit behavior explicitly.
 
-Use a coproduct for type-directed dispatch and alternative base or recursive cases. Use composition for ordered recursive calls. Use a product only when recursive branches are independent and participate together. A loop may contain recursive dispatch when processing a collection, but the loop and recursive call remain separate structures.
+Use conditional branching for type-directed dispatch and alternative base or recursive cases. Use composition for ordered recursive calls. Use parallel branching only when recursive branches are independent and participate together. A loop may contain recursive dispatch when processing a collection, but the loop and recursive call remain separate structures.
 
 Detailed templates for direct structural recursion, compact mutual recursion, hierarchical type dispatch, multiple recursive children, and guarded graph traversal are in `skill/layered-spec-core/references/recursive-workflows.md`.
 

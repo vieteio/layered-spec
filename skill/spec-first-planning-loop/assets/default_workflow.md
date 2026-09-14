@@ -3,6 +3,8 @@
 - Default workflow version: `0.2.2`
 
 ## Workflow Chain
+After preparing or editing technical use cases and before consistency review, follow `skill/layered-spec-core/references/validation.md`. Apply its validation/repair completion rule, workflow.json preferences, installation approval and permitted skips, including when optional semantic review is skipped. This does not change implementation authorization.
+
 
 ```text
 task in chat

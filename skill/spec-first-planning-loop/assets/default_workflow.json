@@ -1,0 +1,10 @@
+{
+  "validation": {
+    "enabled": true,
+    "python": null,
+    "installation": {
+      "decision": "ask",
+      "requirements_sha256": null
+    }
+  }
+}
