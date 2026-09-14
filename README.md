@@ -3,24 +3,29 @@
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=vieteio.layered-spec)
 
 
-Compact implementation spec syntax which makes AI code generation **predictable** for well-decomposed tasks and speeds up development.
+Compact solution specification syntax which makes AI code generation **predictable** for well-decomposed tasks and speeds up development.
 
 ## General idea
 
 Solution logic can be fully described in several layers, starting with a workflow diagram and then adding details gradually.
 
-AI-agent generates high quality specs from task in chat.
+AI-agent generates high quality specs from a task in chat.
 First 1-3 layers are for review by a user, remaining layers are for reliable code generation by AI.
 
 Compact layered syntax makes spec driven development concise, fast, and convenient.
 
-## New! Layered-spec is partially rewritten using layered-spec
+## New! Architecture decision records (ADRs) support is added into layered-spec.
+Both users and AI agents can now create records for their decisions.
 
-1. Layered-spec lifecycle is now described using layered-specs's own syntax. It is stored in your project's `/specs` folder at `specs/spec-lifecycle/workflow.md`, where it is explicit, easy to review, and fully customizable. You can extend layered-spec now with steps from your own workflow, such as BDD testing and PR preparation.
+What does this mean?
 
-2. As the first lifecycle customization, this update adds specification completeness and consistency checks. These checks reduce the need for manual spec review and editing.
+1. When a user provides architectural decision details in their messages, those decisions are now recorded in ADRs in addition to being applied to the described use cases. An architectural decision that is implicitly applied to a use case will therefore also be explicitly documented in an ADR.
 
-3. Loop syntax was added to support the changes above, making the layered-spec syntax minimally complete.
+2. When a user does not provide solution details for a specified task, the AI agent makes architectural and technical decisions on its own. To make those decisions explicit, the AI agent records them in ADRs as well.
+
+When making a decision requires comparing several alternatives, the default workflow now includes a step for comparing and evaluating them.
+
+The structure of the `specs` folder has been updated to store ADRs, alternative evaluation results, and task context that is shared across several workflow steps.
 
 ## Quick start
 
@@ -68,6 +73,12 @@ Canonical skill sources live under:
 
 Spec lifecycle files live under:
 - `specs/spec-lifecycle/workflow.md` — repository lifecycle workflow that users can review and customize
+
+Generated planning artifacts may also include:
+
+- `specs/task-contexts/` — reusable task evidence and findings
+- `specs/architecture/` — architecture decision records and an optional repository ADR template
+- `specs/<solution-name>/candidates/` — task solution basis candidates and comparisons
 
 Describe a task in chat with an AI agent and ask it to create a spec. Review the spec and refine it in chat. When the spec is correct, ask the agent to implement it in a loop.
 
