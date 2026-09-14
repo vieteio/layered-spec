@@ -81,6 +81,8 @@ Skip it for a genuinely local change that can be implemented safely without a me
 - Do not silently skip an optional step when its description requires a recorded reason.
 - Follow the step order in `workflow.md`; do not reconstruct the lifecycle from this skill or from specialized-skill instructions.
 - Keep the task's main solution spec and affected older specs synchronized as implementation proceeds.
+- When placing a workflow chain in an answer, comments may be used according to the syntax in `planning/planning_contract.md`.
+- Do not use comments in workflow chains written to specifications or user stories.
 
 ## How To Follow The Lifecycle
 
