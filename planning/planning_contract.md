@@ -266,6 +266,16 @@ Detailed templates for direct structural recursion, compact mutual recursion, hi
 
 Refactoring syntax exists because implemented specs can become outdated after an implementation update. Use it when the plan changes an existing workflow rather than adding a net-new one.
 
+#### Workflow Line Comments
+
+A workflow chain in an answer may contain `#` or `//` comments. Place a commented chain in a fenced `workflow` code section.
+
+- Outside quoted text, `#` or `//` starts a comment when it is the first non-whitespace text on a line or is preceded by a space or tab.
+- The comment ends at the end of the line.
+- Matching `"..."`, `'...'`, and backtick spans protect comment markers.
+
+Do not use comments in workflow chains written to specifications.
+
 ### Scientific Formula Syntax
 
 Use KaTeX only when a scientific or mathematical expression materially clarifies a technical rule, algorithm, invariant, transformation, or data definition. Keep ordinary implementation prose in plain language.
