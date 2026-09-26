@@ -10,6 +10,8 @@ metadata:
 When this skill creates or edits a specification, follow `skill/layered-spec-core/references/skill-pack-versioning.md`.
 
 ## When to Use
+After creating or updating structured use cases, follow `skill/layered-spec-core/references/validation.md`, including saved validation preferences, installation approval and permitted skips. This also applies outside the specification lifecycle.
+
 - Plan a new solution before implementation when the target artifact needs explicit workflows, state changes, or step-owned logic
 - Expand user-provided workflow-bearing use cases into a complete set of workflows
 - Fill missing layers for workflows the user has already started
@@ -140,7 +142,7 @@ Choose the smallest structure that keeps required behavior and implementation lo
 2. Add `Requirements` directly to that implementation use case when non-trivial conditions, invariant obligations, rejection rules, or required outcomes need explicit normative definitions but the implementation remains one coherent workflow.
 3. Introduce a separate declarative use case when its requirements and the implementation decomposition each need an independently understandable structure, normally because several use cases jointly realize the behavior.
 4. In either requirements-bearing form, use identified workflow chains when explicit inputs and outcomes improve clarity, EARS for natural-language behavioral requirements, a hierarchical contract when one umbrella obligation benefits from detailed clauses, and identified invariants, types, formulas, tables, or compatibility rules for non-transition constraints.
-5. Select composition, product, coproduct, loop, recursive calls, or separate chains from the actual relationship between requirements.
+5. Select composition, parallel branching, conditional branching, loops, recursive calls, or separate chains from the actual relationship between requirements.
 6. When requirement ownership and realization are separate, add realization mappings by mapping requirements through `Realized by` and adding the symmetric `Realizes` mapping to every realizing use case. A realizing use case may itself be declarative and may contain `Realizes`, its own `Requirements`, and a further `Realized by` layer. Do not add self-referential mappings when one implementation use case owns its requirements.
 7. Use `Uses` on an implementation use case when one of its states or steps references another declarative or implementation use case.
 8. Keep reusable framework use cases separate when several callers use them. Use a declarative framework use case with separate realizations when the framework contract needs its own decomposition; otherwise an implementation framework use case may own its `Requirements` directly.
@@ -230,6 +232,8 @@ Add `Invariants` only when selected workflow states have meaningful invariants w
 
 Treat the layer as a selective parallel chain over the main workflow. Keep its outline concise, map each invariant to a meaningful workflow state, and map each derivation from its source invariant or invariants through the relevant workflow transition or transition span to its target invariant or invariants. Put long natural-language reasoning, formulas, pseudocode, or formal text in detailed entries below the outline.
 
+When the developer provides ideas for why proposed solution logic or a proposed direction should work, preserve them in the optional `Rationale` subsection and assess each retained note before using it. Supported notes and explicitly qualified parts may guide solution development, invariant selection, and derivation. Unsupported notes do not justify a derivation. Mark a completely incorrect rationale as `rejected`, explain why, and use the different justification, solution, or direction required by the assessment rather than forcing the plan to fit it.
+
 An invariant is not automatically a requirement. A requirement may reference an invariant owned by the same use case. When the invariant belongs to a realizing use case, keep the owning requirement self-contained, preserve the realization mappings, and let the invariant derivation identify the requirement it justifies. Natural-language reasoning may be a proof; use **verifiable proof** only for a formalism successfully checked by its verifier.
 
 Follow `skill/layered-spec-core/references/invariants.md` for exact syntax and boundaries.
@@ -279,6 +283,8 @@ If the user started adding types, tables, or endpoints:
 - preserve naming consistency across layers
 
 If meaningful state invariants and their derivation are part of the solution, add an `Invariants` layer only to the affected use cases. Do not propagate it to unrelated states or use cases for structural uniformity.
+
+If the developer supplied solution rationale, assess it before completing the affected solution logic and invariant derivations. Keep the original rationale meaning distinguishable from qualifications, rejection reasons, and the final derivation.
 
 If concrete constants, templates, matrices, lists, or other structured values matter to the workflow, add a `Data` layer instead of burying those values in prose.
 
@@ -347,6 +353,7 @@ If the user asks for improvement instead of expansion:
 - Execution Logic and Implementation Plan steps include Input, Outcome, Logic, External state, Config parameters, and Metrics
 - Scientific formulas use KaTeX in a technical Logic, Data, or `Invariants` layer when useful; workflow chains and invariant outlines remain prose-only and scannable
 - `Invariants` is used only where selected state invariants and their derivations materially clarify the workflow, and its outline remains consistent with the detailed invariant and derivation entries
+- Supplied solution rationale is kept in `Rationale`, assessed as supported, qualified, unsupported, or rejected, and never substituted for derivation reasoning
 - **verifiable proof** is used only when formal text was successfully checked by the corresponding verifier
 - `Implementation Logic` is added only when declarative workflow layers are insufficient for implementation, and `Implementation Logic Proposal` or omission is used when the algorithm should remain developer-owned
 - Complex algorithmic decompositions and intermediate structures are made explicit in the plan when they are needed for a correct or maintainable implementation

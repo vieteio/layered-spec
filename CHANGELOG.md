@@ -16,7 +16,7 @@ The structure of the `specs` folder has been updated to store ADRs, alternative 
 
 ## 0.2.2-alpha
 
-`Requirements` and `Invariants` layers are added into layered-spec!
+`Requirements` and `Invariants` layers are added into layered-spec.
 
 ### Requirements
 

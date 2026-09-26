@@ -16,7 +16,8 @@ export const CORE_REFERENCE_NAMES = [
   "invariants.md",
   "recursive-workflows.md",
   "skill-pack-versioning.md",
-  "task-context.md"
+  "task-context.md",
+  "validation.md"
 ];
 
 export const SKILL_RESOURCE_PATHS = [

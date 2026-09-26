@@ -10,7 +10,12 @@
   "files": [
     "scripts/npm/bin/",
     "scripts/npm/src/",
-    "skill/",
+    "skill/**/SKILL.md",
+    "skill/**/references/*.md",
+    "skill/**/assets/**",
+    "skill/layered-spec-core/requirements.txt",
+    "skill/layered-spec-core/scripts/*.py",
+    "skill/layered-spec-core/scripts/spec_validation/*.py",
     "planning/",
     "README.md",
     "LICENSE"

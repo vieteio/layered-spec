@@ -1,5 +1,7 @@
 __pycache__/
 *.py[cod]
+.pytest_cache/
+
 .specstory/
 
 # Generated skillpack installs (see scripts/install_skillpack.py)

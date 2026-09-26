@@ -195,30 +195,38 @@ Do not present a deferred basis as selected or complete a use case that depends 
 
 ## Use Cases
 
-Represent planning detail under numbered use cases. Use-case numbering may be hierarchical when a parent use case is refined into narrower subcases. Each use case begins with the use case name, then the workflow line, then optional layers.
+Represent planning detail under level-three use-case headings inside `## Use cases`. Numbers are optional; when present they may be hierarchical. Each use case begins with its exact title and optional number, then the workflow line, then optional layers. Use `### 4. Render`, `### UC4 — Render`, or `### Render`. Quote the entire title when a numeric-looking title should be treated as a name rather than a number.
 
 Use this shape:
 
 ```md
+## Use cases
+
 ### 1. Use case name
 initial state --step name--> next state
+
 Layer_1_name:
 layer content
+
 Layer_2_name:
 layer content
 
 ### 1.1 Child use case name
 child state --step name--> child next state
+
 Layer_name:
 layer content
 ```
 
 Rules:
 
-- The workflow line appears immediately under the use case name.
+- The workflow line or fenced `text`/`workflow` block appears immediately under the use case name.
 - The workflow line does not use a `Workflow:` label.
 - Layers are grouped directly under their use case.
 - Individual layers are not rendered as markdown headers.
+- Start each layer with a capitalized standalone column-zero `<layer name>:` and a preceding blank line. Precede it with a blank line unless it is the first body content. Use the standard names below, with an uppercase first letter; capitalization of the remaining words may vary. Use `Extension/<name>:` for custom layers.
+- Indent standalone internal labels by two spaces, for example `  Input:` or `  Rules:`. Ordinary continuation text may be unindented; indent any continuation line that would itself look like a layer label. Inline `Input: some text` needs no indentation because text follows the colon.
+- Headings and labels inside code, quotations, list items or HTML belong to that Markdown content. Close literal blocks before resuming document declarations.
 - Use hierarchical numbering such as `1`, `1.1`, `1.2`, `2` when a child use case refines the parent scope instead of introducing an unrelated top-level concern.
 - Keep hierarchical numbering shallow and consistent unless deeper nesting materially improves clarity.
 - Use-case-specific questions may be recorded in a use-case layer.
@@ -272,11 +280,17 @@ Use these layer names when they help:
 
 Use additional layer names only when they communicate a distinct responsibility clearly.
 
+### Optional Layer Subsections
+
+Any layer may use optional named subsections: write `- Name:` beneath the layer label and indent its content beneath that item. A sibling subsection ends the preceding one; deeper labels remain content. Subsections retain the parent layer's rules, so grouped requirements, mappings and workflows keep their meaning. In `Detailed Workflow`, a name immediately followed by a chain still names that workflow; place explanatory prose first when grouping mixed text and workflows. Ordinary bullets and fenced examples remain available when a subsection is not intended.
+
 ### Invariants Layer Syntax
 
 Use `Invariants` when selected workflow states have meaningful invariants and the derivation of later state invariants should be explicit. It is a selective parallel chain over the main workflow and does not require an invariant for every state.
 
 Keep a concise invariant outline in the layer, then place long invariant definitions, assumptions, calculations, proofs, and formal text in its detailed state-invariant and derivation entries. A derivation identifies its source invariant or invariants, target invariant or invariants, and the workflow transition or transition span that establishes the target.
+
+When a developer supplies ideas for why the solution logic or direction should work, preserve them in an optional `Rationale` subsection and assess each retained note as `supported`, `qualified`, `unsupported`, or `rejected`. Supported rationale and explicitly qualified parts may guide invariant selection and derivation. A rejected rationale is completely incorrect and requires a different justification, solution, or direction. Rationale does not replace the reasoning in a derivation.
 
 Invariants and derivations may use natural language, mathematical notation, pseudocode, Lean, or another named formalism. Natural-language reasoning may be a proof, justification, or proof sketch. Call it a **verifiable proof** only when it is expressed in a formalism and successfully verified by the corresponding checker.
 
@@ -343,7 +357,7 @@ Examples:
 
 Place loop workflows in fenced text blocks or inline code so the enclosing `|` characters are not interpreted as a Markdown table.
 
-Recursive workflows use the existing composition, coproduct, product, loop, typed-state, and use-case-reference syntax. Do not introduce a recursion delimiter or represent recursion as a loop merely because execution repeats.
+Recursive workflows use the existing composition, conditional, parallel, loop, typed-state, and use-case-reference syntax. Do not introduce a recursion delimiter or represent recursion as a loop merely because execution repeats.
 
 Show a recursive call as a normal transition whose step names the called chain or use case:
 
@@ -353,7 +367,7 @@ For compact recursion, place one separately labeled workflow chain per distinct 
 
 A recursive step may terminate locally, call itself, call another recursive step, or delegate without its own exit. The recursive family as a whole must identify at least one reachable base or exit case and a progress measure such as descent to a strict substructure, fewer remaining elements, consumed input, or decreasing depth. When the data may contain cycles or unbounded references, specify cycle or depth-limit behavior explicitly.
 
-Use a coproduct for type-directed dispatch and alternative base or recursive cases. Use composition for ordered recursive calls. Use a product only when recursive branches are independent and participate together. A loop may contain recursive dispatch when processing a collection, but the loop and recursive call remain separate structures.
+Use conditional branching for type-directed dispatch and alternative base or recursive cases. Use composition for ordered recursive calls. Use parallel branching only when recursive branches are independent and participate together. A loop may contain recursive dispatch when processing a collection, but the loop and recursive call remain separate structures.
 
 Detailed templates for direct structural recursion, compact mutual recursion, hierarchical type dispatch, multiple recursive children, and guarded graph traversal are in `skill/layered-spec-core/references/recursive-workflows.md`.
 
@@ -367,7 +381,7 @@ A workflow chain in an answer may contain `#` or `//` comments. Place a commente
 - The comment ends at the end of the line.
 - Matching `"..."`, `'...'`, and backtick spans protect comment markers.
 
-Do not use comments in workflow chains written to specifications or user stories.
+Do not use comments in workflow chains written to specifications.
 
 ### Scientific Formula Syntax
 
@@ -619,6 +633,7 @@ A valid planning artifact should satisfy all of these:
 - uses workflow operators consistently, including refactoring syntax when updating an existing implementation path
 - uses KaTeX for scientific formulas only where it clarifies technical logic, data, or invariants, while keeping workflow chains and invariant outlines as readable prose
 - uses `Invariants` only for meaningful workflow states, keeps its outline concise, and maps every derivation from identified source invariants through workflow logic to identified target invariants
+- preserves supplied solution rationale separately from invariants and derivations, assesses retained notes, and prevents unsupported or rejected rationale from being used as derivation support
 - reserves **verifiable proof** for formal text successfully checked by its corresponding verifier
 - uses hierarchical use-case numbering when parent and child use cases need distinct workflow treatment
 - plans early validation and the post-validation contract when later workflow steps depend on stronger assumptions
