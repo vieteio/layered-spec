@@ -65,7 +65,7 @@ At minimum, identify:
 
 Helpful optional inputs:
 
-- an existing task-context file under `specs/task-contexts/`
+- an existing task-context file at `specs/task-contexts/<task-name>/task_context.md`
 - related tables
 - related stores or components
 - existing plan documents
@@ -87,7 +87,7 @@ Result:
 
 ### 2. Scan Spec And ADR Context
 
-Before expanding the rest of the connected map, inspect `specs/` for relevant plans or specs and `specs/architecture/` for relevant ADRs. Exclude `architecture/template.md` from ADR discovery and exclude the architecture directory from solution-spec lifecycle classification.
+Before expanding the rest of the connected map, inspect `specs/` for relevant plans or specs and `specs/architecture/` for relevant ADRs. Exclude `architecture/template.md` from ADR discovery and exclude the architecture, task-contexts, and spec-lifecycle directories from solution-spec lifecycle classification. Supporting context and candidate files are not solution specs.
 
 For each relevant spec, record:
 
@@ -115,7 +115,7 @@ When an orchestrated workflow supplies a task-context path, read [task-context-e
 
 Task context is an optional reusable input and output, not a completeness boundary. When invoked standalone or without a task-context path, produce the requested connected map without requiring or creating a task-context file.
 
-Do not create a new `<solution-name>/connected_context.md`. Existing files at that legacy path remain valid evidence and may be cited without migration.
+When a task workspace is supplied, follow explicit links to its context, candidates, and consuming specs. The task may affect several business or framework specs; their names need not match the task folder.
 
 ### 3. Build A Connected-Part Map
 

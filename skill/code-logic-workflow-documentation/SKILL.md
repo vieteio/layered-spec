@@ -52,6 +52,8 @@ Reverse documentation describes observed behavior and implementation. Do not pro
 
 When an in-scope task-context path is supplied, read `skill/layered-spec-core/references/task-context.md`. Link the durable observed-workflow document from that context and add only the evidence and findings likely to be reused by another ADR, basis comparison, spec, or verification pass. Keep the complete workflow definitions, state traces, structures, and navigation aids in the reverse-documentation artifact.
 
+Shared task context is stored at `specs/task-contexts/<task-name>/task_context.md`. Its task folder may also contain candidate evaluations. Follow the supplied context path and explicit artifact links rather than assuming the documentation or spec shares the task's name.
+
 If documentation work corrects shared task understanding, update the task context and its affected-artifact references. Details needed only to make the reverse-documentation artifact standalone may remain local. When no task context is supplied, produce the requested documentation without requiring one.
 
 ## Workflow Syntax Compatibility

@@ -205,6 +205,8 @@ The target may be either:
 
 Use the first form when the framework contract and its realizations each need independently understandable structure. Use the second form when a separate declarative framework use case would add no clarity. Several callers may use the same separately identified framework use case or framework specification; do not duplicate its requirements or realizations under each caller.
 
+One task may create or update both a business spec and a separately named reusable-framework spec. Keep framework-owned requirements, types, invariants, and use cases in the framework spec; the business spec owns its application behavior and local integration details. Use file-qualified references such as `reusable-framework.md#UC7` for `Uses` and reciprocal file-qualified `Realized by` / `Realizes` mappings when formal realization crosses specs. Neither spec's name must match the task folder. Both may link the same task context and comparison. This separation does not require a component-folder hierarchy and does not make every framework implementation choice an architectural decision; classify decision reach separately.
+
 ## Requirement Representations
 
 Use `Requirement representations` when requirements are translated into another syntax for review, parsing, test generation, code generation, analysis, or visualization.

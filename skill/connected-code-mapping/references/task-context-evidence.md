@@ -1,8 +1,10 @@
 # Connected-Code Contributions To Task Context
 
-Use this reference when connected-code mapping receives a task-context file under `specs/task-contexts/`.
+Use this reference when connected-code mapping receives `specs/task-contexts/<task-name>/task_context.md`.
 
 Read the shared file contract in `skill/layered-spec-core/references/task-context.md`. Preserve existing identifiers and revision history.
+
+Follow explicit links between the task context, its task-owned candidates, and affected specs. One task can support several specs, including reusable-framework specs; do not infer consumers from matching names.
 
 ## What To Add
 
@@ -22,4 +24,4 @@ Keep detailed file inventories, implementation tasks, artifact-local planning im
 
 ## Standalone Use
 
-When no task-context path is supplied, produce the requested connected map normally. Do not create task context implicitly. Existing legacy `<solution-name>/connected_context.md` files may be read and cited but are not migrated by this skill.
+When no task-context path is supplied, produce the requested connected map normally. Do not create task context implicitly.

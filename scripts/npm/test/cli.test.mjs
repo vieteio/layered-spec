@@ -30,7 +30,9 @@ test("init writes a Codex project install and versioned manifest", async () => {
   assert.match(planningContract, /## Task development/);
   assert.match(planningContract, /solution specification/);
   assert.doesNotMatch(planningContract, /technical spec/i);
-  assert.match(planningContract, /specs\/task-contexts\//);
+  assert.match(planningContract, /specs\/task-contexts\/<task-name>\/task_context\.md/);
+  assert.match(planningContract, /specs\/<spec-name>\.md/);
+  assert.doesNotMatch(planningContract, /specs\/<solution-name>\/spec\.md/);
   assert.match(planningContract, /specs\/architecture\//);
   assert.match(planningContract, /\.agents\/skills\/layered-spec-core\/references\/requirements-and-realization\.md/);
   assert.match(planningContract, /\.agents\/skills\/layered-spec-core\/references\/recursive-workflows\.md/);
@@ -50,6 +52,8 @@ test("init writes a Codex project install and versioned manifest", async () => {
   assert.match(recursiveWorkflowsReference, /Template 6: Guarded Graph Recursion/);
   assert.match(versioningReference, /Last edited with skill pack/);
   assert.match(taskContextReference, /reusable shared context/);
+  assert.match(taskContextReference, /specs\/task-contexts\/<task-name>\//);
+  assert.match(taskContextReference, /candidates\/\s+# only when basis evaluation is needed/);
   assert.doesNotMatch(`${requirementsReference}\n${invariantsReference}\n${recursiveWorkflowsReference}`, /user-story-workflow-documentation|design-ux-guardrails/i);
 
   const lifecycleSkill = await readFile(path.join(project, ".agents", "skills", "spec-first-planning-loop", "SKILL.md"), "utf8");
@@ -63,7 +67,10 @@ test("init writes a Codex project install and versioned manifest", async () => {
   const basisReference = await readFile(path.join(project, ".agents", "skills", "solution-basis-evaluation", "references", "candidate-artifacts.md"), "utf8");
   assert.match(basisSkill, /confirmed.*proposed.*deferred/s);
   assert.match(basisSkill, /architecture-decision-recording/);
+  assert.match(basisSkill, /specs\/task-contexts\/<task-name>\/candidates\//);
   assert.match(basisReference, /focused evaluation slice/);
+  assert.match(basisReference, /Spec Ownership/);
+  assert.doesNotMatch(basisReference, /Existing Spec Migration/);
 
   const adrSkill = await readFile(path.join(project, ".agents", "skills", "architecture-decision-recording", "SKILL.md"), "utf8");
   const adrLifecycle = await readFile(path.join(project, ".agents", "skills", "architecture-decision-recording", "references", "adr-lifecycle.md"), "utf8");

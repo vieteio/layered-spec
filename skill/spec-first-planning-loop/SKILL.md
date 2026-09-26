@@ -78,6 +78,7 @@ Skip it for a genuinely local change that can be implemented safely without a me
 - Preserve the user's concrete task language and existing authoritative spec content unless the current step requires a local correction.
 - Treat task context as reusable shared grounding rather than an exclusive source or certification that later artifacts have sufficient context.
 - Preserve one task-context file across clarifications and continuations of the same logical task, update its revision when shared content changes materially, and create a new context only when the requested outcome is materially replaced.
+- Use `task_context.md` for task-workspace naming and identity. Task context and candidates share `specs/task-contexts/<task-name>/`; solution specs remain named single files outside that workspace. One task may affect several specs and several tasks may contribute to one spec; follow explicit links rather than matching names.
 - Keep each artifact-producing skill responsible for obtaining any additional context needed by its output.
 - Do not silently skip an optional step when its description requires a recorded reason.
 - Follow the step order in `workflow.md`; do not reconstruct the lifecycle from this skill or from specialized-skill instructions.
@@ -177,6 +178,7 @@ The final outcomes mean:
 - Required branch and skip decisions were recorded.
 - Task context, when used, was treated as reusable shared context rather than the completeness boundary for any artifact.
 - Each artifact skill remained responsible for its own additional context acquisition and output correctness.
+- Specs remained named single files and task-owned candidates stayed in task workspaces.
 - User input was requested and processed according to the active step's `Request next user input` instructions.
 - Workflow-declared conversation state was preserved across lifecycle tasks in the same conversation, reset for a new conversation, and kept out of solution artifacts unless the workflow required it there.
 - Lifecycle-policy files were excluded from solution-spec searches and status classification.

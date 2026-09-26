@@ -16,8 +16,9 @@ When this skill creates or edits an ADR, follow `skill/layered-spec-core/referen
 - Active repository template: `specs/architecture/template.md`
 - ADR records: `specs/architecture/ADR-NNNN-<short-title>.md`
 - Bundled default template: `assets/default_adr_template.md`
-- Optional task context: `specs/task-contexts/CTX-NNNN-<task-slug>.md`
-- Optional basis comparison: `specs/<solution-name>/candidates/comparison.md`
+- Optional task context: `specs/task-contexts/<task-name>/task_context.md`
+- Optional basis comparison: `specs/task-contexts/<task-name>/candidates/comparison.md`
+- Consuming specs: `specs/<spec-name>.md`
 - Shared planning contract: `planning/planning_contract.md`
 
 Exclude `architecture/template.md` from ADR discovery. Keep the architecture directory flat until a later architectural decision changes its organization.
@@ -35,6 +36,8 @@ Use all relevant available sources: the user request, existing ADRs and specs, t
 A task-context file is reusable input, not a completeness guarantee or exclusive source. Reuse its relevant directives, findings, and evidence, then inspect original or additional sources when the ADR needs more context. Keep ADR-specific details in the ADR. Write back a finding to an in-scope task context only when it is useful to another artifact or corrects shared understanding.
 
 Preserve useful references to consumed task-context identifiers. Do not promote an observed implementation or inferred finding into an architectural decision without an authoritative task instruction, accepted governance decision, or evidence-backed basis selection.
+
+Read [task-context.md](../layered-spec-core/references/task-context.md) when using task workspaces. One task may support several ADRs and specs, and one ADR may govern specs developed by several tasks. Use explicit relative links rather than deriving paths from matching names.
 
 ## Procedure
 

@@ -4,13 +4,25 @@ A task-context file is reusable shared context for one logical task. It reduces 
 
 ## Location And Identity
 
-Store new task contexts under:
+Store supporting artifacts for a logical task in one flat task folder:
 
 ```text
-specs/task-contexts/CTX-NNNN-<task-slug>.md
+specs/task-contexts/<task-name>/
+  task_context.md
+  candidates/          # only when basis evaluation is needed
+    <basis-name>.md
+    comparison.md
 ```
 
-Allocate the next globally unique sequential `CTX-NNNN` identifier from files in that directory. A logical task includes its initial request and later clarifications that continue the same requested outcome. Create a new context when a later request materially replaces that outcome.
+Use a descriptive lowercase hyphenated task name. Resume a folder only when its recorded scope matches the same logical task; a matching name alone is insufficient. For an unrelated task whose name collides on the filesystem, append the next available numeric suffix, such as `task-name-2`, without overwriting or merging the existing folder. Keep task workspaces directly under `specs/task-contexts/`; component hierarchy is outside this version.
+
+The folder is a task workspace, not a solution spec. `task_context.md` contains reusable context; `candidates/` contains task-owned basis evaluations. Create only artifacts that are needed. Standalone basis evaluation may create the workspace and candidates without requiring or creating a context file. This does not require a lifecycle workflow or a context-assembly skill.
+
+Keep the stable `CTX-NNNN` identity in the context document's title, independently of the folder name. Allocate the next globally unique sequential identifier by inspecting context titles in task folders. Use the highest allocated number plus one; do not fill gaps or reuse known historical identifiers. Do not assign a context ID to a candidates-only workspace until its context file is created. Renaming a task folder does not change its context identity; update incoming path references if a rename is explicitly requested.
+
+A logical task includes its initial request and later clarifications that continue the same requested outcome. Resume its existing workspace and context for those continuations. Create a new workspace when a later request materially replaces that outcome.
+
+Task names and spec names are independent. One task may create or update several business, framework, ADR, or other artifacts; several tasks may contribute to the same spec. Record explicit relative links in `Affected artifacts`, and let consuming artifacts link relevant contexts and comparisons where useful. Do not infer a relationship only from matching names.
 
 Use `active` while the task continues and `closed` when the task has ended. Status does not certify that every possible source or artifact has been exhaustively investigated. Increment the revision when shared directives, evidence, findings, affected-artifact mappings, or gaps change materially.
 
@@ -68,7 +80,7 @@ Give each artifact-neutral synthesis a stable `F-NN` identifier and record:
 - potential reach without prematurely fixing `solution-local` or `architectural` ownership;
 - ADRs, comparisons, or specs to which it may be relevant.
 
-Findings bridge evidence and artifact authoring, but remain task-scoped analysis. The consuming artifact owns its requirements, decisions, evaluation, or behavior.
+Findings bridge evidence and artifact authoring, but remain task-scoped analysis. The consuming artifact owns its requirements, decisions, evaluation, or technical behavior.
 
 ### Affected Artifacts, Gaps, And Resolutions
 
@@ -91,7 +103,3 @@ Durable reverse documentation remains a separate reusable artifact when valuable
 ## Content Boundary
 
 Do not store raw conversation transcripts, secrets, irrelevant repository dumps, complete candidate evaluations, ADR rationale, or use-case implementations merely for completeness. Link canonical artifacts and original sources instead.
-
-## Legacy Compatibility
-
-Existing `<solution-name>/connected_context.md` files remain valid evidence artifacts until a later migration. Do not relocate or rewrite them automatically. A new task context may cite a legacy file and its stable `CC` identifiers as evidence. New task development writes reusable shared context to `specs/task-contexts/` instead of creating another `connected_context.md`.

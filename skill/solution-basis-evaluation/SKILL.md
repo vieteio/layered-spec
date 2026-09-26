@@ -12,11 +12,10 @@ When this skill creates or edits a specification, follow `skill/layered-spec-cor
 
 ## Locations And Inputs
 
-- Simple solution spec: `specs/<solution-name>.md`
-- Solution directory: `specs/<solution-name>/`
-- Canonical solution spec after candidate evaluation: `specs/<solution-name>/spec.md`
-- Optional task context: `specs/task-contexts/CTX-NNNN-<task-slug>.md`
-- Candidate artifacts: `specs/<solution-name>/candidates/`
+- Consuming solution specs: `specs/<spec-name>.md`
+- Task workspace: `specs/task-contexts/<task-name>/`
+- Optional task context: `specs/task-contexts/<task-name>/task_context.md`
+- Candidate artifacts: `specs/task-contexts/<task-name>/candidates/`
 - Architecture directory: `specs/architecture/`
 - Architectural decision records: `specs/architecture/ADR-NNNN-<short-title>.md`
 - Shared planning contract: `planning/planning_contract.md`
@@ -49,6 +48,8 @@ Use all relevant available context: the task, existing artifacts, code, tests, c
 
 When new information is useful to several artifacts or corrects shared understanding, write it back to an in-scope task context. Keep candidate-specific detail in the candidate or comparison. Treat observed constraints as evidence, not as an automatic choice of the current implementation. Do not require a task-context file for standalone evaluation.
 
+Read [task-context.md](../layered-spec-core/references/task-context.md) before establishing or resuming the task workspace. Use the workspace supplied by the caller, or establish one for the logical task when standalone evaluation needs candidate storage. A candidates-only workspace is permitted. Keep consuming spec paths explicit: one comparison may serve several business or framework specs, and a later task may evaluate a basis for an existing spec without moving it. Do not infer task identity from a spec name.
+
 ### 2. Identify Reasonable Bases
 
 For each candidate basis, state:
@@ -63,11 +64,11 @@ Use a basis set when different concerns need different compatible bases. Do not 
 
 ### 3. Create Focused Candidate Artifacts
 
-Create one `candidates/<basis-name>.md` file per reasonable basis. Read `references/candidate-artifacts.md` for the candidate workflow shape, permitted evaluation layers, and rules that keep candidates focused rather than complete solution specs.
+Create one `candidates/<basis-name>.md` file per reasonable basis inside the task workspace. Read `references/candidate-artifacts.md` for the candidate workflow shape, permitted evaluation layers, and rules that keep candidates focused rather than complete solution specs.
 
 ### 4. Compare And Classify Basis State
 
-Create `candidates/comparison.md` using the comparison shape and criteria rules in `references/candidate-artifacts.md`.
+Create the task workspace's `candidates/comparison.md` using the comparison shape and criteria rules in `references/candidate-artifacts.md`.
 
 Classify each concern independently:
 
@@ -88,7 +89,7 @@ Assign exactly one authoritative record to each confirmed or proposed concern. A
 
 ### 6. Persist Or Hand Off The Decision
 
-For a confirmed or proposed solution-local concern, record the basis in the canonical `spec.md`:
+For a confirmed or proposed solution-local concern, record the basis in its canonical named spec:
 
 ````md
 ## Task development
@@ -98,9 +99,11 @@ For a confirmed or proposed solution-local concern, record the basis in the cano
 - Selected or proposed basis: <basis assigned to this concern>
 - Decision reach: `solution-local`
 - Authoritative record: this specification
-- Candidate artifacts: `candidates/<basis-name>.md`
-- Comparison: `candidates/comparison.md`
-- Use-case handoff: <the use cases that now consume the selected capabilities>
+- Task context: `task-contexts/<task-name>/task_context.md` when consumed
+- Candidate artifacts: `task-contexts/<task-name>/candidates/<basis-name>.md`
+- Comparison: `task-contexts/<task-name>/candidates/comparison.md`
+- Assumptions and local consequences: <solution-owned information needed to understand and implement the basis>
+- Technical handoff: <the technical use cases that now consume the selected capabilities>
 - Basis-validation requirements: <stable requirement IDs when proposed, or none>
 ````
 
@@ -120,8 +123,8 @@ For a confirmed or proposed architectural concern, produce an ADR handoff contai
 - Decision scope: <concern evaluated>
 - Basis state: `confirmed` or `proposed`
 - Decision reach: `architectural`
-- Governing ADR: `../architecture/ADR-NNNN-<short-title>.md`
-- Comparison: `candidates/comparison.md`
+- Governing ADR: `architecture/ADR-NNNN-<short-title>.md`
+- Comparison: `task-contexts/<task-name>/candidates/comparison.md`
 - Local consequences: <only consequences or parameters owned by this specification>
 - Use-case handoff: <the use cases that consume the selected capabilities>
 - Basis-validation requirements: <stable requirement IDs when proposed, or none>
@@ -131,9 +134,7 @@ For a deferred concern, keep its questions and missing evidence authoritative in
 
 Planning may consume confirmed bases completely. It may consume a proposed basis only with stable basis-validation requirements in the relevant spec. Those requirements state the evidence implementation must produce, confirmation criteria, and reconsideration criteria. Validation execution and result processing are outside this skill's current scope. A deferred concern blocks only dependent use cases.
 
-## Existing Spec Migration
-
-When an existing single-file solution spec needs candidate evaluation, follow the migration procedure in `references/candidate-artifacts.md`.
+The examples above are relative to a spec directly under `specs/`. Compute relative links from each referring artifact. Candidates and comparison own detailed evaluation; the owning spec must state the selected local solution without requiring those files for basic comprehension.
 
 ## Quality Checks
 
@@ -150,6 +151,8 @@ When an existing single-file solution spec needs candidate evaluation, follow th
 - Use cases consume selected capabilities from their authoritative records and do not silently reopen a resolved comparison or ADR.
 - Task context is reused when available but is never treated as an exclusive source or completeness guarantee.
 - Standalone evaluation does not require a lifecycle workflow or task-context file.
+- Candidates belong to the logical task's workspace, not a consuming spec's folder; one task may serve several specs.
+- Named spec paths remain unchanged by evaluation.
 
 ## One-Line Heuristic
 

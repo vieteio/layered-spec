@@ -17,11 +17,10 @@ Use this folder as the default planning and spec registry unless a narrower loca
 
 Use these locations:
 
-- `specs/<simple-solution>.md` for a solution with no candidate evaluation;
-- `specs/<solution-name>/spec.md` for a solution with task development artifacts;
-- `specs/task-contexts/CTX-NNNN-<task-slug>.md` for reusable shared context assembled for one logical task;
-- `specs/<solution-name>/candidates/<basis-name>.md` for focused basis candidates;
-- `specs/<solution-name>/candidates/comparison.md` for the basis comparison;
+- `specs/<spec-name>.md` for every solution spec, including a reusable framework spec, regardless of basis evaluation;
+- `specs/task-contexts/<task-name>/task_context.md` for reusable shared context assembled for one logical task;
+- `specs/task-contexts/<task-name>/candidates/<basis-name>.md` for focused basis candidates;
+- `specs/task-contexts/<task-name>/candidates/comparison.md` for the basis comparison;
 - `specs/architecture/template.md` for the active repository ADR template;
 - `specs/architecture/ADR-NNNN-<short-title>.md` for an architectural decision record.
 
@@ -29,11 +28,17 @@ Use these locations:
 
 `specs/architecture/` contains the active ADR template and architectural decision records rather than solution specifications. Exclude the directory from solution-spec lifecycle classification, and exclude `architecture/template.md` from ADR discovery. Keep this directory flat until a later architecture-organization decision introduces narrower subdirectories.
 
-`specs/task-contexts/` contains task-scoped reusable context rather than solution specifications. Read `skill/layered-spec-core/references/task-context.md` for its file shape, stable identifiers, reuse boundary, and legacy compatibility rules. A task context is not an exclusive source or a certification that every artifact has sufficient context.
+`specs/task-contexts/` contains task-scoped reusable context rather than solution specifications. Read `skill/layered-spec-core/references/task-context.md` for its file shape, stable identifiers, and reuse boundary. A task context is not an exclusive source or a certification that every artifact has sufficient context.
 
-Existing `specs/<solution-name>/connected_context.md` files remain valid legacy evidence artifacts. Do not migrate them automatically. New task development uses task context when shared context is useful rather than creating another solution-local `connected_context.md`.
+Basis evaluation never changes a spec's name or location.
 
-When an existing single-file solution spec needs candidate evaluation, move its full content to `<solution-name>/spec.md`, then leave a short compatibility pointer at the original path. Preserve the content before replacing the old file.
+## Single-File Specs And Task Relationships
+
+A spec contains the solution-owned information needed to understand and implement its behavior: use cases and sub-use cases, requirements, types, invariants, logic, and other applicable layers. Candidate evaluations and task context provide supporting evidence; readers must not need them to discover the selected solution. Record the selected solution-local basis, relevant assumptions, local consequences, and required basis validation directly in the owning spec. Detailed alternative evaluation remains in the comparison.
+
+Shared framework contracts and architectural decisions remain authoritative in their own named specs and ADRs and are referenced rather than duplicated. A task may create or update separate business and reusable-framework specs. Splitting by reusable behavior is allowed; splitting one spec merely because basis evaluation occurred is not.
+
+Task folders and spec files have a many-to-many relationship. Their names may match for convenience but do not establish ownership. Task context lists affected artifacts; each spec preserves useful links to the contexts and comparisons that contributed to it. Resolve links relative to the referring artifact, not by assuming candidates are siblings of the spec. Keep the current flat organization; component hierarchy is deferred.
 
 ## Terms
 
@@ -45,6 +50,7 @@ When an existing single-file solution spec needs candidate evaluation, move its 
 - `decision reach`: whether one selected concern is `solution-local` or `architectural`.
 - `ADR`: the authoritative record for one architecturally significant selected concern and its rationale.
 - `task context`: optional reusable directives, evidence, findings, affected-artifact mappings, and gaps collected for one logical task.
+- `task workspace`: the task-scoped folder for optional context and candidate artifacts, independent of any consuming spec's name or location.
 - `basis state`: whether a basis is `confirmed`, `proposed` for implementation-backed validation, or `deferred` without a justified working basis.
 
 
@@ -176,7 +182,7 @@ For a confirmed or proposed architectural concern, one ADR under `specs/architec
 
 Do not duplicate one decision's rationale in its ADR and consuming specs. Split ownership only when the architectural concern and the solution-local concern are distinct; never create two authoritative copies of the same concern.
 
-Candidate files are focused evaluation slices rather than complete specs. `solution-basis-evaluation` owns their workflow shape, comparison criteria, and migration procedure.
+Candidate files are task-owned focused evaluation slices rather than complete specs. `solution-basis-evaluation` owns their workflow shape and comparison criteria; `skill/layered-spec-core/references/task-context.md` owns workspace structure and identity. Basis evaluation does not relocate specs.
 
 Candidate evaluation may select multiple compatible bases for different solution concerns. Use cases assemble selected capabilities from their authoritative local records or governing ADRs and do not silently reopen a recorded decision.
 
@@ -625,9 +631,14 @@ A valid planning artifact should satisfy all of these:
 - records which specs stay authoritative and which become outdated or superseded
 - discovers relevant ADRs, preserves their lifecycle state, and references architectural rationale instead of duplicating it
 - records every evaluated concern as confirmed, proposed, or deferred with exactly one allowed decision destination
+- records task-development candidate evidence, decision reach, one authoritative record per selected concern, and the selected-basis handoff when a material solution choice was evaluated
+- keeps architectural decisions in ADRs, keeps solution-local decisions in their canonical specs, and uses references instead of duplicated rationale
 - includes stable validation requirements when a spec consumes a proposed basis
 - leaves deferred-basis-dependent use cases blocked without blocking unrelated planning
 - treats task context as reusable shared evidence rather than a completeness boundary or exclusive source
+- keeps each solution spec in one named file regardless of basis evaluation, with its selected local solution understandable without opening task context or candidates
+- uses explicit many-to-many task/spec links and file-qualified references to reusable framework contracts without duplicated ownership
+- keeps candidate workflows focused on evaluation rather than turning every candidate into a complete solution spec
 - includes spec maintenance in the implementation checklist when relevant
 - records code-to-spec traceability when implementation boundaries map cleanly to use-case workflow steps
 - uses workflow operators consistently, including refactoring syntax when updating an existing implementation path

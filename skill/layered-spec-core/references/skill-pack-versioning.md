@@ -14,4 +14,4 @@ This value records the skill-pack version used for the most recent skill-guided 
 
 `architecture-decision-recording/assets/default_adr_template.md` carries its source version as `Default ADR template version`. The active repository template is `specs/architecture/template.md`. Initialize the active template from the bundled default only when it is missing. Never overwrite, merge, reconcile, or update an existing active template automatically when the bundled default changes. A user-provided active template remains authoritative even when it omits the bundled source-version marker.
 
-Task-context files under `specs/task-contexts/` also use the `Last edited with skill pack` line. Their `active` or `closed` status describes the logical task lifecycle and is not a completeness certification.
+Task-context files at `specs/task-contexts/<task-name>/task_context.md` also use the `Last edited with skill pack` line. Their `active` or `closed` status describes the logical task lifecycle and is not a completeness certification. Their `CTX-NNNN` identity remains in the document rather than its filename.

@@ -67,6 +67,14 @@ When invoked by an orchestrated lifecycle, consume the artifacts and constraints
 
 Read `skill/layered-spec-core/references/task-context.md` when consuming or updating task context. The shared planning contract remains the owner of the spec's exact structure.
 
+## Spec Ownership And Supporting Task Artifacts
+
+Store each solution spec at `specs/<spec-name>.md`. Keep its use cases, requirements, types, invariants, logic, and applicable layers together. Task context and candidate comparisons live in the logical task's workspace under `specs/task-contexts/<task-name>/`; basis evaluation does not relocate the spec.
+
+One task may create or update several named specs, including separate business and reusable-framework specs, and several tasks may contribute to the same spec. Choose spec boundaries from behavior ownership and reuse, not task names or the presence of candidates. Keep framework-owned content in its framework spec and use file-qualified `Uses` or reciprocal realization references according to the shared contract.
+
+Record the selected solution-local basis, relevant assumptions, local consequences, and required validation directly in its owning spec. Readers must not need task context or candidate files to discover the selected solution. Link detailed evaluation and shared ADRs rather than duplicating their rationale. Preserve useful many-to-many task/spec provenance with actual relative links, not assumed sibling paths.
+
 Represent each use case as:
 
 1. one workflow line or workflow block
@@ -322,6 +330,8 @@ If the user asks for improvement instead of expansion:
 - The workflow line has no label; it is the raw workflow text immediately under the use case name
 - Exact syntax, section order, and layer rules come from `planning/planning_contract.md`
 - Generated plans and active specs are placed in `specs/` unless the task explicitly narrows the location
+- Each spec remains one named file; supporting candidates are task-owned
+- Business and reusable-framework specs have explicit cross-file references and do not duplicate framework-owned content
 - User-authored content is preserved unless it conflicts with nearby structure
 - Pure analysis or reference documents without workflow-bearing sections are left in a lighter structure and do not trigger this skill
 - Mixed documents use layered syntax only for the workflow-bearing section that needs it

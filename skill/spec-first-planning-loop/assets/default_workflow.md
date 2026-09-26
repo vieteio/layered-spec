@@ -60,6 +60,7 @@ Logic:
 3. Decide whether focused code inspection, connected-code mapping, or durable reverse documentation may contribute useful shared context.
 4. Detect whether materially different reasonable solution bases may exist; do not select a basis before decision-relevant evidence is collected.
 5. Identify related solution specs and preliminary actions: `reuse`, `amend`, `mark outdated`, `replace`, or `archive`.
+   Identify spec names and behavior ownership independently of the task name. One task may affect several specs, including business and reusable-framework specs; several tasks may contribute to the same spec.
 6. Identify relevant ADRs under `specs/architecture/`, their status, and whether they constrain or may be superseded by the task.
 7. Exclude `specs/spec-lifecycle/`, `specs/architecture/`, and `specs/task-contexts/` from solution-spec discovery and lifecycle classification. Exclude `architecture/template.md` from ADR discovery.
 
@@ -86,7 +87,7 @@ Input:
 
 Logic:
 1. Read `../../skill/layered-spec-core/references/task-context.md` completely.
-2. Create a task-context file for a new logical task or resume the existing file for a continuation. Seed it with the outcome, scope, task directives and their authority, known sources, preliminary affected artifacts, and open concerns; do not create an empty placeholder.
+2. Create or resume the logical task's workspace according to the shared contract, with its context at `specs/task-contexts/<task-name>/task_context.md`. Preserve the stable context identity independently of the folder name. Seed the file with the outcome, scope, task directives and their authority, known sources, preliminary affected artifacts, and open concerns; do not create an empty placeholder.
 3. Inspect related planning artifacts, repository rules, and focused code entry points. Add reusable evidence with stable identifiers and provenance.
 4. When shared understanding requires tracing a non-local change across ownership, dataflow, persistence, propagation, or validation responsibilities, read and use `connected-code-mapping`. Contribute the reusable evidence, artifact-neutral findings, concern relationships, and affected-surface map to task context.
 5. When an important existing workflow is insufficiently documented and durable documentation would simplify later work, read and use `code-logic-workflow-documentation`. Create or update the observed workflow documentation, link it from task context, and extract reusable evidence and findings. Record small observations directly instead of creating unnecessary durable documentation.
@@ -95,7 +96,8 @@ Logic:
 8. Record the current revision, affected artifacts, gaps, and expected consumers. Keep artifact-specific details out of shared context when no other consumer is expected.
 
 Output:
-- An active reusable task context under `specs/task-contexts/`.
+- An active reusable task context at `specs/task-contexts/<task-name>/task_context.md`.
+- The task-workspace path for optional candidate storage and explicit links to affected artifacts; names need not match.
 - Optional observed workflow documentation when durable reverse documentation was useful.
 - A context-enriched planning task; not a completeness certification for later artifacts.
 
@@ -119,13 +121,14 @@ Skip when:
 
 Input:
 - Task outcome and non-negotiable constraints.
+- The task-workspace path for `candidates/`, independent of any consuming spec's name or location.
 - Task context when available and all other relevant evidence needed by the comparison.
 
 Skill:
 - `solution-basis-evaluation`
 
 Output:
-- Candidate and comparison artifacts with `confirmed`, `proposed`, or `deferred` basis state per concern.
+- Task-owned candidate and comparison artifacts under `specs/task-contexts/<task-name>/candidates/`, with `confirmed`, `proposed`, or `deferred` basis state per concern. Existing specs are not relocated when evaluation begins.
 - For each confirmed or proposed concern, a decision reach and either an authoritative solution-local record or an architectural decision handoff.
 - For each proposed concern, stable planned spec requirements defining validation evidence, confirmation criteria, and reconsideration criteria.
 - For each deferred concern, no selected basis or decision record and a blocker limited to dependent planning.
@@ -188,7 +191,7 @@ Skill:
 - `layered-workflow-planning`
 
 Output:
-- Canonical solution spec with planning anchor, connected or observed logic, task-development handoff when applicable, governing ADR references without duplicated rationale, and use cases in the smallest sufficient form: implementation workflow and logic alone, implementation with owned requirements, or declarative requirements mapped to separate implementation use cases.
+- One or more canonical named solution specs, each at `specs/<spec-name>.md`, with planning anchor, connected or observed logic, task-development handoff when applicable, governing ADR references without duplicated rationale, and use cases in the smallest sufficient form: implementation workflow and logic alone, implementation with owned requirements, or declarative requirements mapped to separate implementation use cases. Keep selected local bases, assumptions, consequences, and required validation directly in their owning specs; detailed alternative evaluation remains task-owned supporting evidence.
 - Complete dependent use cases for confirmed concerns; use cases with stable basis-validation requirements for proposed concerns; scoped blockers instead of completed dependent use cases for deferred concerns; and unrelated planning allowed to continue.
 - Updated task context only when newly discovered information is useful across artifacts or corrects existing shared understanding.
 
@@ -210,7 +213,8 @@ Skip when:
 - The requested artifact is intentionally limited to analysis or decision recording without implementation planning.
 
 Input:
-- Canonical solution spec and related artifacts.
+- Canonical named solution specs and related artifacts.
+- When several specs drive one task, include each spec's checklist and the cross-spec dependency references.
 
 Logic:
 1. Create a numbered status-bearing checklist in dependency order.
@@ -309,9 +313,10 @@ Logic:
 3. Preserve reasonable non-blocking assumptions that remain supported by the available context.
 4. Correct a finding autonomously only when its resolution follows from relevant available context or a reasonable non-blocking assumption, and synchronize every affected planning artifact.
 5. Do not introduce a new solution decision solely to make the artifact set pass the check.
-6. When a finding cannot be resolved from relevant available context or a reasonable non-blocking assumption, record it in `Open questions`. Classify it as blocking only when continuing would require an unsupported solution decision.
-7. Do not expand the task to resolve unrelated pre-existing issues.
-8. Do not treat the consistency check as passed while a blocking consistency finding remains unresolved.
+6. Preserve task/spec/context/comparison links and cross-spec framework dependencies. Basis evaluation never causes a spec relocation.
+7. When a finding cannot be resolved from relevant available context or a reasonable non-blocking assumption, record it in `Open questions`. Classify it as blocking only when continuing would require an unsupported solution decision.
+8. Do not expand the task to resolve unrelated pre-existing issues.
+9. Do not treat the consistency check as passed while a blocking consistency finding remains unresolved.
 
 Request next user input:
 - When blocking consistency findings remain, request the information needed to resolve them as one coherent question batch and keep this step active.
@@ -324,6 +329,7 @@ Output:
 
 Record:
 - Consistency findings and their disposition.
+- Whether task/spec provenance links resolve, framework references preserve single ownership, and the selected local solution is understandable directly from its owning spec without opening candidates or task context.
 
 Next:
 - `Check specification completeness` when resolving a consistency finding changed specification content.
