@@ -92,7 +92,14 @@ test("init writes a Codex project install and versioned manifest", async () => {
   assert.doesNotMatch(workflowTemplate, /implementation\s+spec/i);
   assert.match(workflowTemplate, /Check specification completeness/);
   assert.match(workflowTemplate, /Check specification consistency/);
+  assert.match(workflowTemplate, /basis_evaluation/);
+  assert.match(workflowTemplate, /specification_check_loop/);
   assert.doesNotMatch(workflowTemplate, /user stor|design-ux|UX layer/i);
+
+  const workflowConfig = JSON.parse(await readFile(path.join(project, ".agents", "skills", "spec-first-planning-loop", "assets", "default_workflow.json"), "utf8"));
+  assert.equal(workflowConfig.basis_evaluation, true);
+  assert.equal(workflowConfig.specification_check_loop, true);
+  assert.equal(workflowConfig.validation.enabled, true);
 
   const manifest = JSON.parse(await readFile(path.join(project, ".agents", "layered-spec-skillpack.json"), "utf8"));
   assert.equal(manifest.package_name, "@viete-io/layered-spec");
@@ -151,6 +158,8 @@ test("init supports all hosts in user scope", async () => {
     const core = path.join(home, prefix, "skills/layered-spec-core");
     await stat(path.join(core, "scripts/validate_specs.py"));
     const config = JSON.parse(await readFile(path.join(home, prefix, "skills/spec-first-planning-loop/assets/default_workflow.json"), "utf8"));
+    assert.equal(config.basis_evaluation, true);
+    assert.equal(config.specification_check_loop, true);
     assert.equal(config.validation.installation.decision, "ask");
     const validation = await readFile(path.join(core, "references/validation.md"), "utf8");
     assert.ok(validation.includes(`~/${prefix}/skills/layered-spec-core/scripts/validate_specs.py`));

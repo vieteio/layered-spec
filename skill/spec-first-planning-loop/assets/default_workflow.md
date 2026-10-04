@@ -2,6 +2,10 @@
 
 - Default workflow version: `0.2.3`
 
+## Workflow Configuration
+
+Read `workflow.json` beside the active workflow before choosing the affected steps. Its settings can affect whether or how individual workflow steps execute. Interpret each setting according to the affected step's instructions; a setting does not alter steps that do not refer to it.
+
 ## Workflow Chain
 After preparing or editing technical use cases and before consistency review, follow `skill/layered-spec-core/references/validation.md`. Apply its validation/repair completion rule, workflow.json preferences, installation approval and permitted skips, including when optional semantic review is skipped. This does not change implementation authorization.
 
@@ -117,6 +121,7 @@ Run when:
 - Two or more reasonable technologies, APIs, protocols, frameworks, algorithms, or approaches materially change workflow behavior, policy compliance, operational metrics, or architecture.
 
 Skip when:
+- `basis_evaluation` in `workflow.json` is `false`. This configuration skip takes precedence over `Run when`; an absent setting has the same meaning as `true`. Do not create candidates or a comparison, do not confirm a basis or claim that no material alternatives exist, and continue with `Resolve architecture decisions` without a basis handoff or additional skip record.
 - An explicit requirement, repository policy, authoritative contract, or applicable accepted ADR whose context remains valid fixes the basis; or no materially different reasonable alternatives exist.
 
 Input:
@@ -132,10 +137,10 @@ Output:
 - For each confirmed or proposed concern, a decision reach and either an authoritative solution-local record or an architectural decision handoff.
 - For each proposed concern, stable planned spec requirements defining validation evidence, confirmation criteria, and reconsideration criteria.
 - For each deferred concern, no selected basis or decision record and a blocker limited to dependent planning.
-- Confirmed basis handoff with an explicit skip reason when evaluation does not run.
+- Confirmed basis handoff with an explicit skip reason when evaluation does not run for an evidence-based reason. A configuration skip produces no basis handoff or additional record.
 
 Record:
-- Decision scope, basis state, selected or proposed basis when present, rejected and deferred bases, evidence, assumptions, validation requirements, decision reach and local record or architectural handoff, allowed consumers, or explicit skip reason.
+- Decision scope, basis state, selected or proposed basis when present, rejected and deferred bases, evidence, assumptions, validation requirements, decision reach and local record or architectural handoff, allowed consumers, or explicit evidence-based skip reason. Record nothing for a configuration skip.
 
 Next:
 - `Resolve architecture decisions`.
@@ -232,7 +237,7 @@ Record:
 - Whether the verification loop was entered or skipped, and why.
 
 Next:
-- `Check specification completeness` when the task is complicated or large-scale.
+- `Check specification completeness` when `specification_check_loop` is `true` and the task is complicated or large-scale.
 - Otherwise, `Select the handoff`.
 
 ### Check specification completeness
@@ -246,6 +251,7 @@ Run when:
 - Once the verification loop has started, keep it active until both checks have passed or the active check is awaiting required user input.
 
 Skip when:
+- `specification_check_loop` in `workflow.json` is `false`. This configuration skip takes precedence over `Run when`; an absent setting has the same meaning as `true`. Skip the complete completeness-and-consistency loop, continue with `Select the handoff`, do not claim either check passed, and do not add a separate skip record. This setting does not change structural or reference validation controlled by `validation.enabled`.
 - Before the first iteration, skip the verification loop when the task is not complicated or large-scale.
 
 Input:
@@ -294,6 +300,9 @@ Purpose:
 
 Run when:
 - `Check specification completeness` completed in the current check-loop iteration.
+
+Skip when:
+- `specification_check_loop` in `workflow.json` is `false`. Do not run this step independently or describe it as passed; continue with `Select the handoff`. An absent setting has the same meaning as `true`.
 
 Input:
 - The task together with all relevant available context established before and during artifact preparation.
