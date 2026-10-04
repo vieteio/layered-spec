@@ -1,12 +1,16 @@
 ---
 name: design-ux-guardrails
 description: "Use when: designing or reviewing UI so layouts stay resilient under real content, interactive areas are never unexplained, and user flows remain legible across states and screen sizes. Synchronize story UI states with shared layout and style/icon contracts when they exist."
+metadata:
+  version: "0.2.3"
 user-invocable: true
 argument-hint: "Describe the UI surface, task mode, and whether you need design guidance, review, or wireframe updates before implementation."
 ---
 # Design UX Guardrails
 
 Use this skill when designing or reviewing UI so layouts stay resilient under real content, interactive areas are never unexplained, and user flows remain legible across states and screen sizes.
+
+When this skill creates or edits a specification, follow `skill/layered-spec-core/references/skill-pack-versioning.md`.
 
 ## Supporting Artifacts
 
@@ -343,7 +347,7 @@ Checklist:
 
 When the request changes a user-visible workflow, first identify the related user-story state or create it through `user-story-workflow-documentation`.
 
-- Keep a state-specific wireframe, visible expectation, and technical mapping in the story.
+- Keep a state-specific wireframe, visible expectation, and `Uses` mapping in the story.
 - Keep shared geometry in `specs/ui/layout-wireframes.md`.
 - Keep reusable visual roles in `specs/ui/style-and-icons.md`.
 - Do not copy a shared rule into each story or promote a one-off story detail into the shared contract without reuse value.

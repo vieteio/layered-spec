@@ -4,6 +4,8 @@ This document defines the canonical shape for planning artifacts in this reposit
 
 Implemented plans become specs. Later implementation updates, refactorings, or compatibility slices may leave older specs partially outdated or fully superseded. Planning must therefore create new specs and keep affected existing specs synchronized.
 
+Specifications created or edited with this pack record the current skill-pack version as defined in `skill/layered-spec-core/references/skill-pack-versioning.md`.
+
 ## Primary Location
 
 
@@ -13,17 +15,56 @@ Store generated plans and active specs in this folder:
 
 Use this folder as the default planning and spec registry unless a narrower location is explicitly required by the task.
 
+Use these locations:
+
+- `specs/<spec-name>.md` for every solution spec, including a reusable framework spec, regardless of basis evaluation;
+- `specs/task-contexts/<task-name>/task_context.md` for reusable shared context assembled for one logical task;
+- `specs/task-contexts/<task-name>/candidates/<basis-name>.md` for focused basis candidates;
+- `specs/task-contexts/<task-name>/candidates/comparison.md` for the task's basis comparison;
+- `specs/stories/<solution-name>_user_stories.md` for a related user story;
+- `specs/architecture/template.md` for the active repository ADR template;
+- `specs/architecture/ADR-NNNN-<short-title>.md` for an architectural decision record.
+
 `specs/spec-lifecycle/` contains specification-lifecycle policy rather than generated solution specifications. Do not classify files in that folder with solution-spec lifecycle states such as `active`, `partially outdated`, `superseded`, or `archived`.
+
+`specs/architecture/` contains the active ADR template and architectural decision records rather than solution specifications. Exclude the directory from solution-spec lifecycle classification, and exclude `architecture/template.md` from ADR discovery. Keep this directory flat until a later architecture-organization decision introduces narrower subdirectories.
+
+`specs/task-contexts/` contains task-scoped reusable context rather than solution specifications. Read `skill/layered-spec-core/references/task-context.md` for its file shape, stable identifiers, and reuse boundary. A task context is not an exclusive source or a certification that every artifact has sufficient context.
+
+Basis evaluation never changes a spec's name or location.
+
+## Single-File Specs And Task Relationships
+
+A spec contains the solution-owned information needed to understand and implement its behavior: use cases and sub-use cases, requirements, types, invariants, logic, and other applicable layers. Candidate evaluations and task context provide supporting evidence; readers must not need them to discover the selected solution. Record the selected solution-local basis, relevant assumptions, local consequences, and required basis validation directly in the owning spec. Detailed alternative evaluation remains in the comparison.
+
+Shared framework contracts and architectural decisions remain authoritative in their own named specs and ADRs and are referenced rather than duplicated. A task may create or update separate business and reusable-framework specs. Splitting by reusable behavior is allowed; splitting one spec merely because basis evaluation occurred is not.
+
+Task folders and spec files have a many-to-many relationship. Their names may match for convenience but do not establish ownership. Task context lists affected artifacts; each spec preserves useful links to the contexts and comparisons that contributed to it. Resolve links relative to the referring artifact, not by assuming candidates are siblings of the spec. Keep the current flat organization; component hierarchy is deferred.
+
+## Terms
+
+- `task`: the request, problem, or desired change.
+- `solution`: the intended response to a task; it can be a new capability, refactoring, compatibility slice, or broader application logic.
+- `solution spec`: the planning artifact that describes a solution.
+- `basis`: a technology, API, protocol, framework, algorithm, or approach that supplies composable workflow steps.
+- `candidate`: a focused partial solution that evaluates one basis for one decision scope.
+- `decision reach`: whether one selected concern is `solution-local` or `architectural`.
+- `ADR`: the authoritative record for one architecturally significant selected concern and its rationale.
+- `task context`: optional reusable directives, evidence, findings, affected-artifact mappings, and gaps collected for one logical task.
+- `task workspace`: the task-scoped folder for optional context and candidate artifacts, independent of any consuming spec's name or location.
+- `basis state`: whether a basis is `confirmed`, `proposed` for implementation-backed validation, or `deferred` without a justified working basis.
 
 ## Planning Levels
 
 Use the smallest level that preserves the requested behavior:
 
 - user stories under `specs/stories/` describe user goals, user/application actions, visible states, waits that affect the journey, UI states, and E2E acceptance;
-- technical use-case specs under `specs/` describe application-owned transitions, validation, persistence, APIs, events, and implementation logic;
+- solution specifications under `specs/` describe application-owned transitions, validation, persistence, APIs, events, and implementation logic;
 - shared UI contracts under `specs/ui/` describe reusable spatial and visual rules across stories.
+- task development artifacts under `specs/task-contexts/<task-name>/candidates/` compare reasonable bases before dependent technical use cases are assembled;
+- optional task contexts under `specs/task-contexts/` reduce repeated investigation across stories, ADRs, basis evaluations, and specs without replacing artifact-owned context collection.
 
-For mixed work, maintain both a story and one or more technical use cases. A material application action or state in the story maps to the use case or use cases that implement it. Do not duplicate internal contracts, durable-state representations, or implementation algorithms in the story merely because the same feature has a technical spec.
+For mixed work, maintain both a story and one or more use cases in a solution specification. A material application action or state in the story maps to the use case or use cases that implement it. Do not duplicate internal contracts, durable-state representations, or implementation algorithms in the story merely because the same solution has a solution specification.
 
 Create or update a story when the change affects a meaningful user journey. Do not require one for an internal-only refactor, local algorithm change, or maintenance task with no user-visible workflow.
 
@@ -46,6 +87,8 @@ Allowed maintenance actions:
 - `replace`
 - `archive`
 
+ADRs use their own status inside each record, such as `proposed`, `accepted`, or `superseded`. Do not apply solution-spec lifecycle states to ADRs. A proposed ADR is pending rather than an authoritative existing-system constraint. When an accepted decision changes, create a superseding ADR and preserve the earlier record.
+
 ## Required Top-Level Sections
 
 Every non-trivial technical use-case planning artifact should use these top-level sections in this order. User-story artifacts use the shape in `User-Story Mapping` instead.
@@ -53,10 +96,11 @@ Every non-trivial technical use-case planning artifact should use these top-leve
 1. `Title and scope`
 2. `Planning anchor`
 3. `Connected groups or observed existing logic`
-4. `Use cases`
-5. `Implementation checklist`
-6. `Open questions`
-7. `Decision log`
+4. `Task development` when a material basis decision was evaluated
+5. `Use cases`
+6. `Implementation checklist`
+7. `Open questions`
+8. `Decision log`
 
 Do not add `Validation` or `Tests` as fixed top-level sections. Those belong under the relevant use case when needed.
 
@@ -86,11 +130,12 @@ The `Planning anchor` section should record:
 - the changed assumption or compatibility rule behind the change
 - why the work is non-local when applicable
 - impacted specs already present in `specs/`
+- relevant ADRs under `specs/architecture/`, their status, and whether they constrain or may be superseded by the task
 - preliminary spec action per impacted spec: `reuse`, `amend`, `mark outdated`, `replace`, or `archive`
 
 ## Connected Groups Or Observed Existing Logic
 
-Use this section to collect existing behavior before planning updates.
+Use this section to write the existing behavior and connected technical context needed by this spec before planning updates.
 
 When connected-code mapping is needed, group existing context by responsibility. Example groups:
 
@@ -101,6 +146,7 @@ When connected-code mapping is needed, group existing context by responsibility.
 5. Frontend consumers
 6. Validation
 7. Specs
+8. Governing architecture decisions
 
 The `Specs` group should list:
 
@@ -108,51 +154,141 @@ The `Specs` group should list:
 - why each spec is connected to the planning anchor
 - whether it remains authoritative or must be updated, marked outdated, or superseded
 
+The `Governing architecture decisions` group should list:
+
+- each relevant ADR and its status;
+- the affected decision concern;
+- how an accepted ADR constrains the task, or why changed evidence may require a superseding decision;
+- the specifications that consume the decision.
+
 When the task is local and full connected mapping is unnecessary, this section may instead contain `Observed Existing Logic` with focused notes only.
+
+When task context is available, reuse its relevant directives, findings, and evidence and cite stable identifiers where provenance is useful. Supplement it with original or additional sources whenever this spec needs context that is absent, incomplete, ambiguous, stale, or artifact-specific. Keep information local here when it has no expected cross-artifact consumer. Write newly discovered information back to an in-scope task context only when it is useful to several artifacts or corrects shared understanding.
+
+This section is written directly into the spec. Do not create an intermediate materialized context-view artifact. A task-context file is reusable input rather than a completeness boundary, so the technical artifact owner remains responsible for this section whether or not task context exists.
+
+## Task development
+
+Use `task development` in prose and `## Task development` as the section heading. Include it only when a solution has two or more reasonable bases whose selection materially changes workflow behavior, policy compliance, operational metrics, or architecture. It is not required when the basis is already fixed by task requirements, repository policy, or an authoritative existing-system contract.
+
+Record each concern's basis state as:
+
+- `confirmed`: available evidence supports selection and complete dependent technical use cases;
+- `proposed`: one basis is justified as an implementation proposal, but implementation must produce evidence defined by stable validation requirements in the consuming spec;
+- `deferred`: available evidence does not justify a working basis, so dependent use cases remain blocked while unrelated planning may continue.
+
+Classify every selected concern independently as `solution-local` or `architectural` and assign it exactly one authoritative record. A composed basis set may contain concerns with different reach.
+
+For a confirmed or proposed solution-local concern, the canonical solution spec records:
+
+- decision scope and non-negotiable constraints;
+- basis state, selected or proposed basis, and `solution-local` decision reach;
+- that the current specification is authoritative;
+- candidate and comparison artifact links;
+- the technical use cases that consume the selected capabilities.
+
+For a confirmed or proposed architectural concern, one ADR under `specs/architecture/` owns the context, drivers, considered bases, decision, consequences, evidence, and affected specifications. `architecture-decision-recording` owns ADR creation and lifecycle; basis evaluation hands the concern to it instead of creating the ADR itself. A consuming solution spec records:
+
+- decision scope and `architectural` reach;
+- a relative link to the governing ADR;
+- the candidate comparison link;
+- only local application consequences or parameters;
+- the technical use cases that consume the selected capabilities.
+
+Do not duplicate one decision's rationale in its ADR and consuming specs. `Both` means split ownership of distinct architectural and local concerns, not two authoritative copies of the same concern.
+
+Candidate files are task-owned focused evaluation slices rather than complete specs. `solution-basis-evaluation` owns their workflow shape and comparison criteria; `skill/layered-spec-core/references/task-context.md` owns workspace structure and identity. Basis evaluation does not relocate specs.
+
+Candidate evaluation may select multiple compatible bases for different solution concerns. Technical use cases assemble selected capabilities from their authoritative local records or governing ADRs and do not silently reopen a recorded decision.
+
+When a spec consumes a proposed basis, add stable basis-validation requirements to its owning `Requirements` layer and include their execution in the implementation checklist. State the evidence to produce, confirmation criteria, and reconsideration criteria. Basis-validation execution and result processing are separate follow-up work in this version; after implementation, ask the user whether required basis validation should be performed.
+
+Do not create an ADR or selected-basis record for a deferred concern.
+
+Task-development stages have these dependency constraints:
+
+- `Solution-basis candidate development and comparison`: candidates and comparisons must cite available evidence, including task-context identifiers when consumed. Task context is reusable input rather than a prerequisite or completeness guarantee.
+- `Task-development summary`: the comparison must be completed; every concern must have a basis state and allowed planning scope; and every confirmed or proposed concern must have a classified decision reach and authoritative local record or ADR handoff.
+- `Technical use-case completion`: confirmed or proposed basis capabilities consumed by each use case must be defined from their authoritative local record or governing ADR. Proposed-basis consumers must include their validation requirements. Deferred-basis consumers remain blocked.
+- `Dependent-stage completion`: outputs from every prerequisite stage must be persisted and verified before the dependent stage is completed.
+
+Do not present a deferred basis as selected or complete a technical use case that depends on it. Obtain context from all relevant available sources rather than treating task-context presence or absence as the completeness test.
 
 ## Use Cases
 
-Represent planning detail under numbered use cases. Use-case numbering may be hierarchical when a parent use case is refined into narrower subcases. Each use case begins with the use case name, then the workflow line, then optional layers.
+Represent planning detail under level-three use-case headings inside `## Use cases`. Numbers are optional; when present they may be hierarchical. Each use case begins with its exact title and optional number, then the workflow line, then optional layers. Use `### 4. Render`, `### UC4 — Render`, or `### Render`. Quote the entire title when a numeric-looking title should be treated as a name rather than a number.
+
+The same heading hierarchy applies to `## User stories` and optional `## States`: level-three headings introduce entries, and deeper headings explain the current entry. The next level-one or level-two heading ends the section. Surrounding document sections remain ordinary Markdown.
 
 Use this shape:
 
 ```md
+## Use cases
+
 ### 1. Use case name
 initial state --step name--> next state
-Layer_1_name:
+
+Requirements:
 layer content
-Layer_2_name:
+
+Logic:
 layer content
 
 ### 1.1 Child use case name
 child state --step name--> child next state
-Layer_name:
+
+Logic:
 layer content
 ```
 
 Rules:
 
-- The workflow line appears immediately under the use case name.
+- The workflow line or fenced `text`/`workflow` block appears immediately under the use case name.
 - The workflow line does not use a `Workflow:` label.
 - Layers are grouped directly under their use case.
 - Individual layers are not rendered as markdown headers.
+- Start each layer with a capitalized standalone column-zero `<layer name>:` and a preceding blank line. Precede it with a blank line unless it is the first body content. Use the standard names below, with an uppercase first letter; capitalization of the remaining words may vary. Use `Extension/<name>:` for custom layers.
+- Indent standalone internal labels by two spaces, for example `  Input:` or `  Rules:`. Ordinary continuation text may be unindented; indent any continuation line that would itself look like a layer label. Inline `Input: some text` needs no indentation because text follows the colon.
+- Headings and labels inside code, quotations, list items or HTML belong to that Markdown content. Close literal blocks before resuming document declarations.
 - Use hierarchical numbering such as `1`, `1.1`, `1.2`, `2` when a child use case refines the parent scope instead of introducing an unrelated top-level concern.
 - Keep hierarchical numbering shallow and consistent unless deeper nesting materially improves clarity.
 - Use-case-specific questions may be recorded in a use-case layer.
 - `Open questions` remains a top-level section for general, cross-use-case, or escalated question batches.
 
+### Requirements And Implementation Structure
+
+Use the smallest use-case structure that preserves both the required behavior and the implementation logic:
+
+1. Use one implementation use case with its workflow and `Logic` layers when they describe the behavior completely. Do not add `Requirements` or a declarative parent only for structural uniformity.
+2. Add `Requirements` directly to the implementation use case when non-trivial conditions, invariant obligations, rejection rules, or required outcomes need an explicit normative definition but one implementation workflow remains coherent. The use case's workflow and logic implement its own requirements; do not add self-referential `Realized by` or `Realizes` mappings.
+3. Introduce a declarative use case with separate realization mappings when the required behavior and its implementation decomposition each need an independently understandable structure, normally because several use cases jointly realize the behavior. Map the requirements through `Realized by`, and add the symmetric `Realizes` mapping to each realizing use case. A realizing use case may itself be declarative and may therefore contain `Realizes`, its own `Requirements`, and a further `Realized by` layer.
+
+The `Requirements` layer may specify declarative behavior through EARS requirements, identified workflow chains, hierarchical contracts, or identified non-transition constraints. A hierarchical contract uses a parent requirement as its umbrella obligation and descendant requirement IDs as its clauses. Each requirement has a stable ID.
+
+Hierarchical numbering expresses containment; it does not replace explicit realization mappings. When requirements belong to a separate declarative use case, that use case maps them through `Realized by`, and every realizing use case provides the symmetric `Realizes` mapping. A reusable framework use case remains separately identified; a user story or implementation use case whose behavior relies on it references it through `Uses`.
+
+For each requirement ID, the definition written directly in `Requirements` is authoritative. Optional duplicate or translated representations must reference that ID and preserve its meaning. The definition may be an EARS requirement, a workflow chain, a hierarchical contract entry or clause, or an identified non-transition constraint. EARS, Gherkin, RIDDL, or other representations also declare their format and semantic relation in `Requirement representations`; the contract does not require one scenario or translation syntax.
+
+Read `skill/layered-spec-core/references/requirements-and-realization.md` when a specification uses a `Requirements` layer, separate declarative and realizing use cases, `Realized by`, `Realizes`, `Uses`, framework boundaries, or external requirement representations.
+
+Read `skill/layered-spec-core/references/invariants.md` when a use case or user story uses an `Invariants` layer to record invariants for selected states or derive later state invariants from earlier ones.
+
+Read `skill/layered-spec-core/references/recursive-workflows.md` when a workflow directly or mutually invokes itself, dispatches over recursive data variants, or needs explicit base-case, progress, cycle, or depth-limit treatment.
+
 ## User-Story Mapping
 
 User stories are the parent product-workflow level, not a second prose rendering of technical use cases. A story may contain several user actions and application actions; each application action may decompose into one or more technical use cases with additional internal states.
 
-Use stable mapping labels where the relationship matters, for example `S2.step3 -> UC5.2`.
+Use a `Uses` layer with stable mapping labels where the relationship matters, for example `S2.step3 -> UC5.2`.
+
+When a story step uses a declarative use case, map the step to that declarative use case and optionally to its requirement IDs. Do not additionally map the story step to use cases listed in `Realized by` unless they represent distinct user-visible behavior. When no separate declarative use case exists, map the story step to the implementation use case that owns the behavior. Story scenarios may cite requirement IDs, but no particular scenario syntax is required.
 
 Story artifacts should normally contain:
 
 - `Terms` for non-trivial actor, artifact, and state vocabulary;
 - `Connected Groups Or Observed Existing Logic` when related stories, use cases, observed behavior, or shared UI contracts materially reach, resume, constrain, or otherwise operate on a story state or transition;
-- `States` with user expectations, an optional story-specific `UI` wireframe, and technical mapping;
-- `User stories` with a compact workflow and `User expectations`, `Technical mapping`, and `E2E tests` layers;
+- `States` with user expectations, an optional story-specific `UI` wireframe, and `Uses` mappings;
+- `User stories` with a compact workflow and `User expectations`, `Uses`, optional `Invariants`, and `E2E tests` layers;
 - `Implementation checklist`, `Open questions`, and `Decision log` when the story is actively driving implementation.
 
 Use actor names in story workflow lines. Waiting is an actor action on a transition, not a state. Record it in the transition label only when it changes ownership, visible status, interruption behavior, retry/cancel options, or another user expectation. Model an intermediate condition as a state only when that condition or its available actions are meaningful to the story; do not create a state solely to say that an actor waits.
@@ -172,14 +308,38 @@ Use these layer names when they help:
 - `Tables`
 - `Data`
 - `Detailed Workflow`
+- `Invariants`
 - `Logic Details`
 - `Observed Existing Logic`
 - `Input Validation And Contracts`
 - `Tests`
 - `Validation`
 - `Use Case Questions`
+- `Requirements`
+- `Realized by`
+- `Realizes`
+- `Uses`
+- `Requirement representations`
 
 Use additional layer names only when they communicate a distinct responsibility clearly.
+
+### Optional Layer Subsections
+
+Any layer may use optional named subsections: write `- Name:` beneath the layer label and indent its content beneath that item. A sibling subsection ends the preceding one; deeper labels remain content. Subsections retain the parent layer's rules, so grouped requirements, mappings and workflows keep their meaning. In `Detailed Workflow`, a name immediately followed by a chain still names that workflow; place explanatory prose first when grouping mixed text and workflows. Ordinary bullets and fenced examples remain available when a subsection is not intended.
+
+### Invariants Layer Syntax
+
+Use `Invariants` when selected workflow states have meaningful invariants and the derivation of later state invariants should be explicit. It is a selective parallel chain over the main workflow and does not require an invariant for every state.
+
+Keep a concise invariant outline in the layer, then place long invariant definitions, assumptions, calculations, proofs, and formal text in its detailed state-invariant and derivation entries. A derivation identifies its source invariant or invariants, target invariant or invariants, and the workflow transition or transition span that establishes the target.
+
+When a developer supplies ideas for why the solution logic or direction should work, preserve them in an optional `Rationale` subsection and assess each retained note as `supported`, `qualified`, `unsupported`, or `rejected`. Supported rationale and explicitly qualified parts may guide invariant selection and derivation. A rejected rationale is completely incorrect and requires a different justification, solution, or direction. Rationale does not replace the reasoning in a derivation.
+
+Invariants and derivations may use natural language, mathematical notation, pseudocode, Lean, or another named formalism. Natural-language reasoning may be a proof, justification, or proof sketch. Call it a **verifiable proof** only when it is expressed in a formalism and successfully verified by the corresponding checker.
+
+An invariant is not automatically a normative requirement. A requirement may reference an invariant owned by the same use case when satisfying that invariant is required. When an invariant belongs to a realizing use case, keep the owning requirement self-contained, retain the realization mappings, and let the invariant derivation identify the requirement it justifies.
+
+Follow `skill/layered-spec-core/references/invariants.md` for the exact shape, identifiers, workflow mapping, proof terminology, requirement relationship, and story-versus-technical boundary.
 
 ### Early Validation And Contract Rule
 
@@ -199,6 +359,8 @@ When the contract is meant to simplify later steps, say that explicitly and avoi
 ### Workflow Syntax
 
 Use this syntax for the workflow line or detailed workflow layers:
+
+Both locations use one workflow-expression grammar. `Detailed Workflow` can interleave chains with Markdown prose and ordinary lists; use standalone chains, named bullet blocks, local subheadings, or text/workflow fences. A group may contain blank lines. Structural parsing preserves those groups and the surrounding prose; it does not infer execution or termination semantics. See `skill/layered-spec-core/references/recursive-workflows.md` for mixed-content authoring and recursive chain labels.
 
 `state 1 --step name--> state 2`
 
@@ -240,15 +402,39 @@ Examples:
 
 Place loop workflows in fenced text blocks or inline code so the enclosing `|` characters are not interpreted as a Markdown table.
 
+Recursive workflows use the existing composition, conditional, parallel, loop, typed-state, and use-case-reference syntax. Do not introduce a recursion delimiter or represent recursion as a loop merely because execution repeats.
+
+Show a recursive call as a normal transition whose step names the called chain or use case:
+
+`recursive input --apply recursive-step-a recursively--> recursive result`
+
+For compact recursion, place one separately labeled workflow chain per distinct recursive step body in `Detailed Workflow`, then reference those labels from call transitions. For larger recursion, give the dispatcher a parent use case and give materially distinct recursive step bodies hierarchical child use cases. Use `Uses` to map a call transition to another use case; self-referential and mutually referential `Uses` mappings are valid when they describe recursive invocation rather than realization.
+
+A recursive step may terminate locally, call itself, call another recursive step, or delegate without its own exit. The recursive family as a whole must identify at least one reachable base or exit case and a progress measure such as descent to a strict substructure, fewer remaining elements, consumed input, or decreasing depth. When the data may contain cycles or unbounded references, specify cycle or depth-limit behavior explicitly.
+
+Use conditional branching for type-directed dispatch and alternative base or recursive cases. Use composition for ordered recursive calls. Use parallel branching only when recursive branches are independent and participate together. A loop may contain recursive dispatch when processing a collection, but the loop and recursive call remain separate structures.
+
+Detailed templates for direct structural recursion, compact mutual recursion, hierarchical type dispatch, multiple recursive children, and guarded graph traversal are in `skill/layered-spec-core/references/recursive-workflows.md`.
+
 Refactoring syntax exists because implemented specs can become outdated after an implementation update. Use it when the plan changes an existing workflow rather than adding a net-new one.
+
+#### Workflow Line Comments
+
+A workflow chain in an answer may contain `#` or `//` comments. Place a commented chain in a fenced `workflow` code section.
+
+- Outside quoted text, `#` or `//` starts a comment when it is the first non-whitespace text on a line or is preceded by a space or tab.
+- The comment ends at the end of the line.
+- Matching `"..."`, `'...'`, and backtick spans protect comment markers.
+
+Do not use comments in workflow chains written to specifications or user stories.
 
 ### Scientific Formula Syntax
 
 Use KaTeX only when a scientific or mathematical expression materially clarifies a technical rule, algorithm, invariant, transformation, or data definition. Keep ordinary implementation prose in plain language.
 
-Put formulas primarily in `Execution Logic`, `Implementation Logic`, `Logic Details`, or `Data`. Use inline KaTeX (`$...$`) for a short expression within a sentence and display KaTeX (`$$...$$`) for a standalone equation, derivation, or multi-line aligned expression.
+Put formulas primarily in `Execution Logic`, `Implementation Logic`, `Logic Details`, `Data`, or `Invariants`. Use inline KaTeX (`$...$`) for a short expression within a sentence and display KaTeX (`$$...$$`) for a standalone equation, derivation, or multi-line aligned expression.
 
-Do not put KaTeX in workflow lines, transition labels, branch labels, or workflow-state names. Those chains must remain scannable state-to-state prose. Give the chain a concise semantic state or step name, then place the formula in the relevant Logic layer and refer to the named state or quantity there.
+Do not put KaTeX in workflow lines, transition labels, branch labels, or workflow-state names. Those chains must remain scannable state-to-state prose. Give the chain a concise semantic state or step name, then place the formula in the relevant detailed layer and refer to the named state or quantity there.
 
 For example:
 
@@ -256,7 +442,7 @@ For example:
 raw measurements --estimate model parameters--> fitted model
 
 Logic Details:
-Least-squares estimator:
+  Least-squares estimator:
 $$
 \hat{\theta} = \underset{\theta}{\operatorname{arg\,min}}\; \lVert X\theta - y \rVert_2^2
 $$
@@ -296,6 +482,7 @@ Prefer capturing this detail in one or more of these layers when useful:
 - `Data`
 - `Files And Functions`
 - `Logic Details`
+- `Invariants`
 
 ### Implementation Logic Layer Rule
 
@@ -385,6 +572,7 @@ Use this shape for the `Tests` layer:
 Tests:
 optional test file name
  - description: test 1 description
+   requirements: optional requirement ids
    input: input description
    workflow: state 1 with given input --one or several steps--> final state 1
    expected outcome: expected output or exception description
@@ -395,6 +583,10 @@ Rules:
 - The optional test file name line may be omitted.
 - At least one of `description` or `workflow` must be present for each test entry.
 - If `workflow` is present, `input` and `expected outcome` should usually be present as well.
+- When a test verifies identified requirements, add their IDs to the test entry. A scenario or external representation does not replace its canonical requirement unless equivalent coverage is explicitly declared and validated.
+- Plan the smallest useful set of tests for changed observable outcomes and important rejection paths; do not mirror every implementation step.
+- When an observable workflow depends on application assembly, plan a representative test through its real entrypoint and the minimum assembled runtime needed to reach the outcome. Name relevant registration, routing, configuration, dependency, scheduling, or event-delivery boundaries in `description` or `workflow` when they are known. Focused tests of inner logic may supplement this test but do not prove that the application exposes the behavior.
+- For an assembled-path acceptance test, include `expected outcome` with the observable success or rejection. If the required assembled path cannot yet be tested or its composition is unknown, record that verification gap explicitly rather than treating a narrower test as complete coverage.
 
 ## Implementation Checklist
 
@@ -426,6 +618,8 @@ When more execution detail is needed, each step should include:
 - `Metrics`
 
 Spec maintenance tasks belong here. If a plan updates behavior already described in an existing spec, include the spec update or supersession step in the implementation checklist rather than leaving it as optional cleanup.
+
+When requirement mappings are present, retain the requirement IDs satisfied by each implementation task so checklist completion can be traced back to normative behavior.
 
 If implementation is expected to create a function or method that matches a use-case workflow step, note in that implementation step that the docstring should name the workflow link.
 
@@ -481,12 +675,35 @@ A valid planning artifact should satisfy all of these:
 - distinguishes story-level workflows from technical use cases and maps material application transitions between them when both levels apply
 - keeps story-specific UI states in `specs/stories/` and reusable UI rules in `specs/ui/`
 - records code-to-spec traceability when implementation boundaries map cleanly to use-case workflow steps
+- records task-development candidate evidence, decision reach, one authoritative record per selected concern, and the selected-basis handoff when a material solution choice was evaluated
+- keeps architectural decisions in ADRs, keeps solution-local decisions in their canonical specs, and uses references instead of duplicated rationale
+- keeps candidate workflows focused on evaluation rather than turning every candidate into a complete solution spec
+- keeps each solution spec in one named file regardless of basis evaluation, with its selected local solution understandable without opening task context or candidates
+- uses explicit many-to-many task/spec links and file-qualified references to reusable framework contracts without duplicated ownership
 - uses workflow operators consistently, including refactoring syntax when updating an existing implementation path
-- uses KaTeX for scientific formulas only where it clarifies technical logic or data, while keeping workflow chains as readable prose
+- gives every distinct recursive step body its own workflow chain and names the target of every recursive call
+- records a reachable base or exit case plus a progress, cycle, or depth-limit contract for every recursive family
+- uses KaTeX for scientific formulas only where it clarifies technical logic, data, or invariants, while keeping workflow chains and invariant outlines as readable prose
+- uses `Invariants` only for meaningful workflow states, keeps its outline concise, and maps every derivation from identified source invariants through workflow logic to identified target invariants
+- preserves supplied solution rationale separately from invariants and derivations, assesses retained notes, and prevents unsupported or rejected rationale from being used as derivation support
+- reserves **verifiable proof** for formal text successfully checked by its corresponding verifier
 - uses hierarchical use-case numbering when parent and child use cases need distinct workflow treatment
 - plans early validation and the post-validation contract when later workflow steps depend on stronger assumptions
 - uses `Implementation Logic` only when algorithmic detail is needed beyond declarative workflow behavior, and uses `Implementation Logic Proposal` or omission when the implementation should stay developer-owned
 - introduces non-trivial decompositions and intermediate algorithmic structures in the plan when implementation quality depends on them
+- uses the smallest sufficient use-case structure and does not introduce a declarative parent when one implementation use case remains clear
+- keeps non-trivial requirements on the owning implementation use case when separate declarative requirements and realizing use cases are unnecessary
+- uses identified requirement entries and symmetric `Realized by` / `Realizes` mappings when required behavior and its realization both need separate structures
+- permits a declarative realizing use case to contain `Realizes`, its own `Requirements`, and `Realized by`
+- uses `Uses` to map user-story steps and implementation-use-case steps to referenced declarative or implementation use cases, including reusable framework boundaries
+- keeps the definition under each requirement ID as the meaning that optional duplicate or translated representations must preserve
+- checks that every requirement is implemented by its owning use case or is realized, explicitly deferred, or declared outside implementation ownership; every realization mapping is symmetric, and non-deferred declarative requirements eventually reach implementation coverage
 - uses direct task-native wording in `Title and scope` and avoids abstract boilerplate
 - groups `Title and scope` by conceptual subchange rather than raw edit order when multiple related changes are involved
 - keeps `Title and scope` readable by using one compact lead sentence + an optional second sentence when detail is needed
+
+- discovers relevant ADRs, preserves their lifecycle state, and references architectural rationale instead of duplicating it
+- records every evaluated concern as confirmed, proposed, or deferred with exactly one allowed decision destination
+- includes stable validation requirements when a spec consumes a proposed basis
+- leaves deferred-basis-dependent use cases blocked without blocking unrelated planning
+- treats task context as reusable shared evidence rather than a completeness boundary or exclusive source

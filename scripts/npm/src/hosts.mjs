@@ -7,8 +7,27 @@ export const SKILL_NAMES = [
   "spec-first-planning-loop",
   "connected-code-mapping",
   "code-logic-workflow-documentation",
+  "solution-basis-evaluation",
+  "architecture-decision-recording",
   "user-story-workflow-documentation",
   "design-ux-guardrails"
+];
+
+export const CORE_REFERENCE_NAMES = [
+  "requirements-and-realization.md",
+  "invariants.md",
+  "recursive-workflows.md",
+  "skill-pack-versioning.md",
+  "task-context.md",
+  "validation.md"
+];
+
+export const SKILL_RESOURCE_PATHS = [
+  ["design-ux-guardrails", "references", "design-system-sync.md"],
+  ["connected-code-mapping", "references", "task-context-evidence.md"],
+  ["solution-basis-evaluation", "references", "candidate-artifacts.md"],
+  ["architecture-decision-recording", "references", "adr-lifecycle.md"],
+  ["architecture-decision-recording", "assets", "default_adr_template.md"]
 ];
 
 const host = (displayName, repo, user) => ({ displayName, repo, user });

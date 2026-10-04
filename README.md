@@ -3,42 +3,66 @@
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=vieteio.layered-spec)
 
 
-Compact syntax for spec-programming which makes AI code generation **predictable** for well-decomposed tasks and speed up development.
-
-> **✨ New!** Layered-spec now includes a User-stories level, supplementing spec with a context, UI layers and e2e tests.
+Compact solution specification syntax which makes AI code generation **predictable** for well-decomposed tasks and speeds up development.
 
 ## General idea
 
-Solution logic can be fully described in several layers, starting with a workflow chain and then adding details gradually.
+Solution logic can be fully described in several layers, starting with a workflow diagram and then adding details gradually.
 
-AI-agent generates high quality specs from task in chat.
+AI-agent generates high quality specs from a task in chat.
 First 1-3 layers are for review by a user, remaining layers are for reliable code generation by AI.
 
 Compact layered syntax makes spec driven development concise, fast, and convenient.
 
+## New! Architecture decision records (ADRs) support is added into layered-spec.
+Both users and AI agents can now create records for their decisions.
+
+What does this mean?
+
+1. When a user provides architectural decision details in their messages, those decisions are now recorded in ADRs in addition to being applied to the described use cases. An architectural decision that is implicitly applied to a use case will therefore also be explicitly documented in an ADR.
+
+2. When a user does not provide solution details for a specified task, the AI agent makes architectural and technical decisions on its own. To make those decisions explicit, the AI agent records them in ADRs as well.
+
+When making a decision requires comparing several alternatives, the default workflow now includes a step for comparing and evaluating them.
+
+The structure of the `specs` folder has been updated to store ADRs, alternative evaluation results, and task context that is shared across several workflow steps.
+
+See the [changelog](CHANGELOG.md) for the other releases details.
+
 ## Quick start
 
 1. Install spec skills
+
+Ask your AI-agent
+```
+Install skills from https://github.com/vieteio/layered-spec
+```
+<details>
+<summary>Or install with npm</summary>
+
 ```bash
 npm install -g @viete-io/layered-spec@latest
 cd your-project
 layered-spec init
 ```
+
+</details>
+
 2. Describe task in a chat and add "Make spec for that" or "Update spec for that"
 
-3. Review spec and refine it in chat with AI
+3. Review spec and edit it in the chat with AI
 
-4. When spec is ready, write in chat "Implement the spec" or "Implement spec update"
+4. When spec is ready, write "Implement the spec" or "Implement spec update"
 
-### Spec driven vibecoding
+### Spec-driven vibecoding
 
 Skip spec review step.
 
 Limit your work to
 1. Describe task and add "Make spec for that"
-2. Next message in chat "Implement the spec"
+2. Message in the chat "Implement the spec"
 
-AI agent will decompose moderate level complexity tasks well into use-cases with detailed workflow chains and then will generate code properly for well decomposed tasks.
+AI agent will decompose moderately level complexity tasks well into use cases with detailed workflow chains and then will generate code properly for well-decomposed tasks.
 
 ## Skills
 
@@ -48,7 +72,18 @@ Canonical skill sources live under:
 
 - `skill/` — skill definitions
 - `planning/planning_contract.md` — spec structure description
-- `skill/spec-first-planning-loop/assets/default_workflow.md` — default specification lifecycle installed with the planning-loop skill
+
+Spec lifecycle files live under:
+- `specs/spec-lifecycle/workflow.md` — repository lifecycle workflow that users can review and customize
+- `specs/spec-lifecycle/workflow.json` — workflow settings, including steps settings and validation preferences
+
+Generated planning artifacts may also include:
+
+- `specs/task-contexts/<task-name>/task_context.md` — reusable task evidence and findings
+- `specs/task-contexts/<task-name>/candidates/` — task-owned solution-basis candidates and comparisons
+- `specs/architecture/` — architecture decision records and an optional repository ADR template
+- `specs/stories/<solution-name>_user_stories.md` — user journeys with `Uses` mappings and E2E acceptance coverage
+- `specs/ui/layout-wireframes.md` and `specs/ui/style-and-icons.md` — shared UI contracts
 
 Describe a task in chat with an AI agent and ask it to create a spec. Review the spec and refine it in chat. When the spec is correct, ask the agent to implement it in a loop.
 
@@ -87,7 +122,7 @@ To return to the stable release, install `@latest` again. The selected package v
 Clone this repository, then run the existing Python installer from its root:
 
 ```bash
-python scripts/install_skillpack.py --host <host_name> 
+python scripts/install_skillpack.py --host <host_name>
 ```
 
 Requires Python 3.10 or later.
@@ -102,17 +137,30 @@ Repo-scoped installs place skills under each host's expected directory (for exam
 
 See the [layered-spec meetup demo](https://github.com/vieteio/layered-spec-meetup-demo) project with spec and AI-agent chat log in the repo.
 
-## User-stories
+## User stories and UI planning
 
-**✨ New!** User stories are added as a new level. They are extracted automatically from tasks descriptions in a chat.
+For changes to a meaningful user journey, the default lifecycle prepares a user story, synchronizes affected UI contracts, and maps story states and application actions to solution use cases through `Uses`. Stories can include user-visible invariants and E2E acceptance tests. Internal maintenance tasks can proceed directly to technical planning.
 
-User stories are separated well from specifications. A user story describes an end-to-end scenario, including the user's actions and the application's responses. A spec describes only application actions, so each action begins with an event—most often one initiated by the user.
+The pack includes `user-story-workflow-documentation` and `design-ux-guardrails` alongside the technical planning, basis evaluation, and ADR skills. Both public installers install all eight skills and their supporting references.
 
-User stories also include UI layers that describe the interface the user interacts with during the scenario.
+## Interactive planning approach
 
-## Recommended spec layers:
+Describe the app or new feature in a free-form way to give the AI agent a general understanding.
+This can also be a code refactoring task rather than a feature. The workflow syntax supports that, see the syntax below.
+
+Then prepare workflows for each meaningful use case, each of which may start with some trigger such as user input or an API call.
+
+Ask the AI agent to add workflows for any missing use cases.
+
+Next, add layers to some workflows, fill those layers with examples, and ask the AI agent to complete the corresponding layers in other workflows.
+
+Use typed workflows to control data flow strictly.
+
+Recommended layers:
 
 - Workflow
+- Requirements and realization mappings
+- Invariants
 - Types and tables
 - Logic
 - Events and endpoints
@@ -128,29 +176,42 @@ step: state 1 --step name--> state 2
 conditional branches: [branch1, branch2, branch3]
 parallel branches: (branch1, branch2, branch3)
 workflow refactoring: {workflow1} --refactoring step--> {workflow2}
+workflow loop: | loop condition: input --step name--> outcome |
+inline comment: // comment
+inline comment: # comment
 ```
+
+Place loop workflows in fenced text blocks or inline code so the enclosing `|` characters are not interpreted as a Markdown table.
 
 Example:
 
 ```python
 state 1 --step name 1--> state 2 --step name 2--> [
-conditional state 1 --branch 1 step--> branch 1 state,
-conditional state 2 --branch 2 step--> branch 2 state
+  conditional state 1 --branch 1 step--> branch 1 state, // first state option
+  conditional state 2 --branch 2 step--> branch 2 state  // second state option
 ] --step name 3--> final state
+
+| process each file: file --perform analysis--> report |
+
+| while unfinished work items remain:
+  current work state --select next item--> selected item # one item per iteration
+  --process item--> updated work state |
 ```
 
 ### Layered use cases
 
 ```md
-### 1. use_case_name
+## Use cases
+
+### 1. Use case name
 workflow
-Layer_1_name: layer content
+
+Layer_1_name:
+layer content
+
 Layer_2_name:
 multi line
 layer content
-Layer_3_name: multi line
-layer
-content
 ```
 
 #### Type or table layer syntax
@@ -172,17 +233,14 @@ Syntax:
 
 ```python
 step: state 1: Type --step name--> state 2: Type
-conditional branches: [branch1, branch2, branch3]
-parallel branches: (branch1, branch2, branch3)
-workflow refactoring: {workflow1} --refactoring step--> {workflow2}
 ```
 
 Example:
 
 ```python
 state 1: Tuple[A, B] --step name 1--> state 2: List[X] --step name 2--> [
-conditional state 1 --branch 1 step--> branch 1 state,
-conditional state 2 --branch 2 step--> branch 2 state
+  conditional state 1 --branch 1 step--> branch 1 state,
+  conditional state 2 --branch 2 step--> branch 2 state
 ] --step name 3--> final state
 ```
 

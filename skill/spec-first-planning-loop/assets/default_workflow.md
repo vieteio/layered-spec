@@ -1,26 +1,59 @@
 # Specification Lifecycle Workflow
 
+- Default workflow version: `0.2.3`
+
+## Workflow Configuration
+
+Read `workflow.json` beside the active workflow before choosing the affected steps. `basis_evaluation` and `specification_check_loop` are top-level booleans and default to `true`; an absent switch has the same meaning as `true`.
+
+- When `basis_evaluation` is `false`, skip `Evaluate solution basis` regardless of its `Run when` condition. Do not create candidates or a comparison, and continue with `Resolve architecture decisions` without a basis handoff. The skip does not confirm a basis or establish that no material alternatives exist.
+- When `specification_check_loop` is `false`, skip both `Check specification completeness` and `Check specification consistency`, then continue with `Select the handoff`. Do not describe either check as passed.
+
+The disabled switch is the complete skip reason; do not add a separate skip record to planning artifacts. These switches do not change `validation.enabled`, which independently controls structural and reference validation.
+
 ## Workflow Chain
+
+After each story or technical-use-case preparation step, after subsequent edits and before cross-artifact consistency review, follow `skill/layered-spec-core/references/validation.md` (workspace-root-relative). Apply its validation/repair completion rule, saved validation preferences, installation approval and permitted skips. This structural/reference check also applies when the optional semantic review loop is skipped; it does not change implementation authorization.
 
 ```text
 task in chat
-  --classify task and required planning levels--> classified planning task
-  --reverse-document existing behavior when necessary--> understood existing behavior
-  --collect connected context when necessary--> grounded planning task
+  --classify task and affected planning artifacts--> classified planning task
+  --build shared task context--> context-enriched planning task
+  --evaluate solution basis when needed-->
+[
+  basis fixed or no material alternatives
+    --record why comparison is skipped--> confirmed basis handoff,
+
+  materially different reasonable bases exist
+    --develop focused candidates--> solution-basis candidates
+    --compare candidates using available evidence, including task-context evidence--> solution-basis comparison
+    --classify selection maturity-->
+    [
+      available evidence supports the selection
+        --record confirmed basis--> confirmed basis handoff,
+
+      one basis is suitable for implementation but requires implementation evidence
+        --record proposed basis and its validation requirements--> proposed basis handoff,
+
+      available evidence does not justify an implementation basis
+        --record classified questions and deferred concerns--> deferred basis handoff
+    ]
+]
+  --resolve applicable architecture decisions within the allowed basis handoff--> architecture-aware planning task
   --prepare a user story when the task changes a meaningful user journey--> story-aware planning task
   --synchronize shared UI contracts when visible UI changes--> product workflow defined
-  --prepare layered technical use cases--> canonical solution spec
-  --prepare implementation checklist--> reviewable solution spec with implementation checklist
-| while completeness and consistency checks are needed and the specification has not passed both checks:
-  reviewable solution spec with implementation checklist or corrected solution spec
-    --check specification completeness--> completeness-checked solution spec
-    --check specification consistency--> reviewable solution spec |
+  --prepare layered technical use cases within the allowed decision handoffs--> canonical planning artifact set
+  --prepare implementation checklist when implementation is planned--> reviewable planning artifact set
+| while the planning artifact set has not been verified against the task and all relevant available context:
+  reviewable planning artifact set or corrected planning artifact set
+    --check completeness against the task and all relevant available context--> completeness-checked planning artifact set
+    --check cross-artifact consistency and evidence references--> task-accurate reviewable planning artifact set |
   --select handoff-->
 [
   implementation is authorized
-    --implement the plan in a loop--> implemented and synchronized solution spec,
+    --implement the plan and synchronize code and planning artifacts--> implemented and synchronized planning artifact set,
   implementation requires confirmation
-    --present the prepared specification and ask whether to implement it--> spec ready for user review
+    --present the prepared artifacts and ask whether to implement them--> planning artifacts ready for user review
 ]
 ```
 
@@ -29,7 +62,7 @@ task in chat
 ### Classify the task
 
 Purpose:
-- Determine the planning route, required artifact levels, context needs, and related-spec scope so later steps start from explicit state.
+- Determine the planning route, required artifact levels, context and basis needs, and related-spec scope so later steps start from explicit state.
 
 Input:
 - User request and conversation-local decisions.
@@ -37,73 +70,118 @@ Input:
 
 Logic:
 1. Classify the request as trivial/local, mostly new non-trivial behavior, a refactoring, or a compatibility/migration slice.
-2. Classify the required planning levels as user-story only, technical-use-case only, or mixed.
-3. Decide whether existing runtime behavior needs reverse documentation.
-4. Decide whether connected-code mapping is required.
+2. Classify the affected planning artifacts as task context, user story, ADR, spec, UI contract, or a combination.
+3. Decide whether focused code inspection, connected-code mapping, or durable reverse documentation may contribute useful shared context.
+4. Detect whether materially different reasonable solution bases may exist; do not select a basis before decision-relevant evidence is collected.
 5. Identify related solution specs and preliminary actions: `reuse`, `amend`, `mark outdated`, `replace`, or `archive`.
-6. Exclude `specs/spec-lifecycle/` from solution-spec discovery and lifecycle classification.
+   Identify spec names and behavior ownership independently of the task name. One task may affect several specs, including business and reusable-framework specs; several tasks may contribute to the same spec.
+6. Identify relevant ADRs under `specs/architecture/`, their status, and whether they constrain or may be superseded by the task.
+7. Exclude `specs/spec-lifecycle/`, `specs/architecture/`, and `specs/task-contexts/` from solution-spec discovery and lifecycle classification. Exclude `architecture/template.md` from ADR discovery.
 
 Output:
-- Classified planning task with a planning anchor, required artifact levels, context needs, and related-spec actions.
+- Classified planning task with a planning anchor, affected artifact kinds, context needs, possible basis-decision scope, and related-spec actions.
 
 Record:
 - Meaningful scope assumptions and preliminary related-spec actions.
 
 Next:
-- `Reverse-document existing behavior`.
+- `Build task context`.
 
-### Reverse-document existing behavior
+### Build task context
 
 Purpose:
-- Make uncertain existing behavior explicit enough to ground connected mapping and planning without presenting observations as planned behavior.
-
-Run when:
-- Existing runtime behavior cannot be described reliably enough from current specs and focused code inspection.
-
-Skip when:
-- Existing behavior is already clear enough to support connected mapping and planning.
+- Create or resume reusable shared context for the logical task so later artifacts can reuse common directives, evidence, findings, and affected-artifact mappings.
+- Completing this step does not certify that every artifact has sufficient context; each artifact-producing skill remains responsible for additional investigation needed by its output.
 
 Input:
 - Classified planning task.
-- Concrete runtime entrypoint or code path.
+- Current user request and relevant conversation clarifications.
+- Repository instructions and existing task context when the logical task is being resumed.
+- Potentially related stories, ADRs, specs, UI contracts, source files, tests, configuration, and external evidence.
 
-Skill:
-- `code-logic-workflow-documentation`
+Logic:
+1. Read `skill/layered-spec-core/references/task-context.md` completely.
+2. Create or resume the logical task's workspace according to the shared contract, with its context at `specs/task-contexts/<task-name>/task_context.md`. Preserve the stable context identity independently of the folder name. Seed the file with the outcome, scope, task directives and their authority, known sources, preliminary affected artifacts, and open concerns; do not create an empty placeholder.
+3. Inspect related planning artifacts, repository rules, and focused code entry points. Add reusable evidence with stable identifiers and provenance.
+4. When shared understanding requires tracing a non-local change across ownership, dataflow, persistence, propagation, UI, or validation responsibilities, read and use `connected-code-mapping`. Contribute the reusable evidence, artifact-neutral findings, concern relationships, and affected-surface map to task context.
+5. When an important existing workflow is insufficiently documented and durable documentation would simplify later work, read and use `code-logic-workflow-documentation`. Create or update the observed workflow documentation, link it from task context, and extract reusable evidence and findings. Record small observations directly instead of creating unnecessary durable documentation.
+6. Synthesize artifact-neutral findings that connect directives and evidence to user-visible, architectural, implementation, validation, or unresolved concerns. Record their derivations and potential consumers.
+7. Repeat focused inspection, connected mapping, reverse documentation, and synthesis while additional shared context is useful for known downstream work. Record remaining gaps for the artifact owner that can resolve them.
+8. Record the current revision, affected artifacts, gaps, and expected consumers. Keep artifact-specific details out of shared context when no other consumer is expected.
 
 Output:
-- Standalone observed workflow context or an observed-logic section suitable for connected mapping.
+- An active reusable task context at `specs/task-contexts/<task-name>/task_context.md`.
+- The task-workspace path for optional candidate storage and explicit links to affected artifacts; names need not match.
+- Optional observed workflow documentation when durable reverse documentation was useful.
+- A context-enriched planning task; not a completeness certification for later artifacts.
 
 Record:
-- The reason for skipping when reverse documentation is unnecessary.
+- Task directives and authority, evidence and provenance, artifact-neutral findings and derivations, related artifacts and actions, relevant ADR status, material gaps and conflicts, and explicitly deferred shared investigation.
+- The reason connected mapping or durable reverse documentation was unnecessary when that distinction is material.
 
 Next:
-- `Collect connected context`.
+- `Evaluate solution basis`.
 
-### Collect connected context
+### Evaluate solution basis
 
 Purpose:
-- Trace the change across connected responsibilities so later decisions and specifications use evidence and do not omit affected surfaces.
+- Produce the strongest evidence-backed basis state for each concern before dependent technical use cases are prepared: confirmed, proposed for implementation-backed validation, or deferred without a justified working basis; or record why comparison is unnecessary.
 
 Run when:
-- The task is non-local, crosses ownership boundaries, or changes shared state or data shape.
+- Two or more reasonable technologies, APIs, protocols, frameworks, algorithms, or approaches materially change workflow behavior, policy compliance, operational metrics, or architecture.
 
 Skip when:
-- Focused observed logic is sufficient for a local technical-use-case spec.
+- `basis_evaluation` in `workflow.json` is `false`; this configuration skip takes precedence over `Run when` and requires no additional skip record.
+- An explicit requirement, repository policy, authoritative contract, or applicable accepted ADR whose context remains valid fixes the basis; or no materially different reasonable alternatives exist.
 
 Input:
-- Classified planning task.
-- Reverse-documented behavior when produced.
-- Relevant existing specs.
+- Task outcome and non-negotiable constraints.
+- Thin user-visible outcome context when applicable.
+- The task-workspace path for `candidates/`, independent of any consuming spec's name or location.
+- Task context when available and all other relevant evidence needed by the comparison.
 
 Skill:
-- `connected-code-mapping`
+- `solution-basis-evaluation`
 
 Output:
-- Connected context in the canonical solution spec.
+- Task-owned candidate and comparison artifacts under `specs/task-contexts/<task-name>/candidates/`, with `confirmed`, `proposed`, or `deferred` basis state per concern. Existing specs are not relocated when evaluation begins.
+- For each confirmed or proposed concern, a decision reach and either an authoritative solution-local record or an architectural decision handoff.
+- For each proposed concern, stable planned spec requirements defining validation evidence, confirmation criteria, and reconsideration criteria.
+- For each deferred concern, no selected basis or decision record and a blocker limited to dependent planning.
+- Confirmed basis handoff with an explicit skip reason when evaluation does not run for an evidence-based reason. A configuration skip produces no basis handoff or additional record.
 
 Record:
-- Mapped responsibility groups, evidence, related-spec actions, compatibility strategy, validation path, and explicitly deferred surfaces.
-- The reason for skipping when focused observed logic is sufficient.
+- Decision scope, basis state, selected or proposed basis when present, rejected and deferred bases, evidence, assumptions, validation requirements, decision reach and local record or architectural handoff, allowed consumers, or explicit evidence-based skip reason. Record nothing for a configuration skip.
+
+Next:
+- `Resolve architecture decisions`.
+
+### Resolve architecture decisions
+
+Purpose:
+- Apply an existing architecture decision or create, update, or supersede the one ADR that authoritatively owns each architectural concern permitted by the basis handoff.
+- Leave a deferred architectural concern unresolved without inventing an ADR.
+
+Run when:
+- The task contains a direct architectural decision, changes an accepted decision, produces a confirmed or proposed architectural basis, or needs an existing ADR applied or synchronized.
+
+Skip when:
+- No architectural concern or affected ADR is relevant.
+
+Input:
+- Original task and relevant conversation decisions.
+- Task context when available and any additional ADR-specific sources.
+- Existing ADRs and affected or planned specifications.
+- Confirmed, proposed, or deferred basis handoff when evaluation ran.
+
+Skill:
+- `architecture-decision-recording`
+
+Output:
+- Applicable governing ADR references, newly proposed ADRs, synchronized non-decision metadata, superseding ADRs, or an explicit unresolved result for deferred architectural concerns.
+
+Record:
+- ADR operation and authority, status, relevant context and evidence references, basis comparison when applicable, affected specifications, supersession links, or reason no ADR was created.
 
 Next:
 - `Prepare the user story`.
@@ -120,7 +198,8 @@ Skip when:
 - The task is an internal-only refactoring, local algorithm change, or non-user-visible maintenance task.
 
 Input:
-- Grounded planning task.
+- Original task and relevant available context, including task context when present.
+- Confirmed, proposed, or deferred basis handoff and applicable governing or proposed ADRs.
 - Related stories, use cases, and observed visible behavior.
 
 Skill:
@@ -166,7 +245,8 @@ Next:
 ### Prepare technical use cases
 
 Purpose:
-- Turn the grounded task and applicable product contracts into the canonical technical specification for the planned slice.
+- Produce or update the canonical solution specification from all relevant available context using the smallest use-case structure that preserves required behavior and implementation logic.
+- Reuse shared context when available without treating it as complete or exclusive.
 
 Run when:
 - The task requires application-owned state transitions, validation, persistence, APIs, events, implementation logic, or another workflow-bearing technical section.
@@ -175,17 +255,23 @@ Skip when:
 - A user-story-only clarification intentionally stops before technical system behavior is planned.
 
 Input:
-- Grounded planning task.
+- Original task and relevant conversation decisions.
+- Task context when available, plus original or additional sources required for this technical artifact.
+- Confirmed, proposed, or deferred basis handoff and applicable governing or proposed ADRs.
 - Related user story and UI contracts when applicable.
+- Explicit paths for each affected or planned spec, including separate business and reusable-framework specs when reuse justifies that boundary.
 
 Skill:
 - `layered-workflow-planning`
 
 Output:
-- Canonical solution spec with planning anchor, connected or observed logic, and technical use cases for the planned slice.
+- One or more canonical named solution specs, each at `specs/<spec-name>.md`, with planning anchor, connected or observed logic, task-development handoff when applicable, governing ADR references without duplicated rationale, and technical use cases in the smallest sufficient form: implementation workflow and logic alone, implementation with owned requirements, or declarative requirements mapped to separate implementation use cases. Keep selected local bases, assumptions, consequences, and required validation directly in their owning specs; detailed alternative evaluation remains task-owned supporting evidence.
+- Complete dependent use cases for confirmed concerns; use cases with stable basis-validation requirements for proposed concerns; scoped blockers instead of completed dependent use cases for deferred concerns; and unrelated planning allowed to continue.
+- Updated task context only when newly discovered information is useful across artifacts or corrects existing shared understanding.
 
 Record:
-- Story-to-technical-use-case mappings, implementation-owned assumptions, local use-case questions, and affected-spec lifecycle decisions.
+- Story-to-technical-use-case mappings; the selected use-case structure and its reason when requirements or separate realization mappings are introduced; requirement-to-realization mappings when applicable; basis state and validation-requirement references; implementation-owned assumptions; artifact-local context and questions; shared findings written back when useful; and affected-spec lifecycle decisions.
+- Explicit task/spec links and file-qualified business/framework references when several specs are prepared or amended. The task name does not determine spec identity or ownership.
 
 Next:
 - `Prepare the implementation checklist`.
@@ -203,74 +289,76 @@ Skip when:
 
 Input:
 - Canonical solution spec and related artifacts.
+  When several specs drive one task, include each spec's checklist and the cross-spec dependency references.
 
 Logic:
 1. Create a numbered status-bearing checklist in dependency order.
 2. Include spec maintenance, shared state or helpers, runtime path, propagation, validation, and cleanup when those responsibilities apply.
 3. Keep deferred work explicit rather than silently omitting it.
 4. Add `Input`, `Outcome`, `Logic`, `External state`, `Config parameters`, and `Metrics` when a checklist task needs execution detail.
-5. Keep current status markers accurate.
+5. Derive implementation work from implementation use cases and retain the requirement IDs each task implements when requirements are present, whether they are owned by the same use case or mapped from a separate declarative use case.
+6. Keep current status markers accurate.
+7. Preserve task/spec/context/comparison links and cross-spec framework dependencies. Basis evaluation never causes a spec relocation.
 
 Output:
-- Reviewable solution spec with implementation checklist, ready for the optional completeness and consistency loop.
+- Reviewable planning artifact set with implementation checklist, ready for verification against the task and all relevant available context when applicable.
 
 Record:
 - Explicitly deferred implementation work and checklist status.
-- Whether the optional check loop was entered or skipped, and why.
+- Whether the verification loop was entered or skipped, and why.
 
 Next:
-- `Check specification completeness` when the check-loop condition applies.
+- `Check specification completeness` when `specification_check_loop` is `true` and the task is complicated or large-scale.
 - Otherwise, `Select the handoff`.
 
 ### Check specification completeness
 
 Purpose:
-- Ensure the solution specification and its supporting planning artifacts cover the task's required scope, applicable lifecycle outputs, and implementation work without silent omissions.
-- If required missing content cannot be derived safely, request and process user input before completing the check.
+- Verify that the generated or updated planning artifact set completely represents the solution established from the task and all relevant available context, without accidental omissions or scope drift.
+- When a completeness finding cannot be resolved from the established planning context or a reasonable non-blocking assumption, record it in `Open questions`; pause and request user input only when correct planning cannot continue without the answer.
 
 Run when:
-- Before the first iteration, run the check loop when one or more of these conditions apply:
-  - the task was described partially and material behavior was developed while preparing the specification;
-  - the specification contains material assumptions or non-obvious design decisions;
-  - several workflows, branches, responsibilities, contracts, or planning artifacts must agree;
-  - omissions or contradictions remain plausible;
-  - the user explicitly requested the checks.
-- Once the loop has started, keep it active until both checks have passed.
+- The specification was prepared for a complicated or large-scale task.
+- Once the verification loop has started, keep it active until both checks have passed or the active check is awaiting required user input.
 
 Skip when:
-- Before the first iteration, skip the entire check loop when the task and result are narrow and unambiguous, the specification contains no material inference, the checklist follows directly from it, and no meaningful cross-artifact reconciliation is required.
+- `specification_check_loop` in `workflow.json` is `false`; skip the complete completeness-and-consistency loop, continue with `Select the handoff`, and do not claim either check passed.
+- Before the first iteration, skip the verification loop when the task is not complicated or large-scale.
 
 Input:
-- Solution spec with implementation checklist or corrected solution spec.
-- User request and recorded decisions.
-- Supporting connected-context, user-story, and UI-contract artifacts produced by earlier steps.
-- Planning contract and the recorded run or skip decisions for earlier lifecycle steps.
+- The task, optional shared task context, artifact-local context, and all other relevant context established before and during artifact preparation.
+- The generated or updated planning artifact set.
 
 Logic:
 
 ```text
-| while the specification has not passed the completeness check:
-  current specification and supporting planning artifacts
-    --compare required scope with represented workflows, contracts, decisions, and checklist--> completeness findings
-    --resolve derivable omissions and record explicit exclusions or deferrals--> updated specification set |
+| while the planning artifact set has not passed the completeness check:
+  task and all relevant available context with current planning artifact set
+    --compare the prepared artifacts with the established solution--> completeness findings
+    --resolve findings from relevant available context--> updated or paused planning artifact set |
 ```
 
-1. Check that every applicable earlier lifecycle output is present in the correct artifact or has an explicit valid skip reason.
-2. Check that the requested behavior, relevant states and branches, story-to-technical-use-case mappings, applicable UI contracts, technical use cases, implementation checklist, open questions, and related-spec actions are represented where applicable.
-3. Check that each implementation responsibility implied by the specification is covered by the checklist or explicitly deferred.
-4. Treat an explicit exclusion or deferral as complete only when its scope and reason are recorded and it does not contradict the user's required outcome.
-5. Resolve omissions from available evidence. Do not invent required behavior merely to make the check pass.
+1. Treat the task as the authority for the requested outcome and scope. Use the planning context established during earlier lifecycle steps to interpret and elaborate it.
+2. Inspect the applicable planning artifact set as a whole so content that should have been recognized as relevant is not missed.
+3. Check that the prepared artifacts and implementation checklist preserve the established solution without accidental omissions or scope drift.
+4. Treat task context as reusable evidence, not as the boundary of the check. Include artifact-local and original-source context when relevant.
+5. Reasonable non-blocking assumptions may be made and recorded when they preserve the requested outcome and are supported by the available context.
+6. Correct a finding autonomously only when its resolution follows from relevant available context or a reasonable non-blocking assumption.
+7. Do not introduce a new solution decision solely to make the artifact set pass the check.
+8. When a finding cannot be resolved from relevant available context or a reasonable non-blocking assumption, record it in `Open questions`. Classify it as blocking only when continuing would require an unsupported solution decision.
+9. Do not treat the completeness check as passed while a blocking completeness finding remains unresolved.
 
 Request next user input:
-- Request the information or decision needed when an unresolved completeness finding cannot be resolved safely from the available task and repository context.
+- When blocking completeness findings remain, request the information needed to resolve them as one coherent question batch and keep this step active.
 - Process the response into the affected planning artifacts and resume the completeness check.
 
 Output:
-- Completeness-checked solution spec and synchronized supporting planning artifacts, with no unresolved completeness findings for the current scope.
-- After the check passes, a concise user-visible chat summary of what the check added or changed, including material omissions resolved and explicit exclusions or deferrals. If nothing changed, state that the check passed without changes.
+- While awaiting required user input, the planning artifact set with unresolved blocking completeness findings recorded in `Open questions`.
+- After resolution, a completeness-checked planning artifact set.
+- After the check passes, a concise user-visible chat summary of the inaccuracies corrected. If nothing changed, state that the check passed without changes.
 
 Record:
-- Material omissions that were resolved, explicit exclusions or deferrals, and user decisions required by the check.
+- Completeness findings and their disposition.
 
 Next:
 - `Check specification consistency`.
@@ -278,42 +366,46 @@ Next:
 ### Check specification consistency
 
 Purpose:
-- Ensure the complete specification set expresses one compatible solution across the task requirements, recorded decisions, workflow states, artifact mappings, implementation checklist, and affected specifications.
-- If conflicting authoritative inputs cannot be reconciled safely, request and process user input before completing the check.
+- Verify that the planning artifact set consistently expresses the solution established during artifact preparation.
+- When a consistency finding cannot be resolved from the established planning context or a reasonable non-blocking assumption, record it in `Open questions`; pause and request user input only when correct planning cannot continue without the answer.
 
 Run when:
 - `Check specification completeness` completed in the current check-loop iteration.
 
 Input:
-- Completeness-checked solution spec.
-- Supporting planning artifacts and related specifications.
-- User request, repository rules, and recorded decisions.
+- The task together with all relevant available context established before and during artifact preparation.
+- The completeness-checked planning artifact set.
 
 Logic:
 
 ```text
-| while the specification has not passed the consistency check:
-  completeness-checked specification set
-    --compare shared concepts, transitions, contracts, mappings, and decisions--> consistency findings
-    --resolve contradictions and synchronize affected artifacts--> updated specification set |
+| while the planning artifact set has not passed the consistency check:
+  task and all relevant available context with completeness-checked planning artifact set
+    --compare the artifacts with the established solution--> consistency findings
+    --resolve findings from relevant available context--> updated or paused planning artifact set |
 ```
 
-1. Compare repeated or connected concepts across the task language, planning anchor, connected context, user story, UI contracts, technical use cases, checklist, open questions, decision log, and affected related specs.
-2. Check state and transition compatibility, terminology, scope, ownership, ordering, mappings, data and API contracts, assumptions, deferrals, and completion status where applicable.
-3. Distinguish an intentional planned change from a contradiction with observed existing behavior.
-4. Resolve findings using the user request, explicit user decisions, and repository rules as authorities. Do not silently choose between conflicting authoritative inputs.
-5. Synchronize every artifact affected by a correction rather than repairing only the location where the inconsistency was discovered.
+1. Inspect the planning artifact set as a whole rather than limiting the check to content already identified as task-affected.
+2. Treat a finding as relevant only when it prevents the artifact set from accurately expressing the established solution.
+3. Preserve reasonable non-blocking assumptions that remain supported by the available context.
+4. Correct a finding autonomously only when its resolution follows from relevant available context or a reasonable non-blocking assumption, and synchronize every affected planning artifact.
+5. Do not introduce a new solution decision solely to make the artifact set pass the check.
+6. When a finding cannot be resolved from relevant available context or a reasonable non-blocking assumption, record it in `Open questions`. Classify it as blocking only when continuing would require an unsupported solution decision.
+7. Do not expand the task to resolve unrelated pre-existing issues.
+8. Do not treat the consistency check as passed while a blocking consistency finding remains unresolved.
 
 Request next user input:
-- Request the decision needed when authoritative inputs conflict or more than one materially different correction remains valid.
+- When blocking consistency findings remain, request the information needed to resolve them as one coherent question batch and keep this step active.
 - Process the response into every affected artifact and resume the consistency check.
 
 Output:
-- Complete and consistent reviewable solution spec with synchronized supporting planning artifacts.
-- After the check passes, a concise user-visible chat summary of what the check changed or synchronized, including material contradictions resolved and the affected artifacts or sections. If nothing changed, state that the check passed without changes.
+- While awaiting required user input, the planning artifact set with unresolved blocking consistency findings recorded in `Open questions`.
+- After resolution, a task-accurate reviewable planning artifact set.
+- After the check passes, a concise user-visible chat summary of the inaccuracies corrected. If nothing changed, state that the check passed without changes.
 
 Record:
-- Material inconsistencies that were resolved, the authority used for each non-obvious correction, and user decisions required by the check.
+- Consistency findings and their disposition.
+- Whether task/spec provenance links resolve, framework references preserve single ownership, and the selected local solution is understandable directly from its owning spec without opening candidates or task context.
 
 Next:
 - `Check specification completeness` when resolving a consistency finding changed specification content.
@@ -322,10 +414,10 @@ Next:
 ### Select the handoff
 
 Purpose:
-- Decide whether to stop for specification review or enter implementation using the task's readiness and the conversation-local implementation flow.
+- Decide whether to stop for planning-artifact review or enter implementation using the task's readiness and the conversation-local implementation flow.
 
 Input:
-- Reviewable solution spec after the optional check loop was skipped or completed.
+- Reviewable planning artifact set after the verification loop was skipped or completed.
 - The user's current task request.
 - Any unresolved questions or material planning decisions.
 
@@ -336,18 +428,19 @@ Logic:
 Support the user's work as a flow. In a new conversation, prepare the first specification without implementation unless the user's request already requires an implementation change. The first implementation authorization activates the flow. While the flow is active, later narrow and unambiguous tasks may proceed from specification update to implementation without separate confirmation.
 
 1. Honor the requested outcome. A request requiring an implementation change authorizes implementation; a request limited to specification preparation or review does not.
-2. When implementation is not authorized and the flow is inactive, stop after preparing the specification and request an implementation decision. A later decision resumes from the same specification and checklist.
+2. When implementation is not authorized and the flow is inactive, stop after preparing the planning artifact set and request an implementation decision. A later decision resumes from the same artifacts and checklist.
 3. When implementation is authorized while the flow is inactive, activate the flow and notify the user that later eligible tasks in the current conversation may proceed to implementation without separate confirmation until the user asks to stop the flow. Then continue to implementation after resolving any required user input.
-4. While the flow is active, proceed directly to implementation when the task and resulting specification are narrow and unambiguous, the check loop was skipped, and no material question remains. Otherwise, stop with the specification ready for review without deactivating the flow unless the user requests that it stop.
+4. While the flow is active, a later task that does not request implementation directly may proceed automatically when the task and resulting planning artifacts are narrow and unambiguous, no blocking question remains, and the user has not limited the requested outcome to specification work. Otherwise, stop with the artifacts ready for review without deactivating the flow unless the user requests that it stop.
+5. Whether the verification loop ran or was skipped does not itself authorize or prevent implementation.
 
 Request next user input:
-- When implementation requires confirmation, present the prepared specification and ask whether the user wants to proceed with its implementation.
+- When implementation requires confirmation, present the prepared planning artifacts and ask whether the user wants to proceed with implementation.
 - Do not request this decision when the current task request already authorizes implementation or explicitly limits the outcome to specification preparation or review.
 - Make the requested decision clear and treat any unambiguous implementation authorization as confirmation, regardless of its wording.
 - Keep this step available for a later response. When the response authorizes implementation, process it as input for this handoff, update the conversation state, and continue according to the logic above.
 
 Output:
-- Terminal `spec ready for user review`, or authorization to enter the implementation loop.
+- Terminal `planning artifacts ready for user review`, or authorization to enter the implementation loop.
 - When this handoff activates the implementation flow, a user-visible notification that later eligible tasks in the current conversation may proceed to implementation without separate confirmation until the user asks to stop the flow.
 
 Next:
@@ -360,11 +453,11 @@ Purpose:
 - If correct progress is blocked, request user input with one coherent batch of blocking questions.
 
 Run when:
-- The user has authorized implementation of the reviewable solution spec.
+- The user has authorized implementation of the reviewable planning artifact set.
 
 Input:
 - Canonical solution spec and implementation checklist.
-- Related connected-context, story, and UI artifacts.
+- Related task context when available, basis, ADR, story, UI, and other planning artifacts.
 - Current repository state.
 
 Logic:
@@ -381,8 +474,9 @@ Logic:
 ```
 
 - Select the next dependency-ready checklist task without offering arbitrary alternatives.
-- Ensure implementation matches story expectations, technical-use-case contracts, and applicable UI contracts.
+- Ensure implementation matches each confirmed or proposed local record or governing ADR, story expectations, technical-use-case contracts, and applicable UI contracts. Do not implement a deferred-basis-dependent use case as though its basis were selected.
 - Run focused tests and required broader validation. Use browser-based manual verification when UI behavior requires it.
+- Ordinary implementation validation does not include executing a proposed basis's separately recorded basis-validation requirements. After implementation, when such requirements remain, ask the user whether they should be performed as a separate follow-up. Validation execution and result processing are outside this workflow version's scope.
 - Do not mark implementation complete while affected specs or checklist statuses are stale.
 
 Request next user input:
@@ -391,10 +485,10 @@ Request next user input:
 - Process the response as decisions for continuing the unfinished implementation-checklist items, then resume the implementation loop.
 
 Output:
-- Implemented and verified solution with synchronized planning artifacts.
+- Implemented and synchronized planning artifact set.
 
 Record:
 - Validation evidence, implementation decisions, affected-spec status changes, and completed checklist tasks.
 
 Next:
-- Terminal `implemented and synchronized solution spec`.
+- Terminal `implemented and synchronized planning artifact set`.

@@ -1,6 +1,6 @@
 {
   "name": "@viete-io/layered-spec",
-  "version": "0.2.0-alpha.1",
+  "version": "0.2.3",
   "description": "Install layered-spec skills into AI coding-agent projects.",
   "license": "MIT",
   "type": "module",
@@ -10,7 +10,12 @@
   "files": [
     "scripts/npm/bin/",
     "scripts/npm/src/",
-    "skill/",
+    "skill/**/SKILL.md",
+    "skill/**/references/*.md",
+    "skill/**/assets/**",
+    "skill/layered-spec-core/requirements.txt",
+    "skill/layered-spec-core/scripts/*.py",
+    "skill/layered-spec-core/scripts/spec_validation/*.py",
     "planning/",
     "README.md",
     "LICENSE"
@@ -27,7 +32,7 @@
   },
   "homepage": "https://github.com/vieteio/layered-spec#readme",
   "scripts": {
-    "test": "node --test scripts/npm/test/cli.test.mjs scripts/npm/test/release-channel-check.test.mjs",
+    "test": "node --test scripts/npm/test/cli.test.mjs scripts/npm/test/release-channel-check.test.mjs scripts/npm/test/update-check.test.mjs",
     "check:pack": "npm pack --dry-run",
     "check:packed-cli": "node scripts/npm/check-packed-cli.mjs",
     "check:release-channel": "node scripts/npm/release-channel-check.mjs",
