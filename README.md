@@ -27,19 +27,7 @@ When making a decision requires comparing several alternatives, the default work
 
 The structure of the `specs` folder has been updated to store ADRs, alternative evaluation results, and task context that is shared across several workflow steps.
 
-## Requirements and Invariants
-
-### Requirements
-
-Layered-spec now supports explicit requirements. For complex products, requirements provide a clear source of truth for the behavior that must be implemented and make development easier to manage as the product evolves.
-
-The new `Requirements` layer records normative behavior separately from implementation details. Declarative use cases provide a higher level of abstraction: they can define requirements without prescribing an implementation, then map those requirements to one or more realizing use cases when implementation details are needed.
-
-### Invariants
-
-The new `Invariants` layer describes properties that must hold at selected workflow states and shows how transition logic derives each outcome invariant from earlier invariants.
-
-Invariant definitions and derivations may use natural language, mathematical notation, pseudocode, Lean, or another named formalism. When formal verification is useful, an AI agent can generate the derivation in Lean and run a proof checker, making it possible to verify the corresponding specification logic.
+See the [changelog](CHANGELOG.md) for the other releases details.
 
 ## Quick start
 
@@ -87,13 +75,13 @@ Canonical skill sources live under:
 
 Spec lifecycle files live under:
 - `specs/spec-lifecycle/workflow.md` — repository lifecycle workflow that users can review and customize
-- `specs/spec-lifecycle/workflow.json` — workflow settings; validation preferences live in its `validation` section
+- `specs/spec-lifecycle/workflow.json` — workflow settings, including steps settings and validation preferences
 
 Generated planning artifacts may also include:
 
-- `specs/task-contexts/` — reusable task evidence and findings
+- `specs/task-contexts/<task-name>/task_context.md` — reusable task evidence and findings
+- `specs/task-contexts/<task-name>/candidates/` — task-owned solution-basis candidates and comparisons
 - `specs/architecture/` — architecture decision records and an optional repository ADR template
-- `specs/<solution-name>/candidates/` — task solution basis candidates and comparisons
 
 Describe a task in chat with an AI agent and ask it to create a spec. Review the spec and refine it in chat. When the spec is correct, ask the agent to implement it in a loop.
 

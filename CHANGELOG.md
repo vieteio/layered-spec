@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.3-alpha
+## 0.2.3
 
 Architecture decision records (ADRs) are now supported by layered-spec. Both users and AI agents can create records for their decisions.
 
