@@ -30,6 +30,7 @@ def run_script(script, workspace, cwd, *arguments):
 def test_copied_core_validation_feedback_without_development_tools(tmp_path):
     copied = tmp_path / "portable core"
     shutil.copytree(CORE, copied, ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache"))
+    (copied / "scripts/dotenv.py").write_text("raise AssertionError('Validator must not import dotenv')\n", encoding="utf-8")
     workspace, unrelated = tmp_path / "documents", tmp_path / "unrelated cwd"
     workspace.mkdir()
     unrelated.mkdir()
@@ -68,32 +69,28 @@ def test_copied_core_validation_feedback_without_development_tools(tmp_path):
 
 
 @pytest.mark.parametrize("cli", [validate_specs, render_specs])
-def test_explicit_missing_environment_file_is_a_tool_error(tmp_path, capsys, cli):
+def test_environment_file_option_is_rejected(tmp_path, capsys, cli):
     (tmp_path / "spec.md").write_text(VALID, encoding="utf-8")
     arguments = ["--workspace-root", str(tmp_path), "spec.md", "--env-file", str(tmp_path / "missing.env")]
     if cli is render_specs:
         arguments += ["--output", str(tmp_path / "out.md")]
     else:
         arguments += ["--format", "json"]
-    assert cli.main(arguments) == 2
-    captured = capsys.readouterr()
-    if cli is validate_specs:
-        assert json.loads(captured.out)["status"] == "tool_error"
-    else:
-        assert "Environment file does not exist" in captured.err
+    with pytest.raises(SystemExit) as error:
+        cli.main(arguments)
+    assert error.value.code == 2
+    assert "unrecognized arguments" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("cli", [validate_specs, render_specs])
-def test_explicit_environment_configures_optional_telemetry(tmp_path, monkeypatch, capsys, cli):
-    monkeypatch.delenv("LOGFIRE_TOKEN", raising=False)
+def test_process_environment_configures_optional_telemetry(tmp_path, monkeypatch, capsys, cli):
+    monkeypatch.setenv("LOGFIRE_TOKEN", "local-test-token")
     calls = []
     monkeypatch.setitem(sys.modules, "logfire", SimpleNamespace(
         configure=lambda **options: calls.append(options), LogfireLoggingHandler=logging.NullHandler,
     ))
     (tmp_path / "spec.md").write_text(VALID, encoding="utf-8")
-    environment = tmp_path / "selected.env"
-    environment.write_text("LOGFIRE_TOKEN=local-test-token\n", encoding="utf-8")
-    arguments = ["--workspace-root", str(tmp_path), "spec.md", "--env-file", str(environment)]
+    arguments = ["--workspace-root", str(tmp_path), "spec.md"]
     if cli is render_specs:
         arguments += ["--output", str(tmp_path / "out.md")]
     assert cli.main(arguments) == 0

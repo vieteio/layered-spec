@@ -12,8 +12,6 @@ from tempfile import NamedTemporaryFile
 # Resolve the shipped runtime from this development entrypoint, independent of cwd.
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "skill/layered-spec-core/scripts"))
 
-from dotenv import load_dotenv
-
 from spec_validation.loading import load_document_set
 from spec_validation.models import ValidationOptions
 from spec_validation.parser import parse_document
@@ -27,16 +25,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--mode", choices=("canonical", "lossless"), default="canonical")
     parser.add_argument("--log-file", type=Path, help="Defaults to <workspace-root>/.agents/logs/spec_rendering.log")
-    parser.add_argument("--env-file", type=Path, help="Explicit optional dotenv file for telemetry configuration")
     args = parser.parse_args(argv)
     logger = logging.getLogger("spec_validation.rendering")
     handlers = []
     temporary = None
     try:
-        if args.env_file is not None:
-            if not args.env_file.is_file():
-                raise FileNotFoundError(f"Environment file does not exist: {args.env_file}")
-            load_dotenv(args.env_file)
         if args.log_file is None:
             args.log_file = args.workspace_root / ".agents" / "logs" / "spec_rendering.log"
         source_path = (args.workspace_root / args.file).resolve()
