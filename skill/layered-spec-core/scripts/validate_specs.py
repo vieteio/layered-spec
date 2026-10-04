@@ -8,7 +8,6 @@ import os
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
 from pydantic import ValidationError
 
 from spec_validation.api import validate_documents
@@ -25,7 +24,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--format", choices=("text", "json"), default="text")
     parser.add_argument("--report-json", type=Path)
     parser.add_argument("--log-file", type=Path, help="Defaults to <workspace-root>/specs/logs/spec_validation.log")
-    parser.add_argument("--env-file", type=Path, help="Explicit optional dotenv file for telemetry configuration")
     parser.add_argument("--max-file-bytes", type=int, default=10_485_760)
     parser.add_argument("--max-total-bytes", type=int, default=104_857_600)
     parser.add_argument("--max-nesting-depth", type=int, default=128)
@@ -50,10 +48,6 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.write(f"Invalid validation invocation: {error}\n")
         return 2
     try:
-        if args.env_file is not None:
-            if not args.env_file.is_file():
-                raise ValueError(f"Environment file does not exist: {args.env_file}")
-            load_dotenv(args.env_file)
         if args.log_file is None:
             args.log_file = options.workspace_root / "specs" / "logs" / "spec_validation.log"
         inputs = [(options.workspace_root / path).resolve() for path in args.files]
