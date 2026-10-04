@@ -100,12 +100,12 @@ Preserve an identifier when wording is clarified without changing its meaning. A
 - Use parallel branching when several required calculations or effects participate together.
 - Use conditional branching when one decision has alternative cases or outcomes.
 - Use a loop when required behavior repeats while a stated condition applies.
-- Use an explicit recursive call when a required transition invokes the same workflow chain or another chain in one mutually recursive family.
+- Use a recursive call when a step applies the same workflow family to a smaller or otherwise progressing subproblem. Give every distinct recursive step body its own identified workflow chain.
 - Use separate requirement chains when obligations are independent rather than alternatives.
 
 Do not flatten consecutive stages, simultaneous obligations, and rejection behavior into one conditional group merely because they were originally written as separate requirement sentences.
 
-Recursion does not introduce another delimiter. Use the ordinary workflow operators for each recursive step body, name every recursive call target, and follow [recursive-workflows.md](recursive-workflows.md) for compact versus hierarchical decomposition and family-level termination rules.
+Recursion does not introduce another delimiter. Use the ordinary workflow operators for each recursive step body. Do not flatten recursive variants into one opaque step: keep dispatch, base cases, and recursive call targets explicit. Follow [recursive-workflows.md](recursive-workflows.md) for compact and hierarchical templates, mutual recursion, progress measures, and cycle or depth-limit behavior.
 
 ### Non-Workflow Requirements
 
@@ -189,6 +189,8 @@ An implementation use case that provides shared infrastructure without directly 
 
 Use `Uses` when the internal logic of an implementation-use-case step relies on another use case. `Uses` identifies that reliance on the referenced use case; it does not by itself claim that the caller realizes the referenced requirements.
 
+Self-referential and mutually referential `Uses` mappings are valid when they describe recursive invocation. This does not relax the prohibition on cycles in `Realized by` / `Realizes` mappings: recursion is an execution relationship, while realization remains an acyclic ownership and implementation relationship.
+
 In an implementation use case, map the workflow step that delegates to or depends on the referenced use case:
 
 ```md
@@ -203,7 +205,7 @@ The target may be either:
 
 Use the first form when the framework contract and its realizations each need independently understandable structure. Use the second form when a separate declarative framework use case would add no clarity. Several callers may use the same separately identified framework use case or framework specification; do not duplicate its requirements or realizations under each caller.
 
-For recursive invocation, a `Uses` entry may target the same implementation use case or another use case that eventually calls back. Such self-referential or mutually referential `Uses` mappings describe the recursive call graph and are valid when the recursive family has a reachable exit plus a progress, cycle, or depth-limit contract. This does not relax the prohibition on cycles in `Realized by` / `Realizes` mappings.
+One task may create or update both a business spec and a separately named reusable-framework spec. Keep framework-owned requirements, types, invariants, and use cases in the framework spec; the business spec owns its application behavior and local integration details. Use file-qualified references such as `reusable-framework.md#UC7` for `Uses` and reciprocal file-qualified `Realized by` / `Realizes` mappings when formal realization crosses specs. Neither spec's name must match the task folder. Both may link the same task context and comparison. This separation does not require a component-folder hierarchy and does not make every framework implementation choice an architectural decision; classify decision reach separately.
 
 ## Requirement Representations
 
@@ -272,7 +274,7 @@ A complete specification satisfies these checks:
 - every non-deferred declarative requirement is eventually covered by an implementation use case, directly or through further realizing use cases, unless it is declared outside implementation ownership;
 - realization mappings do not form cycles;
 - every `Uses` entry belongs to an implementation use case, identifies the source step or state, and resolves to an existing declarative or implementation use case;
-- every cyclic `Uses` group represents an intentional recursive family with explicit call targets, a reachable exit, and progress, cycle, or depth-limit behavior;
+- every cyclic group formed by recursive `Uses` mappings has at least one reachable base or exit case and an explicit progress measure, plus cycle or depth-limit behavior when its data may be cyclic or unbounded;
 - requirements and their owning implementation workflow or mapped realizing workflows agree on input, outcome, ordering, failure, and ownership semantics;
 - every requirement that references an invariant resolves to that invariant, and its owning or realizing workflow agrees with the invariant derivation;
 - every required test or scenario identifies the requirements it covers;

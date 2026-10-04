@@ -2,9 +2,7 @@
 name: layered-workflow-planning
 description: "Use when: planning or refining a workflow-bearing solution slice, use-case set, or document section that genuinely needs layered workflow syntax, typed workflows, branch or parallel states, execution logic, types, tables, events, or logic details. Do not use for pure analysis or reference documents with no workflow-bearing section."
 metadata:
-  version: "0.2.2"
-argument-hint: "Describe the workflow-bearing solution or document section, the use cases already written, the layers already filled, and what should be expanded next."
-user-invocable: true
+  version: "0.2.3"
 ---
 
 # Layered Workflow Planning
@@ -40,6 +38,8 @@ Produce a planning artifact that is:
 - layered so different kinds of detail can be added independently
 - concise enough for review, but explicit enough for implementation planning
 - compatible with connected existing-code observations when a new workflow relies on old logic
+- able to consume confirmed or proposed basis decisions and defer only the use cases that depend on a deferred basis
+- able to reuse shared task context without depending on it
 - aligned with `planning/planning_contract.md`
 - stored under `specs/` unless a narrower task-specific location is required
 
@@ -50,6 +50,30 @@ Do not collapse all planning detail into one prose block.
 Do not force the whole document into layered syntax when only one chapter needs workflow structure.
 
 Follow the shared planning artifact contract in `planning/planning_contract.md`.
+
+When a solution spec contains `Task development`, consume the comparison and the recorded state of each concern. A confirmed or proposed concern resolves to an authoritative local record or governing ADR; a deferred concern has no selected-basis record and blocks only dependent use cases. Preserve comparison and governing-ADR links without duplicating their rationale. A proposed-basis consumer must own stable validation requirements that state the evidence, confirmation criteria, and reconsideration criteria. Do not present a proposed basis as confirmed or a deferred basis as selected.
+
+## Context Acquisition And Reuse
+
+Construct each planning artifact from the relevant context available for the task. Sources may include the user request, existing specifications, ADRs, basis artifacts, source code, tests, configuration, documentation, and an optional task-context file under `specs/task-contexts/`.
+
+A task-context file is reusable shared context, not a completeness guarantee or exclusive source. Reuse its relevant directives, findings, and evidence, then inspect original or additional sources whenever the artifact requires information that the shared context does not contain.
+
+This skill remains responsible for the sufficiency and correctness of the artifact it creates or updates.
+
+Keep information local to the artifact when it has no expected cross-artifact consumer. When an available task context is in scope, write back a newly discovered finding only when it is useful to another artifact or changes shared understanding on which other artifacts depend. Write context directly into `Connected groups or observed existing logic`; do not create an intermediate materialized context-view artifact.
+
+When invoked by an orchestrated lifecycle, consume the artifacts and constraints supplied by that lifecycle. Do not depend on particular workflow step names, ordering, or conversation states, and do not require a workflow file or task-context file when invoked standalone.
+
+Read `skill/layered-spec-core/references/task-context.md` when consuming or updating task context. The shared planning contract remains the owner of the spec's exact structure.
+
+## Spec Ownership And Supporting Task Artifacts
+
+Store each solution spec at `specs/<spec-name>.md`. Keep its use cases, requirements, types, invariants, logic, and applicable layers together. Task context and candidate comparisons live in the logical task's workspace under `specs/task-contexts/<task-name>/`; basis evaluation does not relocate the spec.
+
+One task may create or update several named specs, including separate business and reusable-framework specs, and several tasks may contribute to the same spec. Choose spec boundaries from behavior ownership and reuse, not task names or the presence of candidates. Keep framework-owned content in its framework spec and use file-qualified `Uses` or reciprocal realization references according to the shared contract.
+
+Record the selected solution-local basis, relevant assumptions, local consequences, and required validation directly in its owning spec. Readers must not need task context or candidate files to discover the selected solution. Link detailed evaluation and shared ADRs rather than duplicating their rationale. Preserve useful many-to-many task/spec provenance with actual relative links, not assumed sibling paths.
 
 Represent each use case as:
 
@@ -78,12 +102,13 @@ The shared planning contract in `planning/planning_contract.md` is the single no
 - recommended optional use-case layers
 - layer-specific syntax such as `Data`, `Types`, `Tables`, `Files And Functions`, `Tests`, `Invariants`, and `Use Case Questions`
 - question placement rules between local and top-level question sections
+- solution-local versus architectural decision ownership and ADR-reference rules
 
 When a specification needs a `Requirements` layer or implementation realization mappings, also read `skill/layered-spec-core/references/requirements-and-realization.md`. Keep detailed requirement and representation syntax there instead of duplicating it in this skill.
 
 When a use case needs meaningful state invariants or derivations between them, also read `skill/layered-spec-core/references/invariants.md`. Keep the detailed layer syntax and proof terminology there instead of duplicating them in this skill.
 
-When a workflow directly or mutually invokes itself, dispatches over recursive data variants, or needs explicit base-case, progress, cycle, or depth-limit treatment, read `skill/layered-spec-core/references/recursive-workflows.md` and apply its recursive-family rules and templates.
+When a workflow directly or mutually invokes itself, dispatches over recursive data variants, or needs explicit base-case, progress, cycle, or depth-limit treatment, also read `skill/layered-spec-core/references/recursive-workflows.md`. Keep the detailed recursion syntax and templates there instead of duplicating them in this skill.
 
 This skill should not redefine those rules. Use the contract directly for exact syntax and output shape.
 
@@ -101,6 +126,14 @@ Apply that shape only to workflow-bearing artifacts or workflow-bearing sections
 
 Use hierarchical numbering when a use case needs child cases that refine the same parent workflow rather than introducing separate top-level concerns.
 
+## Recursive Workflow Rule
+
+Treat recursion as explicit invocation between workflow chains, not as a loop operator.
+
+Generate one workflow chain for every materially distinct recursive step body. Keep all chains in one use case when the recursion is compact and locally understandable. Use a parent dispatcher with hierarchical child use cases when recursive variants have substantial logic, separate contracts, or independent realization mappings. Name each recursive call target explicitly and map cross-use-case calls through `Uses`; self-referential and mutually referential `Uses` mappings are valid for recursive invocation.
+
+An individual recursive step may terminate, recurse, call another recursive step, or delegate without its own exit. The recursive family must still provide a reachable base or exit case and a progress measure. Specify cycle detection, revisitation policy, or depth limits when the recursive data may be cyclic or unbounded.
+
 Typical examples:
 
 - one parent use case splits into success, partial-success, and rejection subcases
@@ -108,14 +141,6 @@ Typical examples:
 - one broad use case needs narrower algorithmic or persistence subflows that should stay visibly grouped
 
 Keep the hierarchy shallow and consistent unless deeper nesting materially improves readability.
-
-## Recursive Workflow Rule
-
-Treat recursion as explicit invocation between workflow chains, not as a loop operator.
-
-Generate one workflow chain for each distinct recursive step body and show every recursive call with its target chain label or use-case id. Keep compact related chains in one use case under `Detailed Workflow`; use hierarchical child use cases when recursive variants have substantial independent logic, contracts, errors, or tests.
-
-An individual step may delegate without a local exit, but every recursive family must identify a reachable base or exit case and a progress measure. Specify cycle or depth-limit behavior when finite descent is not guaranteed by the input contract. Use self-referential or mutually referential `Uses` mappings for recursive use-case invocation without treating those mappings as realization.
 
 ## Requirements And Realization Rule
 
@@ -305,6 +330,8 @@ If the user asks for improvement instead of expansion:
 - The workflow line has no label; it is the raw workflow text immediately under the use case name
 - Exact syntax, section order, and layer rules come from `planning/planning_contract.md`
 - Generated plans and active specs are placed in `specs/` unless the task explicitly narrows the location
+- Each spec remains one named file; supporting candidates are task-owned
+- Business and reusable-framework specs have explicit cross-file references and do not duplicate framework-owned content
 - User-authored content is preserved unless it conflicts with nearby structure
 - Pure analysis or reference documents without workflow-bearing sections are left in a lighter structure and do not trigger this skill
 - Mixed documents use layered syntax only for the workflow-bearing section that needs it
@@ -313,8 +340,17 @@ If the user asks for improvement instead of expansion:
 - Workflow lines and deeper layers keep concrete task terms unless a new alias is defined immediately and remains semantically exact
 - Helper and intermediate-structure names stay close to the concrete data they hold, the concrete action they perform, and the user-visible distinctions they preserve
 - Existing-code observations are separated from planned new logic
+- Use cases consume selected basis capabilities when task development evaluated a material solution choice
+- Every confirmed or proposed concern consumed by a use case resolves to one authoritative local record or governing ADR
+- Proposed-basis consumers include stable validation requirements and do not claim that the basis is confirmed
+- Deferred-basis concerns block only their dependent use cases and are never presented as selected
+- Architectural rationale is referenced from ADRs rather than duplicated in consuming specifications
+- Task context is reused when available but is never treated as an exclusive source or completeness guarantee
+- Artifact-local context stays in the spec, while shared findings are written back only when another artifact is expected to benefit
+- Standalone use does not require a lifecycle workflow or task-context file
 - Hierarchical numbering is used when parent and child use cases need separate but related workflow treatment
-- Recursive workflows give every distinct recursive step body its own chain, name each call target, and record family-level exit and progress behavior
+- Every materially distinct recursive step body has its own workflow chain, every recursive call names its target, and compact versus hierarchical placement is chosen by workflow size and contract independence
+- Every recursive family identifies a reachable base or exit case and a progress measure, plus cycle or depth-limit behavior when the data may be cyclic or unbounded
 - The specification uses the smallest sufficient structure: implementation workflow and logic alone, implementation with owned requirements, or a declarative use case with separate realization mappings
 - A `Requirements` layer stays on its implementation use case unless required behavior and implementation decomposition both benefit from separate structures
 - Declarative use cases use identified `Requirements` entries and explicit `Realized by` mappings when separate realizing use cases are present

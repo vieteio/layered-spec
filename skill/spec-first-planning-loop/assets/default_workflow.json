@@ -1,4 +1,6 @@
 {
+  "basis_evaluation": true,
+  "specification_check_loop": true,
   "validation": {
     "enabled": true,
     "python": null,

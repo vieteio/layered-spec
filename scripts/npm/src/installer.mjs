@@ -1,6 +1,6 @@
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { CORE_REFERENCE_NAMES, HOSTS, SKILL_NAMES, resolveHostPaths } from "./hosts.mjs";
+import { CORE_REFERENCE_NAMES, HOSTS, SKILL_NAMES, SKILL_RESOURCE_PATHS, resolveHostPaths } from "./hosts.mjs";
 
 const MANIFEST_NAME = "layered-spec-skillpack.json";
 const SOURCE_REPOSITORY = "https://github.com/vieteio/layered-spec";
@@ -52,6 +52,14 @@ async function installHost({ hostNames, paths, scope, targetRoot, sources, packa
     writes.push([
       path.join(paths.skillsDirectory, "layered-spec-core", "references", referenceName),
       rewriteContent(sources.coreReferences.get(referenceName), replacements)
+    ]);
+  }
+
+  for (const resourcePath of SKILL_RESOURCE_PATHS) {
+    const resourceKey = resourcePath.join("/");
+    writes.push([
+      path.join(paths.skillsDirectory, ...resourcePath),
+      rewriteContent(sources.skillResources.get(resourceKey), replacements)
     ]);
   }
 
@@ -113,6 +121,10 @@ async function loadCanonicalSources(packageRoot) {
       await readRequired(sourcePath("skill", "layered-spec-core", "references", referenceName))
     );
   }
+  const skillResources = new Map();
+  for (const resourcePath of SKILL_RESOURCE_PATHS) {
+    skillResources.set(resourcePath.join("/"), await readRequired(sourcePath("skill", ...resourcePath)));
+  }
   const core = sourcePath("skill", "layered-spec-core");
   const moduleDirectory = path.join(core, "scripts", "spec_validation");
   const modules = (await readdir(moduleDirectory, { withFileTypes: true }))
@@ -126,7 +138,7 @@ async function loadCanonicalSources(packageRoot) {
   for (const relativePath of runtimePaths) {
     runtime.set(relativePath, await readFile(path.join(core, relativePath)));
   }
-  return { planning, defaultWorkflow, defaultWorkflowConfig, skills, coreReferences, runtime };
+  return { planning, defaultWorkflow, defaultWorkflowConfig, skills, coreReferences, skillResources, runtime };
 }
 
 async function readRequired(file) {

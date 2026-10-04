@@ -13,6 +13,8 @@ SKILL_NAMES = (
     "spec-first-planning-loop",
     "connected-code-mapping",
     "code-logic-workflow-documentation",
+    "solution-basis-evaluation",
+    "architecture-decision-recording",
 )
 
 PLANNING_CONTRACT = "planning_contract.md"
@@ -23,7 +25,15 @@ CORE_REFERENCE_NAMES = (
     "invariants.md",
     "recursive-workflows.md",
     "skill-pack-versioning.md",
+    "task-context.md",
     "validation.md",
+)
+
+SKILL_RESOURCE_PATHS = (
+    ("connected-code-mapping", "references", "task-context-evidence.md"),
+    ("solution-basis-evaluation", "references", "candidate-artifacts.md"),
+    ("architecture-decision-recording", "references", "adr-lifecycle.md"),
+    ("architecture-decision-recording", "assets", "default_adr_template.md"),
 )
 
 # Canonical source paths (posix-style strings used inside skill text).

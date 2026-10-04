@@ -22,6 +22,7 @@ from skillpack_hosts import (
     HOSTS,
     PLANNING_CONTRACT,
     SKILL_NAMES,
+    SKILL_RESOURCE_PATHS,
     Scope,
     resolve_paths,
 )
@@ -65,6 +66,7 @@ def validate_canonical_source(root: Path) -> list[Path]:
         root / "skill" / "layered-spec-core" / "references" / name
         for name in CORE_REFERENCE_NAMES
     )
+    required.extend(root / "skill" / Path(*resource_path) for resource_path in SKILL_RESOURCE_PATHS)
     required.extend(runtime_sources(root))
     missing = [path for path in required if not path.is_file()]
     if missing:
@@ -259,6 +261,17 @@ def install_host(
         else:
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(reference_text, encoding="utf-8", newline="\n")
+        written.append(target)
+
+    for resource_path in SKILL_RESOURCE_PATHS:
+        source = root / "skill" / Path(*resource_path)
+        target = paths.skills_dir / Path(*resource_path)
+        resource_text = rewrite_content(source.read_text(encoding="utf-8"), replacements)
+        if dry_run:
+            print(f"[dry-run] would write {target}")
+        else:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(resource_text, encoding="utf-8", newline="\n")
         written.append(target)
 
     # Runtime sources become installed bytes; only Markdown instructions need path rewriting.

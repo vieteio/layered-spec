@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.3
+
+Architecture decision records (ADRs) are now supported by layered-spec. Both users and AI agents can create records for their decisions.
+
+What does this mean?
+
+1. When a user provides architectural decision details in their messages, those decisions are now recorded in ADRs in addition to being applied to the described use cases. An architectural decision that is implicitly applied to several use cases will therefore also be explicitly documented in an ADR.
+
+2. When a user does not provide solution details for a specified task, the AI agent makes architectural and technical decisions on its own. To make those decisions explicit, the AI agent records them in ADRs as well.
+
+2.1. When making a decision requires comparing several alternatives, the default workflow now includes a step for comparing and evaluating them.
+
+The structure of the `specs` folder has been updated to store ADRs, alternative evaluation results, and task context that is shared across several workflow steps.
+
 ## 0.2.2-alpha
 
 `Requirements` and `Invariants` layers are added into layered-spec.

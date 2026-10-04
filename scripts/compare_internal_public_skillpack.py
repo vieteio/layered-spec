@@ -38,6 +38,11 @@ FILE_PAIRS = (
         "skill/layered-spec-core/references/skill-pack-versioning.md",
     ),
     FilePair(
+        "task context",
+        ".agents/skills/layered-spec-core/references/task-context.md",
+        "skill/layered-spec-core/references/task-context.md",
+    ),
+    FilePair(
         "layered workflow planning skill",
         ".agents/skills/layered-workflow-planning/SKILL.md",
         "skill/layered-workflow-planning/SKILL.md",
@@ -51,6 +56,36 @@ FILE_PAIRS = (
         "connected code mapping skill",
         ".agents/skills/connected-code-mapping/SKILL.md",
         "skill/connected-code-mapping/SKILL.md",
+    ),
+    FilePair(
+        "connected code task-context evidence",
+        ".agents/skills/connected-code-mapping/references/task-context-evidence.md",
+        "skill/connected-code-mapping/references/task-context-evidence.md",
+    ),
+    FilePair(
+        "solution basis evaluation skill",
+        ".agents/skills/solution-basis-evaluation/SKILL.md",
+        "skill/solution-basis-evaluation/SKILL.md",
+    ),
+    FilePair(
+        "solution basis candidate artifacts",
+        ".agents/skills/solution-basis-evaluation/references/candidate-artifacts.md",
+        "skill/solution-basis-evaluation/references/candidate-artifacts.md",
+    ),
+    FilePair(
+        "architecture decision recording skill",
+        ".agents/skills/architecture-decision-recording/SKILL.md",
+        "skill/architecture-decision-recording/SKILL.md",
+    ),
+    FilePair(
+        "ADR lifecycle",
+        ".agents/skills/architecture-decision-recording/references/adr-lifecycle.md",
+        "skill/architecture-decision-recording/references/adr-lifecycle.md",
+    ),
+    FilePair(
+        "default ADR template",
+        ".agents/skills/architecture-decision-recording/assets/default_adr_template.md",
+        "skill/architecture-decision-recording/assets/default_adr_template.md",
     ),
     FilePair(
         "spec-first planning loop skill",
