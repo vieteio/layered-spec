@@ -47,7 +47,10 @@ def test_installed_runtime_feedback_and_configuration_preservation(tmp_path, ins
     source_template = ROOT / "skill/spec-first-planning-loop/assets/default_workflow.json"
     assert installed_template.read_bytes() == source_template.read_bytes()
     assert f"{prefix}/{template_relative}" in manifest["files"]
-    assert json.loads(installed_template.read_text())["validation"]["installation"]["decision"] == "ask"
+    installed_config = json.loads(installed_template.read_text())
+    assert installed_config["basis_evaluation"] is True
+    assert installed_config["specification_check_loop"] is True
+    assert installed_config["validation"]["installation"]["decision"] == "ask"
     expected_runtime = [CORE / "requirements.txt", *CORE.glob("scripts/*.py"),
                         *CORE.glob("scripts/spec_validation/*.py")]
     for source in expected_runtime:
